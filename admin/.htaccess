@@ -1,4 +1,3 @@
-Options +FollowSymLinks
 RewriteEngine On
 
 # Obtenir le chemin de base en utilisant REQUEST_URI
