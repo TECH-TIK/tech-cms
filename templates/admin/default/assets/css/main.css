@@ -1,0 +1,84 @@
+/* Base imports */
+<<<<<<< HEAD
+@import url('base/variables.css');
+@import url('base/reset.css');
+@import url('base/typography.css');
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+@import 'base/variables.css';
+@import 'base/reset.css';
+@import 'base/typography.css';
+>>>>>>> 2070f58 (New format support partial update for subfolders)
+
+/* Layout imports */
+@import url('layouts/topbar.css');
+@import url('layouts/sidebar.css');
+@import url('layouts/grid.css');
+
+/* Component imports */
+@import url('components/buttons.css');
+@import url('components/cards.css');
+@import url('components/forms.css');
+@import url('components/alerts.css');
+@import url('components/modals.css');
+
+/* Page imports */
+@import url('pages/dashboard.css');
+@import url('pages/clients.css');
+@import url('pages/services.css');
+@import url('pages/products.css');
+@import url('pages/invoices.css');
+@import url('pages/payments.css');
+@import url('pages/tickets.css');
+@import url('pages/settings/settings.css');
+@import url('pages/settings/servers.css');
+
+/* Utility imports */
+<<<<<<< HEAD
+@import url('utils/animations.css');
+@import url('utils/helpers.css');
+@import url('utils/glassmorphism.css');
+=======
+@import 'utils/animations.css';
+@import 'utils/helpers.css';
+@import 'utils/glassmorphism.css';
+=======
+>>>>>>> 25ab08f (New format support partial update for subfolders)
+@import url('base/variables.css');
+@import url('base/reset.css');
+@import url('base/typography.css');
+
+/* Layout imports */
+@import url('layouts/topbar.css');
+@import url('layouts/sidebar.css');
+@import url('layouts/grid.css');
+
+/* Component imports */
+@import url('components/buttons.css');
+@import url('components/cards.css');
+@import url('components/forms.css');
+@import url('components/alerts.css');
+@import url('components/modals.css');
+
+/* Page imports */
+@import url('pages/dashboard.css');
+@import url('pages/clients.css');
+@import url('pages/services.css');
+@import url('pages/products.css');
+@import url('pages/invoices.css');
+@import url('pages/payments.css');
+@import url('pages/tickets.css');
+@import url('pages/settings/settings.css');
+@import url('pages/settings/servers.css');
+
+/* Utility imports */
+@import url('utils/animations.css');
+@import url('utils/helpers.css');
+@import url('utils/glassmorphism.css');
+<<<<<<< HEAD
+=======
+>>>>>>> 0ef9a9c (New format support partial update for subfolders)
+>>>>>>> 25ab08f (New format support partial update for subfolders)
+>>>>>>> 2070f58 (New format support partial update for subfolders)

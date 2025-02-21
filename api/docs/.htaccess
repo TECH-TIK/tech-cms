@@ -1,0 +1,32 @@
+# Protection de la documentation API
+<Files "openapi.yaml">
+    Order Allow,Deny
+    Allow from all
+    Require all granted
+</Files>
+
+# Redirection vers index.php
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L,QSA]
+
+# Headers pour YAML
+<Files "*.yaml">
+    Header set Content-Type "text/yaml"
+    Header set X-Content-Type-Options "nosniff"
+    Header set Access-Control-Allow-Origin "*"
+</Files>
+
+# Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/yaml
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Cache
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/yaml "access plus 1 hour"
+    ExpiresByType application/json "access plus 1 hour"
+</IfModule>

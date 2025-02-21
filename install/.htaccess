@@ -1,0 +1,24 @@
+Options -Indexes
+
+<FilesMatch "^(schema\.sql|installer\.php)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Protection des templates
+<Files ~ "\.php$">
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+<Files "index.php">
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+# Protection contre l'accès direct aux templates
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} ^/install/templates/
+    RewriteRule .* - [F,L]
+</IfModule>

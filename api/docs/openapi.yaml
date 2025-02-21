@@ -1,0 +1,192 @@
+openapi: 3.1.0
+info:
+  title: TechCMS API
+  description: API REST pour la gestion de l'hébergement et des services
+  version: 1.0.0
+  contact:
+    name: Support TechCMS
+    url: https://tech-tik.com
+    email: support@tech-tik.com
+
+servers:
+  - url: /api/v1
+    description: API Version 1
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: integer
+      required:
+        - error
+        - message
+        - code
+
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        status:
+          type: string
+          enum: [active, suspended, pending]
+      required:
+        - name
+        - email
+
+    Service:
+      type: object
+      properties:
+        id:
+          type: integer
+        client_id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+          enum: [hosting, domain, ssl]
+        status:
+          type: string
+          enum: [active, suspended, pending]
+      required:
+        - client_id
+        - name
+        - type
+
+paths:
+  /clients:
+    get:
+      summary: Liste des clients
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Numéro de page
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          description: Nombre d'éléments par page
+      responses:
+        '200':
+          description: Liste des clients
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Client'
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      per_page:
+                        type: integer
+                      current_page:
+                        type: integer
+                      last_page:
+                        type: integer
+
+    post:
+      summary: Créer un client
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Client'
+      responses:
+        '201':
+          description: Client créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+
+  /services:
+    get:
+      summary: Liste des services
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: query
+          name: client_id
+          schema:
+            type: integer
+          description: ID du client
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [hosting, domain, ssl]
+          description: Type de service
+      responses:
+        '200':
+          description: Liste des services
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Service'
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      per_page:
+                        type: integer
+                      current_page:
+                        type: integer
+                      last_page:
+                        type: integer
+
+    post:
+      summary: Créer un service
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '201':
+          description: Service créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'

@@ -1,0 +1,127 @@
+# Protection des fichiers système
+<Files ~ "^.*\.([Hh][Tt][Aa])">
+ order allow,deny
+ deny from all
+ satisfy all
+</Files>
+
+Options -Indexes
+
+<IfModule Litespeed>
+    RewriteEngine On
+    
+    # Détection du sous-répertoire
+    RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
+    RewriteRule ^(.*) - [E=BASE:%1]
+    
+    # Définir BASE comme /test si non défini
+    RewriteCond %{ENV:BASE} ^$
+    RewriteRule .* - [E=BASE:/test]
+    
+    # Ne pas réécrire les fichiers et dossiers qui existent
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Ne pas réécrire les assets
+    RewriteRule ^(templates|assets)/.*\.(css|js|jpg|jpeg|png|gif|ico|woff|woff2|ttf|eot|svg)$ - [L]
+    
+    # Redirection vers l'installation si non installé
+    RewriteCond %{REQUEST_URI} !^%{ENV:BASE}/install
+    RewriteCond %{REQUEST_URI} !^%{ENV:BASE}/assets
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{DOCUMENT_ROOT}%{ENV:BASE}/config/config.php !-f
+    RewriteRule ^(.*)$ %{ENV:BASE}/install [L,R=302]
+    
+    # Réécriture pour l'API
+    RewriteRule ^api/(.*)$ api/index.php [L,QSA]
+    
+    # Réécriture pour les autres URLs
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>
+
+# Protection des fichiers sensibles
+<Files ~ "\.(env|json|lock)$">
+    Order deny,allow
+    Deny from all
+</Files>
+
+# Protection des dossiers sensibles
+<IfModule Litespeed>
+    RewriteCond %{REQUEST_URI} !^%{ENV:BASE}/(templates|assets)/.*\.(css|js|jpg|jpeg|png|gif|ico|woff|woff2|ttf|eot|svg)$ [NC]
+    RewriteCond %{REQUEST_URI} ^%{ENV:BASE}/config/.*$ [OR]
+    RewriteCond %{REQUEST_URI} ^%{ENV:BASE}/vendor/.*$ [OR]
+    RewriteCond %{REQUEST_URI} ^%{ENV:BASE}/includes/.*$
+    RewriteRule .* - [F]
+</IfModule>
+
+# Autoriser l'accès aux ressources statiques
+<FilesMatch "\.(jpg|jpeg|png|gif|css|js|ico|woff|woff2|ttf|eot|svg)$">
+    Allow from all
+</FilesMatch>
+
+# Compression GZIP
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+
+# Configuration générale
+php_value display_errors Off
+php_value log_errors On
+
+# Sécurité
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# Performance
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json
+</IfModule>
+
+# Protection des fichiers sensibles
+<FilesMatch "^(\.env|composer\.json|composer\.lock|package\.json|package-lock\.json)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Réécriture d'URL
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Redirection vers HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+    # Redirection du trafic vers index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
