@@ -77,8 +77,8 @@ Options -Indexes
 </IfModule>
 
 # Configuration générale
-php_value display_errors Off
-php_value log_errors On
+# php_value display_errors Off
+# php_value log_errors On
 
 # Sécurité
 <IfModule mod_headers.c>
