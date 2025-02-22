@@ -4,43 +4,6 @@ function debugLog(message, data = null) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Gestion du thème
-    const themeToggle = document.getElementById('themeToggle');
-    const html = document.documentElement;
-    
-    if (themeToggle) {
-        // Get saved theme or default to auto
-        const savedTheme = localStorage.getItem('theme') || 'auto';
-        html.setAttribute('data-theme', savedTheme);
-        
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            let newTheme = 'light';
-            
-            if (currentTheme === 'light') {
-                newTheme = 'dark';
-            } else if (currentTheme === 'dark') {
-                newTheme = 'auto';
-            }
-            
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            // Update system theme if auto
-            if (newTheme === 'auto') {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                html.classList.toggle('dark-mode', prefersDark);
-            }
-        });
-
-        // Écouter les changements de thème système
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-            if (html.getAttribute('data-theme') === 'auto') {
-                html.classList.toggle('dark-mode', e.matches);
-            }
-        });
-    }
-
     // Gestion du menu utilisateur
     const userMenuBtn = document.querySelector('[data-action="toggle-profile"]');
     const profileMenu = document.querySelector('[data-menu="profile"]');

@@ -1,39 +1,49 @@
 // Theme Initialization
 document.addEventListener('DOMContentLoaded', function() {
     // Theme Switcher
-    const themeSwitcher = document.getElementById('themeSwitcher');
+    const themeSwitcher = document.getElementById('themeToggle');
     const htmlElement = document.documentElement;
-    const icon = themeSwitcher.querySelector('i');
     
-    // Check saved theme
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    htmlElement.setAttribute('data-bs-theme', savedTheme);
-    updateThemeIcon(savedTheme);
-    
-    themeSwitcher.addEventListener('click', function() {
-        const currentTheme = htmlElement.getAttribute('data-bs-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    if (themeSwitcher) {
+        // Check saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        updateTheme(savedTheme);
         
-        htmlElement.setAttribute('data-bs-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        updateThemeIcon(newTheme);
+        themeSwitcher.addEventListener('click', function() {
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            updateTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    }
+
+    function updateTheme(theme) {
+        // Update data-theme attribute
+        htmlElement.setAttribute('data-theme', theme);
         
-        // Mettre à jour les logos
+        // Update icons visibility
+        updateThemeIcons(theme);
+        
+        // Update logos
+        updateLogos(theme === 'dark');
+    }
+
+    function updateThemeIcons(theme) {
+        const icons = themeSwitcher.querySelectorAll('i');
+        icons.forEach(icon => icon.style.display = 'none');
+        
+        // Afficher l'icône opposée au thème actuel
+        const activeIcon = theme === 'dark' ? '.theme-light' : '.theme-dark';
+        themeSwitcher.querySelector(activeIcon).style.display = 'block';
+    }
+
+    function updateLogos(isDark) {
         const darkLogos = document.querySelectorAll('.dark-version');
         const lightLogos = document.querySelectorAll('.light-version');
         
-        if (newTheme === 'dark') {
-            darkLogos.forEach(logo => logo.classList.remove('d-none'));
-            lightLogos.forEach(logo => logo.classList.add('d-none'));
-        } else {
-            darkLogos.forEach(logo => logo.classList.add('d-none'));
-            lightLogos.forEach(logo => logo.classList.remove('d-none'));
-        }
-    });
-    
-    function updateThemeIcon(theme) {
-        icon.classList.remove('fa-sun', 'fa-moon');
-        icon.classList.add(theme === 'dark' ? 'fa-sun' : 'fa-moon');
+        darkLogos.forEach(logo => logo.classList.toggle('d-none', !isDark));
+        lightLogos.forEach(logo => logo.classList.toggle('d-none', isDark));
     }
     
     // Mobile Navigation
