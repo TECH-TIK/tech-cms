@@ -1,5 +1,9 @@
 {
     "require": {
         "ably/ably-php": "^1.1"
-    }
-}
+    },
+    "autoload": {
+        "classmap": [
+            "includes/",
+            "admin/includes/"
+        ]

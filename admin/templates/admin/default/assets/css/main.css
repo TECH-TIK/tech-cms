@@ -1,0 +1,33 @@
+/* Base imports */
+@import 'base/variables.css';
+@import 'base/reset.css';
+@import 'base/typography.css';
+
+/* Layout imports */
+@import 'layouts/topbar.css';
+@import 'layouts/sidebar.css';
+@import 'layouts/grid.css';
+
+/* Component imports */
+@import 'components/buttons.css';
+@import 'components/cards.css';
+@import 'components/forms.css';
+@import 'components/alerts.css';
+@import 'components/modals.css';
+@import 'components/language-selector.css';
+
+/* Page imports */
+@import 'pages/dashboard.css';
+@import 'pages/clients.css';
+@import 'pages/services.css';
+@import 'pages/products.css';
+@import 'pages/invoices.css';
+@import 'pages/payments.css';
+@import 'pages/tickets.css';
+@import 'pages/settings/settings.css';
+@import 'pages/settings/servers.css';
+
+/* Utility imports */
+@import 'utils/animations.css';
+@import 'utils/helpers.css';
+@import 'utils/glassmorphism.css';
