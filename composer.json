@@ -5,5 +5,8 @@
     "autoload": {
         "classmap": [
             "includes/",
-            "admin/includes/"
+            "admin/includes/",
+            "api/"
         ]
+    }
+}

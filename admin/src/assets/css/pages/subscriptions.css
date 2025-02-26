@@ -1,0 +1,134 @@
+/* Variables */
+:root {
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    
+    --primary-blue: #00C3FF;
+    --secondary-blue: #0066FF;
+    --primary-color: var(--primary-blue);
+    --secondary-color: rgba(255, 255, 255, 0.7);
+    --error: #EF4444;
+    
+    --glass-bg: rgba(255, 255, 255, 0.02);
+    --glass-border: rgba(0, 102, 255, 0.1);
+    --text-color: #E4E6EB;
+    --text-muted: #B0B3B8;
+    
+    --transition-fast: 0.2s ease;
+}
+
+/* Layout principal */
+.subscriptions-view {
+    padding: var(--spacing-xl);
+    min-height: calc(100vh - var(--spacing-xl) * 2);
+}
+
+/* Styles spécifiques qui complètent les styles standardisés */
+.empty-icon {
+    font-size: 3rem;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-md);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: rgba(46, 213, 115, 0.15);
+    color: #2ed573;
+}
+
+.status-cancelled {
+    background-color: rgba(235, 77, 75, 0.15);
+    color: #eb4d4b;
+}
+
+.status-expired {
+    background-color: rgba(128, 128, 128, 0.15);
+    color: #808080;
+}
+
+.status-suspended {
+    background-color: rgba(253, 203, 110, 0.15);
+    color: #fdcb6e;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: var(--transition-fast);
+}
+
+.view-btn {
+    background-color: var(--primary-blue);
+}
+
+.edit-btn {
+    background-color: #2ed573;
+}
+
+.cancel-btn {
+    background-color: #eb4d4b;
+}
+
+.renew-btn {
+    background-color: #fdcb6e;
+}
+
+.action-btn:hover {
+    opacity: 0.8;
+    transform: translateY(-2px);
+}
+
+.actions-cell {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+/* Styles pour les états vides et de chargement */
+.loading-container, .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 102, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-blue);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Import standardized box layouts */
+@import '@/assets/css/layouts/boxes.css';

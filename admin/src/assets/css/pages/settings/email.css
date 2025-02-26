@@ -1,0 +1,61 @@
+/* Variables communes */
+@import 'settings.css';
+
+/* Styles spécifiques à la page des paramètres email */
+.email-settings {
+    display: grid;
+    gap: var(--spacing-xl);
+}
+
+.email-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+}
+
+.email-section-header {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.email-section-title {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.smtp-settings {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.test-email-section {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: rgba(var(--primary-color-rgb), 0.05);
+    border: 1px solid rgba(var(--primary-color-rgb), 0.1);
+    border-radius: var(--radius-lg);
+}
+
+.test-email-title {
+    color: var(--primary-color);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: var(--spacing-md);
+}
+
+.test-email-form {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .email-section,
+    .test-email-section {
+        padding: var(--spacing-md);
+    }
+}

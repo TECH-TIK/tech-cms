@@ -1,0 +1,122 @@
+/* Standardized Box Layouts */
+:root {
+  /* Box Variables */
+  --box-padding: 1.5rem;
+  --box-radius: 20px;
+  --box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.15);
+  --box-border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  --box-backdrop-filter: blur(20px);
+}
+
+/* Standard Box */
+.box {
+  background: var(--glass-bg, rgba(16, 20, 35, 0.7));
+  border-radius: var(--box-radius);
+  padding: var(--box-padding);
+  box-shadow: var(--box-shadow);
+  backdrop-filter: var(--box-backdrop-filter);
+  -webkit-backdrop-filter: var(--box-backdrop-filter);
+  border: var(--box-border);
+  transition: all 0.3s ease;
+  margin-bottom: var(--spacing-xl, 2rem);
+}
+
+/* Header Box */
+.header-box {
+  background: var(--glass-bg, rgba(16, 20, 35, 0.7));
+  border-radius: var(--box-radius);
+  padding: var(--box-padding);
+  box-shadow: var(--box-shadow);
+  backdrop-filter: var(--box-backdrop-filter);
+  -webkit-backdrop-filter: var(--box-backdrop-filter);
+  border: var(--box-border);
+  margin-bottom: var(--spacing-xl, 2rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Content Box */
+.content-box {
+  background: var(--glass-bg, rgba(16, 20, 35, 0.7));
+  border-radius: var(--box-radius);
+  padding: var(--box-padding);
+  box-shadow: var(--box-shadow);
+  backdrop-filter: var(--box-backdrop-filter);
+  -webkit-backdrop-filter: var(--box-backdrop-filter);
+  border: var(--box-border);
+  margin-bottom: var(--spacing-xl, 2rem);
+}
+
+/* Table Box */
+.table-box {
+  background: var(--glass-bg, rgba(16, 20, 35, 0.7));
+  border-radius: var(--box-radius);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+  backdrop-filter: var(--box-backdrop-filter);
+  -webkit-backdrop-filter: var(--box-backdrop-filter);
+  border: var(--box-border);
+  margin-bottom: var(--spacing-xl, 2rem);
+}
+
+/* Filter Box */
+.filter-box {
+  background: var(--glass-bg, rgba(16, 20, 35, 0.7));
+  border-radius: var(--box-radius);
+  padding: var(--box-padding);
+  box-shadow: var(--box-shadow);
+  backdrop-filter: var(--box-backdrop-filter);
+  -webkit-backdrop-filter: var(--box-backdrop-filter);
+  border: var(--box-border);
+  margin-bottom: var(--spacing-xl, 2rem);
+}
+
+/* Card Box */
+.card-box {
+  background: var(--glass-bg, rgba(16, 20, 35, 0.7));
+  border-radius: var(--box-radius);
+  padding: var(--box-padding);
+  box-shadow: var(--box-shadow);
+  backdrop-filter: var(--box-backdrop-filter);
+  -webkit-backdrop-filter: var(--box-backdrop-filter);
+  border: var(--box-border);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.card-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px 0 rgba(0, 102, 255, 0.2);
+}
+
+/* Modal Box */
+.modal-box {
+  background: var(--glass-bg, rgba(16, 20, 35, 0.7));
+  border-radius: var(--box-radius);
+  padding: var(--box-padding);
+  box-shadow: var(--box-shadow);
+  backdrop-filter: var(--box-backdrop-filter);
+  -webkit-backdrop-filter: var(--box-backdrop-filter);
+  border: var(--box-border);
+}
+
+/* Grid Box System */
+.box-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg, 1.5rem);
+  margin-bottom: var(--spacing-xl, 2rem);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  :root {
+    --box-padding: 1rem;
+    --box-radius: 15px;
+  }
+  
+  .box-grid {
+    grid-template-columns: 1fr;
+  }
+}

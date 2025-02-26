@@ -1,0 +1,373 @@
+/* Variables */
+:root {
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    
+    --primary-blue: #00C3FF;
+    --secondary-blue: #0066FF;
+    --primary-color: var(--primary-blue);
+    --secondary-color: rgba(255, 255, 255, 0.7);
+    --error: #EF4444;
+    --warning: #F59E0B;
+    --success: #10B981;
+    --info: #3B82F6;
+    
+    --glass-bg: rgba(255, 255, 255, 0.02);
+    --glass-border: rgba(0, 102, 255, 0.1);
+    --text-color: #E4E6EB;
+    --text-muted: #B0B3B8;
+    
+    --transition-fast: 0.2s ease;
+}
+
+/* Layout principal */
+.settings-view {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* En-tête */
+.header-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--glass-bg);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+}
+
+.header-box h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Conteneur des paramètres */
+.settings-container {
+    display: flex;
+    gap: 2rem;
+}
+
+/* Barre latérale */
+.settings-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+}
+
+.settings-tabs {
+    background: var(--glass-bg);
+    border-radius: 20px;
+    padding: 1rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tab-btn {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    text-align: left;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    cursor: pointer;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+    background: linear-gradient(90deg, rgba(0, 195, 255, 0.1), rgba(0, 102, 255, 0.1));
+    color: var(--primary-blue);
+    border-left: 3px solid var(--primary-blue);
+}
+
+.tab-btn i {
+    margin-right: 0.75rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* Contenu des paramètres */
+.settings-content {
+    flex: 1;
+    background: var(--glass-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+}
+
+.settings-section h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.settings-section h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* Formulaires */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
+    transition: all var(--transition-fast);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 2px rgba(0, 195, 255, 0.2);
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.form-check-input {
+    margin-right: 0.75rem;
+}
+
+.form-check-label {
+    color: var(--text-color);
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+}
+
+.input-group-text {
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px 0 0 10px;
+    color: var(--text-muted);
+}
+
+.input-group .form-control {
+    border-radius: 0 10px 10px 0;
+}
+
+/* Boutons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue));
+    color: white;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 0 20px rgba(0, 195, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-danger {
+    background: var(--error);
+    color: white;
+}
+
+.btn-danger:hover {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+/* État de chargement */
+.settings-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--text-muted);
+}
+
+.settings-loading i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--primary-blue);
+}
+
+/* Webhooks */
+.webhooks {
+    margin-top: 1.5rem;
+}
+
+.webhook {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--glass-border);
+}
+
+.webhook-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.webhook-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* API Keys */
+.api-keys {
+    margin-top: 1.5rem;
+}
+
+.api-key {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--glass-border);
+}
+
+.api-key-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.api-key-value {
+    font-family: monospace;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem;
+    border-radius: 5px;
+    word-break: break-all;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .settings-container {
+        flex-direction: column;
+    }
+    
+    .settings-sidebar {
+        width: 100%;
+    }
+    
+    .settings-tabs {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .tab-btn {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+    }
+    
+    .tab-btn i {
+        margin-right: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .settings-view {
+        padding: 1rem;
+    }
+    
+    .settings-content {
+        padding: 1.5rem;
+    }
+    
+    .tab-btn {
+        padding: 0.5rem;
+    }
+    
+    .tab-btn i {
+        margin-right: 0;
+        margin-bottom: 0.25rem;
+        display: block;
+        width: 100%;
+    }
+}
+
+/* Import standardized box layouts */
+@import '@/assets/css/layouts/boxes.css';

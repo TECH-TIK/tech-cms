@@ -30,12 +30,14 @@ CREATE TABLE `admins` (
 
 CREATE TABLE `clients` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
+  `firstname` varchar(100) NOT NULL,
+  `lastname` varchar(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `company` varchar(255) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
   `address` text DEFAULT NULL,
+  `postal_code` varchar(20) DEFAULT NULL,
   `city` varchar(100) DEFAULT NULL,
   `country` varchar(100) DEFAULT NULL,
   `status` enum('active','inactive','suspended') NOT NULL DEFAULT 'active',
@@ -379,6 +381,31 @@ CREATE TABLE `api_tokens` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `subscriptions`
+--
+
+CREATE TABLE `subscriptions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date DEFAULT NULL,
+  `renewal_date` date DEFAULT NULL,
+  `status` enum('active','pending','cancelled','expired') NOT NULL DEFAULT 'pending',
+  `price` decimal(10,2) NOT NULL,
+  `billing_cycle` enum('monthly','quarterly','semi_annual','annual') NOT NULL,
+  `auto_renew` tinyint(1) NOT NULL DEFAULT 0,
+  `notes` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`),
+  KEY `service_id` (`service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Contraintes pour les tables
 --
 
@@ -408,3 +435,7 @@ ALTER TABLE `payment_refunds`
 
 ALTER TABLE `payment_history`
   ADD CONSTRAINT `payment_history_payment_id_fk` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `subscriptions`
+  ADD CONSTRAINT `subscriptions_client_id_fk` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `subscriptions_service_id_fk` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE;

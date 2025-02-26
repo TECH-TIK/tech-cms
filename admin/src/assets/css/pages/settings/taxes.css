@@ -1,0 +1,117 @@
+/* Variables communes */
+@import 'settings.css';
+
+/* Styles spécifiques à la page des taxes */
+.taxes-container {
+    display: grid;
+    gap: var(--spacing-xl);
+}
+
+.taxes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.taxes-title {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Table des taxes */
+.taxes-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.taxes-table th {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.taxes-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.tax-rate {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.tax-status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.tax-status.active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.tax-status.inactive {
+    background: rgba(148, 163, 184, 0.1);
+    color: #94A3B8;
+}
+
+/* Modals */
+.tax-modal {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+}
+
+.tax-modal-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.tax-modal-title {
+    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.tax-modal-body {
+    padding: var(--spacing-lg);
+}
+
+.tax-modal-footer {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .taxes-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: stretch;
+    }
+
+    .taxes-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}

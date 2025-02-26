@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-    <style>
-        .text { fill: #000000; font-family: Arial, sans-serif; font-weight: bold; }
-        .background { fill: none; }
-    </style>
-    <rect width="100%" height="100%" class="background"/>
-    <text x="10" y="28" class="text" font-size="24">TechCMS</text>
-</svg>

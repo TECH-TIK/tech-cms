@@ -1,14 +1,11 @@
 RewriteEngine On
 
-# Obtenir le chemin de base en utilisant REQUEST_URI
-RewriteCond %{REQUEST_URI} ^(.+)/admin/.*$
-RewriteRule ^ - [E=BASE_PATH:%1]
+# Servir directement les fichiers statiques du dossier dist/assets
+RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
 
-# Ne pas appliquer la réécriture aux fichiers et dossiers existants
+# Pour toutes les autres requêtes, rediriger vers index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-
-# Rediriger toutes les requêtes vers index.php
 RewriteRule ^(.*)$ index.php [L,QSA]
 
 Allow from all

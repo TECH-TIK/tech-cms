@@ -1,0 +1,599 @@
+{
+  "common": {
+    "back": "Retour",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "loading": "Chargement...",
+    "actions": "Actions",
+    "select": "Sélectionner...",
+    "close": "Fermer"
+  },
+  "login": {
+    "welcome": "Bienvenue sur TechCMS",
+    "subtitle": "Connectez-vous pour accéder à votre espace d'administration",
+    "email": "Email",
+    "emailPlaceholder": "Votre adresse email",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Votre mot de passe",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié ?",
+    "signIn": "Se connecter",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "resetInstructions": "Entrez votre adresse email pour recevoir les instructions de réinitialisation",
+    "sendReset": "Envoyer les instructions",
+    "resetSent": "Les instructions de réinitialisation ont été envoyées à votre adresse email",
+    "errorFields": "Veuillez remplir tous les champs",
+    "errorEmail": "Veuillez entrer une adresse email valide",
+    "errorGeneral": "Email ou mot de passe incorrect",
+    "errorForgot": "Une erreur est survenue lors de l'envoi des instructions",
+    "copyright": " {year} TechCMS. Tous droits réservés."
+  },
+  "services": {
+    "title": "Services",
+    "add": "Ajouter un service",
+    "edit": "Modifier le service",
+    "search": "Rechercher un service...",
+    "columns": {
+      "name": "Nom",
+      "description": "Description",
+      "price": "Prix",
+      "status": "Statut",
+      "clients": "Clients"
+    },
+    "status": {
+      "all": "Tous",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "maintenance": "Maintenance"
+    },
+    "fields": {
+      "name": "Nom",
+      "description": "Description",
+      "price": "Prix",
+      "status": "Statut",
+      "features": "Fonctionnalités",
+      "featureName": "Nom de la fonctionnalité",
+      "included": "Inclus",
+      "addFeature": "Ajouter une fonctionnalité"
+    },
+    "validation": {
+      "nameRequired": "Le nom est obligatoire",
+      "pricePositive": "Le prix doit être positif"
+    },
+    "success": {
+      "create": "Service créé",
+      "createMessage": "Le service {name} a été créé avec succès",
+      "update": "Service mis à jour",
+      "updateMessage": "Le service {name} a été mis à jour avec succès",
+      "delete": "Service supprimé",
+      "deleteMessage": "Le service {name} a été supprimé avec succès"
+    },
+    "errors": {
+      "fetch": "Erreur de chargement",
+      "fetchMessage": "Impossible de charger les services",
+      "create": "Erreur de création",
+      "update": "Erreur de mise à jour",
+      "saveMessage": "Une erreur est survenue lors de l'enregistrement du service",
+      "delete": "Erreur de suppression",
+      "deleteMessage": "Une erreur est survenue lors de la suppression du service"
+    },
+    "confirm": {
+      "delete": "Êtes-vous sûr de vouloir supprimer le service {name} ?"
+    }
+  },
+  "products": {
+    "title": "Produits",
+    "actions": {
+      "add": "Ajouter un produit",
+      "add_feature": "Ajouter une fonctionnalité"
+    },
+    "modal": {
+      "add_title": "Ajouter un produit",
+      "edit_title": "Modifier le produit"
+    },
+    "columns": {
+      "name": "Nom",
+      "description": "Description",
+      "price": "Prix",
+      "status": "Statut"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "fields": {
+      "name": "Nom",
+      "description": "Description",
+      "price": "Prix",
+      "status": "Statut",
+      "features": "Fonctionnalités",
+      "feature_name": "Nom de la fonctionnalité",
+      "feature_included": "Inclus"
+    },
+    "filters": {
+      "label": "Filtrer par statut",
+      "all": "Tous",
+      "active": "Actifs",
+      "inactive": "Inactifs"
+    },
+    "search": {
+      "placeholder": "Rechercher un produit..."
+    },
+    "empty": {
+      "message": "Aucun produit trouvé",
+      "action": "Ajouter un produit"
+    },
+    "validation": {
+      "name_required": "Le nom est obligatoire",
+      "description_required": "La description est obligatoire",
+      "price_positive": "Le prix doit être positif"
+    },
+    "confirm": {
+      "delete": "Êtes-vous sûr de vouloir supprimer ce produit ?"
+    },
+    "success": {
+      "create": "Produit créé avec succès",
+      "update": "Produit mis à jour avec succès",
+      "delete": "Produit supprimé avec succès"
+    },
+    "errors": {
+      "fetch": "Erreur lors du chargement des produits",
+      "create": "Erreur lors de la création du produit",
+      "update": "Erreur lors de la mise à jour du produit",
+      "delete": "Erreur lors de la suppression du produit"
+    }
+  },
+  "invoices": {
+    "title": "Factures",
+    "actions": {
+      "add": "Ajouter une facture",
+      "edit": "Modifier la facture",
+      "view": "Voir la facture",
+      "delete": "Supprimer la facture",
+      "mark_paid": "Marquer comme payée"
+    },
+    "modal": {
+      "add_title": "Ajouter une facture",
+      "edit_title": "Modifier la facture",
+      "view_title": "Détails de la facture"
+    },
+    "columns": {
+      "number": "Numéro",
+      "client": "Client",
+      "service": "Service",
+      "amount": "Montant",
+      "due_date": "Date d'échéance",
+      "paid_date": "Date de paiement",
+      "status": "Statut",
+      "created_at": "Date de création"
+    },
+    "status": {
+      "pending": "En attente",
+      "paid": "Payée",
+      "overdue": "En retard",
+      "cancelled": "Annulée",
+      "deleted": "Supprimée"
+    },
+    "filters": {
+      "label": "Filtrer par statut",
+      "all": "Toutes",
+      "pending": "En attente",
+      "paid": "Payées",
+      "overdue": "En retard",
+      "cancelled": "Annulées"
+    },
+    "search": {
+      "placeholder": "Rechercher une facture..."
+    },
+    "empty": {
+      "message": "Aucune facture trouvée",
+      "action": "Ajouter une facture"
+    },
+    "confirm": {
+      "delete": "Êtes-vous sûr de vouloir supprimer cette facture ?",
+      "mark_paid": "Êtes-vous sûr de vouloir marquer cette facture comme payée ?"
+    },
+    "success": {
+      "create": "Facture créée avec succès",
+      "update": "Facture mise à jour avec succès",
+      "delete": "Facture supprimée avec succès",
+      "mark_paid": "Facture marquée comme payée avec succès"
+    },
+    "errors": {
+      "fetch": "Erreur lors du chargement des factures",
+      "create": "Erreur lors de la création de la facture",
+      "update": "Erreur lors de la mise à jour de la facture",
+      "delete": "Erreur lors de la suppression de la facture",
+      "mark_paid": "Erreur lors du marquage de la facture comme payée"
+    }
+  },
+  "subscriptions": {
+    "title": "Abonnements",
+    "actions": {
+      "add": "Ajouter un abonnement",
+      "edit": "Modifier l'abonnement",
+      "view": "Voir l'abonnement",
+      "cancel": "Annuler l'abonnement",
+      "renew": "Renouveler l'abonnement"
+    },
+    "table": {
+      "id": "ID",
+      "client": "Client",
+      "service": "Service",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "renewalDate": "Date de renouvellement",
+      "price": "Prix",
+      "billingCycle": "Cycle de facturation",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "filters": {
+      "all": "Tous",
+      "active": "Actifs",
+      "pending": "En attente",
+      "cancelled": "Annulés",
+      "expired": "Expirés"
+    },
+    "search": {
+      "placeholder": "Rechercher un abonnement..."
+    },
+    "empty": {
+      "title": "Aucun abonnement trouvé",
+      "message": "Vous n'avez pas encore d'abonnements. Commencez par en créer un."
+    },
+    "statuses": {
+      "active": "Actif",
+      "pending": "En attente",
+      "cancelled": "Annulé",
+      "expired": "Expiré"
+    },
+    "billingCycles": {
+      "monthly": "Mensuel",
+      "quarterly": "Trimestriel",
+      "semiAnnual": "Semestriel",
+      "annual": "Annuel"
+    },
+    "form": {
+      "client": "Client",
+      "service": "Service",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "price": "Prix",
+      "billingCycle": "Cycle de facturation",
+      "status": "Statut",
+      "autoRenew": "Renouvellement automatique",
+      "notes": "Notes",
+      "cancelReason": "Raison de l'annulation"
+    },
+    "confirm": {
+      "cancel": "Êtes-vous sûr de vouloir annuler cet abonnement ?",
+      "renew": "Êtes-vous sûr de vouloir renouveler cet abonnement ?"
+    },
+    "success": {
+      "create": "Abonnement créé avec succès",
+      "update": "Abonnement mis à jour avec succès",
+      "cancel": "Abonnement annulé avec succès",
+      "renew": "Abonnement renouvelé avec succès"
+    },
+    "errors": {
+      "fetch": "Erreur lors du chargement des abonnements",
+      "fetchOne": "Erreur lors du chargement de l'abonnement",
+      "create": "Erreur lors de la création de l'abonnement",
+      "update": "Erreur lors de la mise à jour de l'abonnement",
+      "cancel": "Erreur lors de l'annulation de l'abonnement",
+      "renew": "Erreur lors du renouvellement de l'abonnement"
+    }
+  },
+  "payments": {
+    "title": "Paiements",
+    "actions": {
+      "add": "Ajouter un paiement",
+      "edit": "Modifier le paiement",
+      "view": "Voir le paiement",
+      "delete": "Supprimer le paiement",
+      "refund": "Rembourser"
+    },
+    "modal": {
+      "add_title": "Ajouter un paiement",
+      "edit_title": "Modifier le paiement",
+      "view_title": "Détails du paiement"
+    },
+    "columns": {
+      "id": "ID",
+      "invoice": "Facture",
+      "client": "Client",
+      "amount": "Montant",
+      "date": "Date de paiement",
+      "method": "Méthode",
+      "transaction_id": "ID de transaction",
+      "status": "Statut",
+      "notes": "Notes",
+      "created_at": "Date de création"
+    },
+    "status": {
+      "completed": "Complété",
+      "pending": "En attente",
+      "failed": "Échoué",
+      "refunded": "Remboursé"
+    },
+    "methods": {
+      "card": "Carte bancaire",
+      "bank_transfer": "Virement bancaire",
+      "paypal": "PayPal",
+      "cash": "Espèces",
+      "check": "Chèque"
+    },
+    "fields": {
+      "transaction_id_help": "Numéro de référence de la transaction (facultatif)"
+    },
+    "filters": {
+      "label": "Filtrer par statut",
+      "all": "Tous",
+      "completed": "Complétés",
+      "pending": "En attente",
+      "failed": "Échoués",
+      "refunded": "Remboursés"
+    },
+    "search": {
+      "placeholder": "Rechercher un paiement..."
+    },
+    "empty": {
+      "message": "Aucun paiement trouvé",
+      "action": "Ajouter un paiement"
+    },
+    "confirm": {
+      "delete": "Êtes-vous sûr de vouloir supprimer ce paiement ?"
+    },
+    "refund": {
+      "title": "Rembourser le paiement",
+      "reason": "Motif du remboursement",
+      "reason_placeholder": "Veuillez indiquer le motif du remboursement",
+      "confirm": "Confirmer le remboursement",
+      "error_title": "Erreur de remboursement",
+      "error_reason_required": "Le motif du remboursement est obligatoire"
+    },
+    "success": {
+      "create": "Paiement créé avec succès",
+      "update": "Paiement mis à jour avec succès",
+      "delete": "Paiement supprimé avec succès",
+      "refund": "Remboursement traité avec succès"
+    },
+    "errors": {
+      "fetch": "Erreur lors du chargement des paiements",
+      "create": "Erreur lors de la création du paiement",
+      "update": "Erreur lors de la mise à jour du paiement",
+      "delete": "Erreur lors de la suppression du paiement",
+      "refund": "Erreur lors du traitement du remboursement"
+    }
+  },
+  "tickets": {
+    "title": "Tickets",
+    "actions": {
+      "add": "Ajouter un ticket",
+      "create": "Créer",
+      "update": "Mettre à jour",
+      "delete": "Supprimer",
+      "view": "Voir"
+    },
+    "modal": {
+      "add_title": "Ajouter un ticket",
+      "edit_title": "Modifier le ticket",
+      "view_title": "Détails du ticket"
+    },
+    "fields": {
+      "client": "Client",
+      "subject": "Sujet",
+      "message": "Message",
+      "priority": "Priorité",
+      "status": "Statut"
+    },
+    "priority": {
+      "low": "Basse",
+      "medium": "Moyenne",
+      "high": "Haute",
+      "urgent": "Urgente"
+    },
+    "status": {
+      "open": "Ouvert",
+      "pending": "En attente",
+      "closed": "Fermé",
+      "resolved": "Résolu"
+    },
+    "filters": {
+      "all": "Tous",
+      "open": "Ouverts",
+      "pending": "En attente",
+      "closed": "Fermés",
+      "resolved": "Résolus"
+    },
+    "table": {
+      "id": "ID",
+      "subject": "Sujet",
+      "client": "Client",
+      "priority": "Priorité",
+      "status": "Statut",
+      "lastReply": "Dernière réponse",
+      "createdAt": "Créé le",
+      "actions": "Actions"
+    },
+    "search": {
+      "placeholder": "Rechercher un ticket..."
+    },
+    "empty": {
+      "message": "Aucun ticket trouvé",
+      "description": "Créez un nouveau ticket ou modifiez vos filtres"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Supprimer le ticket",
+        "message": "Êtes-vous sûr de vouloir supprimer ce ticket ? Cette action est irréversible."
+      }
+    },
+    "success": {
+      "create": "Le ticket a été créé avec succès",
+      "update": "Le ticket a été mis à jour avec succès",
+      "delete": "Le ticket a été supprimé avec succès",
+      "close": "Le ticket a été fermé avec succès",
+      "reopen": "Le ticket a été rouvert avec succès",
+      "reply": "Votre réponse a été ajoutée avec succès"
+    },
+    "errors": {
+      "create": "Une erreur est survenue lors de la création du ticket",
+      "update": "Une erreur est survenue lors de la mise à jour du ticket",
+      "delete": "Une erreur est survenue lors de la suppression du ticket",
+      "fetch": "Une erreur est survenue lors de la récupération des tickets",
+      "close": "Une erreur est survenue lors de la fermeture du ticket",
+      "reopen": "Une erreur est survenue lors de la réouverture du ticket",
+      "reply": "Une erreur est survenue lors de l'ajout de votre réponse"
+    },
+    "selectClient": "Sélectionner un client",
+    "noMessages": "Aucun message pour ce ticket",
+    "addReply": "Ajouter une réponse",
+    "replyPlaceholder": "Votre réponse...",
+    "sendReply": "Envoyer"
+  },
+  "sidebar": {
+    "menu": {
+      "dashboard": "Tableau de bord",
+      "clients": "Clients",
+      "catalog": {
+        "title": "Catalogue",
+        "services": "Services",
+        "products": "Produits"
+      },
+      "billing": {
+        "title": "Facturation",
+        "invoices": "Factures",
+        "payments": "Paiements",
+        "subscriptions": "Abonnements"
+      },
+      "support": {
+        "title": "Support",
+        "tickets": "Tickets",
+        "kb": "Base de connaissances"
+      },
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "general": {
+      "title": "Paramètres généraux",
+      "siteName": "Nom du site",
+      "siteDescription": "Description du site",
+      "siteEmail": "Email du site",
+      "sitePhone": "Téléphone du site",
+      "siteAddress": "Adresse du site",
+      "siteUrl": "URL du site",
+      "logo": "Logo",
+      "favicon": "Favicon",
+      "timezone": "Fuseau horaire",
+      "dateFormat": "Format de date",
+      "timeFormat": "Format d'heure",
+      "language": "Langue",
+      "currency": "Devise",
+      "currencySymbol": "Symbole de devise",
+      "currencyPosition": "Position du symbole de devise",
+      "decimalSeparator": "Séparateur décimal",
+      "thousandSeparator": "Séparateur de milliers",
+      "decimalPlaces": "Nombre de décimales"
+    },
+    "security": {
+      "title": "Paramètres de sécurité",
+      "sessionTimeout": "Délai d'expiration de session (minutes)",
+      "loginAttempts": "Nombre de tentatives de connexion avant blocage",
+      "loginBlockTime": "Durée de blocage après tentatives échouées (minutes)",
+      "passwordMinLength": "Longueur minimale du mot de passe",
+      "passwordRequireUppercase": "Exiger une majuscule dans le mot de passe",
+      "passwordRequireLowercase": "Exiger une minuscule dans le mot de passe",
+      "passwordRequireNumber": "Exiger un chiffre dans le mot de passe",
+      "passwordRequireSpecial": "Exiger un caractère spécial dans le mot de passe",
+      "passwordExpiration": "Expiration du mot de passe (jours, 0 = jamais)",
+      "twoFactorAuth": "Authentification à deux facteurs",
+      "twoFactorAuthRequired": "Exiger l'authentification à deux facteurs",
+      "apiTokenExpiration": "Expiration des jetons API (jours, 0 = jamais)"
+    },
+    "billing": {
+      "title": "Paramètres de facturation",
+      "invoicePrefix": "Préfixe des factures",
+      "invoiceStartNumber": "Numéro de départ des factures",
+      "invoiceFooter": "Pied de page des factures",
+      "invoiceTerms": "Conditions des factures",
+      "invoiceDueDays": "Délai de paiement par défaut (jours)",
+      "invoiceAutoReminder": "Envoyer des rappels automatiques",
+      "invoiceReminderDays": "Jours avant échéance pour le rappel",
+      "taxEnabled": "Activer la taxe",
+      "taxName": "Nom de la taxe",
+      "taxRate": "Taux de taxe (%)",
+      "taxNumber": "Numéro de taxe",
+      "paymentMethods": "Méthodes de paiement",
+      "bankTransfer": "Virement bancaire",
+      "bankName": "Nom de la banque",
+      "bankAccount": "Numéro de compte",
+      "bankIban": "IBAN",
+      "bankSwift": "SWIFT/BIC"
+    },
+    "integration": {
+      "title": "Paramètres d'intégration",
+      "mailDriver": "Service d'envoi d'emails",
+      "mailHost": "Hôte SMTP",
+      "mailPort": "Port SMTP",
+      "mailUsername": "Nom d'utilisateur SMTP",
+      "mailPassword": "Mot de passe SMTP",
+      "mailEncryption": "Chiffrement SMTP",
+      "mailFromAddress": "Adresse d'expédition",
+      "mailFromName": "Nom d'expédition",
+      "smsEnabled": "Activer les SMS",
+      "smsProvider": "Fournisseur SMS",
+      "smsApiKey": "Clé API SMS",
+      "smsFromNumber": "Numéro d'expédition SMS",
+      "pushEnabled": "Activer les notifications push",
+      "pushProvider": "Fournisseur de notifications push",
+      "pushApiKey": "Clé API notifications push",
+      "googleAnalyticsId": "ID Google Analytics",
+      "recaptchaSiteKey": "Clé de site reCAPTCHA",
+      "recaptchaSecretKey": "Clé secrète reCAPTCHA"
+    },
+    "actions": {
+      "save": "Enregistrer les paramètres",
+      "reset": "Réinitialiser les paramètres",
+      "testEmail": "Tester l'envoi d'email",
+      "testSms": "Tester l'envoi de SMS"
+    },
+    "messages": {
+      "saved": "Paramètres enregistrés avec succès",
+      "error": "Une erreur est survenue lors de l'enregistrement des paramètres",
+      "emailTestSent": "Email de test envoyé avec succès",
+      "emailTestError": "Une erreur est survenue lors de l'envoi de l'email de test",
+      "smsTestSent": "SMS de test envoyé avec succès",
+      "smsTestError": "Une erreur est survenue lors de l'envoi du SMS de test"
+    },
+    "tabs": {
+      "general": "Général",
+      "notifications": "Notifications",
+      "security": "Sécurité",
+      "billing": "Facturation",
+      "integrations": "Intégrations",
+      "license": "Licence"
+    },
+    "license": {
+      "title": "Gestion de Licence",
+      "licenseKey": "Clé de licence",
+      "licenseType": "Type de licence",
+      "licenseStatus": "Statut de la licence",
+      "licenseExpiration": "Date d'expiration",
+      "active": "Active",
+      "inactive": "Inactive",
+      "free": "Gratuit",
+      "pro": "Professionnel",
+      "updateSuccess": "Licence mise à jour avec succès",
+      "updateError": "Erreur lors de la mise à jour de la licence",
+      "verifyingLicense": "Vérification de la licence...",
+      "enterLicenseKey": "Veuillez entrer une clé de licence valide"
+    }
+  }
+}

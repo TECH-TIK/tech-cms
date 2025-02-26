@@ -1,0 +1,436 @@
+{
+  "common": {
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "actions": "Actions",
+    "select": "Select...",
+    "close": "Close",
+    "search": "Search",
+    "view_all": "View all",
+    "client": "Client",
+    "email": "Email",
+    "status": "Status",
+    "date": "Date",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "notifications": "Notifications",
+    "notifications.mark_all_read": "Mark all as read",
+    "notifications.empty": "No notifications",
+    "language": {
+      "select": "Select language",
+      "fr": "French",
+      "en": "English"
+    }
+  },
+  "login": {
+    "welcome": "Welcome to TechCMS",
+    "subtitle": "Log in to access your admin panel",
+    "email": "Email",
+    "emailPlaceholder": "Your email address",
+    "password": "Password",
+    "passwordPlaceholder": "Your password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign in",
+    "resetPassword": "Reset password",
+    "resetInstructions": "Enter your email address to receive reset instructions",
+    "sendReset": "Send instructions",
+    "resetSent": "Reset instructions have been sent to your email address",
+    "errorFields": "Please fill in all fields",
+    "errorEmail": "Please enter a valid email address",
+    "errorGeneral": "Incorrect email or password",
+    "errorForgot": "An error occurred while sending instructions",
+    "copyright": " {year} TechCMS. All rights reserved."
+  },
+  "sidebar": {
+    "menu": {
+      "dashboard": "Dashboard",
+      "clients": "Clients",
+      "catalog": {
+        "title": "Catalog",
+        "services": "Services",
+        "products": "Products"
+      },
+      "billing": {
+        "title": "Billing",
+        "invoices": "Invoices",
+        "payments": "Payments",
+        "subscriptions": "Subscriptions"
+      },
+      "support": {
+        "title": "Support",
+        "tickets": "Tickets",
+        "kb": "Knowledge base"
+      },
+      "settings": "Settings",
+      "logout": "Logout"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "stats": {
+      "active_clients": "Active clients",
+      "active_services": "Active services",
+      "total_products": "Products",
+      "monthly_revenue": "Monthly revenue"
+    },
+    "recent_clients": {
+      "title": "Recent clients"
+    },
+    "recent_tickets": {
+      "title": "Recent tickets"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "add_new": "Add client",
+    "description": "Manage your client accounts and their information",
+    "filters": {
+      "search": "Search",
+      "search_placeholder": "Search clients...",
+      "status": "Status",
+      "service_type": "Service type",
+      "apply": "Apply filters"
+    },
+    "status": {
+      "all": "All statuses",
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending"
+    },
+    "services": {
+      "all": "All services",
+      "hosting": "Hosting",
+      "domain": "Domain",
+      "ssl": "SSL"
+    }
+  },
+  "services": {
+    "title": "Services",
+    "add": "Add a service",
+    "edit": "Edit service",
+    "description": "Manage your service offerings and their configurations",
+    "search": "Search for a service...",
+    "columns": {
+      "name": "Name",
+      "description": "Description",
+      "price": "Price",
+      "status": "Status",
+      "clients": "Clients"
+    },
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive",
+      "maintenance": "Maintenance"
+    },
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "price_range": "Price range",
+      "all_prices": "All prices",
+      "price_low": "Low (< €10)",
+      "price_medium": "Medium (€10 - €50)",
+      "price_high": "High (> €50)",
+      "apply": "Apply filters"
+    },
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "price": "Price",
+      "status": "Status",
+      "features": "Features",
+      "featureName": "Feature name",
+      "included": "Included",
+      "addFeature": "Add a feature"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "pricePositive": "Price must be positive"
+    },
+    "success": {
+      "create": "Service created",
+      "createMessage": "The service {name} has been created successfully",
+      "update": "Service updated",
+      "updateMessage": "The service {name} has been updated successfully",
+      "delete": "Service deleted",
+      "deleteMessage": "The service {name} has been deleted successfully"
+    },
+    "errors": {
+      "fetch": "Error loading",
+      "fetchMessage": "Unable to load services",
+      "create": "Error creating",
+      "update": "Error updating",
+      "saveMessage": "An error occurred while saving the service",
+      "delete": "Error deleting",
+      "deleteMessage": "An error occurred while deleting the service"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete the service {name}?"
+    }
+  },
+  "invoices": {
+    "title": "Invoices",
+    "description": "Manage your invoices and billing documents",
+    "actions": {
+      "add": "Add invoice"
+    },
+    "search": {
+      "placeholder": "Search invoices..."
+    },
+    "table": {
+      "id": "ID",
+      "client": "Client",
+      "date": "Date",
+      "dueDate": "Due date",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "date_range": "Date range",
+      "all_time": "All time",
+      "this_month": "This month",
+      "last_month": "Last month",
+      "this_year": "This year",
+      "apply": "Apply filters"
+    },
+    "status": {
+      "all": "All",
+      "paid": "Paid",
+      "unpaid": "Unpaid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "description": "Manage your product catalog and their features",
+    "actions": {
+      "add": "Add a product",
+      "add_feature": "Add a feature"
+    },
+    "modal": {
+      "add_title": "Add a product",
+      "edit_title": "Edit product"
+    },
+    "columns": {
+      "name": "Name",
+      "description": "Description",
+      "price": "Price",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "price": "Price",
+      "status": "Status",
+      "features": "Features",
+      "feature_name": "Feature name",
+      "feature_included": "Included"
+    },
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "price_range": "Price range",
+      "all_prices": "All prices",
+      "price_low": "Low (< €10)",
+      "price_medium": "Medium (€10 - €50)",
+      "price_high": "High (> €50)",
+      "apply": "Apply filters",
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "search": {
+      "placeholder": "Search for a product..."
+    },
+    "empty": {
+      "message": "No products found",
+      "action": "Add a product"
+    },
+    "validation": {
+      "name_required": "Name is required",
+      "description_required": "Description is required",
+      "price_positive": "Price must be positive"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this product?"
+    },
+    "success": {
+      "create": "Product created successfully",
+      "update": "Product updated successfully",
+      "delete": "Product deleted successfully"
+    },
+    "errors": {
+      "fetch": "Error loading products",
+      "create": "Error creating product",
+      "update": "Error updating product",
+      "delete": "Error deleting product"
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "description": "Track and manage all payment transactions",
+    "actions": {
+      "add": "Add payment"
+    },
+    "search": {
+      "placeholder": "Search payments..."
+    },
+    "table": {
+      "id": "ID",
+      "client": "Client",
+      "date": "Date",
+      "amount": "Amount",
+      "method": "Method",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "payment_method": "Payment method",
+      "all_methods": "All methods",
+      "apply": "Apply filters"
+    },
+    "methods": {
+      "card": "Credit card",
+      "bank_transfer": "Bank transfer",
+      "paypal": "PayPal"
+    },
+    "status": {
+      "all": "All",
+      "completed": "Completed",
+      "pending": "Pending",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    }
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "description": "Manage recurring subscriptions and billing cycles",
+    "actions": {
+      "add": "Add subscription"
+    },
+    "search": {
+      "placeholder": "Search subscriptions..."
+    },
+    "table": {
+      "id": "ID",
+      "client": "Client",
+      "service": "Service",
+      "startDate": "Start date",
+      "renewalDate": "Renewal date",
+      "price": "Price",
+      "billingCycle": "Billing cycle",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "billing_cycle": "Billing cycle",
+      "all_cycles": "All cycles",
+      "apply": "Apply filters"
+    },
+    "billingCycles": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semiAnnual": "Semi-annual",
+      "annual": "Annual"
+    },
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    }
+  },
+  "tickets": {
+    "title": "Tickets",
+    "description": "Handle support requests and client communications",
+    "actions": {
+      "add": "Add ticket"
+    },
+    "search": {
+      "placeholder": "Search tickets..."
+    },
+    "table": {
+      "id": "ID",
+      "client": "Client",
+      "subject": "Subject",
+      "date": "Date",
+      "lastUpdate": "Last update",
+      "status": "Status",
+      "priority": "Priority",
+      "actions": "Actions"
+    },
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "priority": "Priority",
+      "apply": "Apply filters"
+    },
+    "priority": {
+      "all": "All priorities",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "status": {
+      "all": "All",
+      "open": "Open",
+      "in_progress": "In progress",
+      "waiting": "Waiting for client",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    }
+  },
+  "settings": {
+    "messages": {
+      "saved": "Settings saved successfully",
+      "error": "An error occurred while saving settings",
+      "emailTestSent": "Test email sent successfully",
+      "emailTestError": "An error occurred while sending test email",
+      "smsTestSent": "Test SMS sent successfully",
+      "smsTestError": "An error occurred while sending test SMS"
+    },
+    "tabs": {
+      "general": "General",
+      "notifications": "Notifications",
+      "security": "Security",
+      "billing": "Billing",
+      "integrations": "Integrations",
+      "license": "License"
+    },
+    "license": {
+      "title": "License Management",
+      "licenseKey": "License Key",
+      "licenseType": "License Type",
+      "licenseStatus": "License Status",
+      "licenseExpiration": "Expiration Date",
+      "active": "Active",
+      "inactive": "Inactive",
+      "free": "Free",
+      "pro": "Professional",
+      "updateSuccess": "License updated successfully",
+      "updateError": "Error updating license",
+      "verifyingLicense": "Verifying license...",
+      "enterLicenseKey": "Please enter a valid license key"
+    }
+  }
+}

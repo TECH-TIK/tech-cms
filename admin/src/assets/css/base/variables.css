@@ -1,0 +1,69 @@
+:root {
+  /* Couleurs */
+  --primary-blue: #0066FF;
+  --secondary-blue: #3399FF;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #3B82F6;
+
+  /* Variantes de couleurs */
+  --primary-light: rgba(0, 102, 255, 0.1);
+  --success-light: rgba(16, 185, 129, 0.1);
+  --warning-light: rgba(245, 158, 11, 0.1);
+  --danger-light: rgba(239, 68, 68, 0.1);
+  --info-light: rgba(59, 130, 246, 0.1);
+
+  /* Arrière-plans */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB;
+  --hover-bg: #F3F4F6;
+  --glass-bg: rgba(255, 255, 255, 0.8);
+
+  /* Texte */
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+
+  /* Bordures */
+  --border-color: #E5E7EB;
+
+  /* Rayons */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Ombres */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Mode sombre */
+.dark {
+  --bg-primary: #111827;
+  --bg-secondary: #1F2937;
+  --hover-bg: #374151;
+  --glass-bg: rgba(17, 24, 39, 0.8);
+
+  --text-primary: #F9FAFB;
+  --text-secondary: #D1D5DB;
+  --text-muted: #9CA3AF;
+
+  --border-color: #374151;
+}
+
+/* Appliquer les styles dark à tous les éléments enfants */
+.dark * {
+  color-scheme: dark;
+}
+
+.dark .app-layout {
+  background-color: var(--bg-secondary);
+}
+
+.dark .app-content {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}

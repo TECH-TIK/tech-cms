@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-    <style>
-        .text { fill: #ffffff; font-family: Arial, sans-serif; font-weight: bold; }
-    </style>
-    <text x="10" y="28" class="text" font-size="24">TechCMS</text>
-</svg>

@@ -1,0 +1,57 @@
+/* Variables communes */
+@import 'settings.css';
+
+/* Styles spécifiques à la page des paramètres généraux */
+.general-settings {
+    display: grid;
+    gap: var(--spacing-xl);
+}
+
+.general-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+}
+
+.general-section-header {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.general-section-title {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.general-form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.general-form-group:last-child {
+    margin-bottom: 0;
+}
+
+.general-form-label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.general-form-hint {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    margin-top: var(--spacing-xs);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .general-section {
+        padding: var(--spacing-md);
+    }
+}

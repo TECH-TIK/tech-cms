@@ -10,14 +10,6 @@ Options -Indexes
 <IfModule Litespeed>
     RewriteEngine On
     
-    # Détection du sous-répertoire
-    RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
-    RewriteRule ^(.*) - [E=BASE:%1]
-    
-    # Définir BASE comme /test si non défini
-    RewriteCond %{ENV:BASE} ^$
-    RewriteRule .* - [E=BASE:/test]
-    
     # Ne pas réécrire les fichiers et dossiers qui existent
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
@@ -26,16 +18,11 @@ Options -Indexes
     # Ne pas réécrire les assets
     RewriteRule ^(templates|assets)/.*\.(css|js|jpg|jpeg|png|gif|ico|woff|woff2|ttf|eot|svg)$ - [L]
     
-    # Redirection vers l'installation si non installé
-    RewriteCond %{REQUEST_URI} !^%{ENV:BASE}/install
-    RewriteCond %{REQUEST_URI} !^%{ENV:BASE}/assets
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{DOCUMENT_ROOT}%{ENV:BASE}/config/config.php !-f
-    RewriteRule ^(.*)$ %{ENV:BASE}/install [L,R=302]
+    # Réécriture pour l'API v1
+    RewriteRule ^api/v1(/.*)?$ api/index.php [L,QSA]
     
-    # Réécriture pour l'API
-    RewriteRule ^api/(.*)$ api/index.php [L,QSA]
+    # Réécriture pour le panneau d'administration
+    RewriteRule ^admin(/.*)?$ admin/dist/index.html [L]
     
     # Réécriture pour les autres URLs
     RewriteCond %{REQUEST_FILENAME} !-f
@@ -48,15 +35,6 @@ Options -Indexes
     Order deny,allow
     Deny from all
 </Files>
-
-# Protection des dossiers sensibles
-<IfModule Litespeed>
-    RewriteCond %{REQUEST_URI} !^%{ENV:BASE}/(templates|assets)/.*\.(css|js|jpg|jpeg|png|gif|ico|woff|woff2|ttf|eot|svg)$ [NC]
-    RewriteCond %{REQUEST_URI} ^%{ENV:BASE}/config/.*$ [OR]
-    RewriteCond %{REQUEST_URI} ^%{ENV:BASE}/vendor/.*$ [OR]
-    RewriteCond %{REQUEST_URI} ^%{ENV:BASE}/includes/.*$
-    RewriteRule .* - [F]
-</IfModule>
 
 # Autoriser l'accès aux ressources statiques
 <FilesMatch "\.(jpg|jpeg|png|gif|css|js|ico|woff|woff2|ttf|eot|svg)$">
@@ -75,10 +53,6 @@ Options -Indexes
     AddOutputFilterByType DEFLATE application/javascript
     AddOutputFilterByType DEFLATE application/x-javascript
 </IfModule>
-
-# Configuration générale
-# php_value display_errors Off
-# php_value log_errors On
 
 # Sécurité
 <IfModule mod_headers.c>
@@ -125,3 +99,74 @@ Options -Indexes
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php [QSA,L]
 </IfModule>
+
+RewriteEngine On
+
+# Rediriger les requêtes API vers le point d'entrée API
+RewriteCond %{REQUEST_URI} ^/api/v1/.*$
+RewriteRule ^api/v1/(.*)$ /api/index.php [L,QSA]
+
+# Rediriger toutes les autres requêtes /admin/* vers l'application Vue.js
+RewriteCond %{REQUEST_URI} ^/admin/.*$
+RewriteCond %{REQUEST_URI} !^/admin/api/.*$
+RewriteCond %{REQUEST_URI} !^/admin/dist/.*$
+RewriteRule ^admin/.*$ /admin/dist/index.html [L]
+
+# Empêcher l'accès direct aux fichiers PHP
+<FilesMatch "\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Autoriser l'accès aux points d'entrée spécifiques
+<Files "index.php">
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+# Headers CORS pour l'API
+<IfModule mod_headers.c>
+    SetEnvIf Origin "^http(s)?://(.+\.)?(localhost:3000|tech-tik\.com)$" origin_is=$0
+    Header always set Access-Control-Allow-Origin %{origin_is}e env=origin_is
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Authorization, Content-Type"
+    Header always set Access-Control-Allow-Credentials "true"
+</IfModule>
+
+# Compression Gzip
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Cache-Control
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType application/x-javascript "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+</IfModule>
+
+# Protection des fichiers sensibles
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "(^#.*#|\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|sw[op])|~)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
