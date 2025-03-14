@@ -11,10 +11,10 @@
       <div class="modal-body">
         <form @submit.prevent="submitForm">
           <div class="form-group">
-            <label for="service_id">{{ $t('invoices.columns.service') }}</label>
+            <label for="product_id">{{ $t('invoices.columns.service') }}</label>
             <select 
-              id="service_id" 
-              v-model="form.service_id" 
+              id="product_id" 
+              v-model="form.product_id" 
               class="form-select" 
               :disabled="isView || isSubmitting"
               required
@@ -134,7 +134,7 @@ const isSubmitting = ref(false)
 
 // Formulaire
 const form = ref({
-  service_id: '',
+  product_id: '',
   amount: 0,
   due_date: new Date().toISOString().split('T')[0],
   status: 'pending'
@@ -165,14 +165,14 @@ const fetchServices = async () => {
 const initForm = () => {
   if (isAdd.value) {
     form.value = {
-      service_id: '',
+      product_id: '',
       amount: 0,
       due_date: new Date().toISOString().split('T')[0],
       status: 'pending'
     }
   } else {
     form.value = {
-      service_id: props.invoice.service_id || '',
+      product_id: props.invoice.product_id || '',
       amount: props.invoice.amount || 0,
       due_date: props.invoice.due_date ? new Date(props.invoice.due_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       status: props.invoice.status || 'pending'

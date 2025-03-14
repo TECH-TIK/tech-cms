@@ -1,0 +1,62 @@
+/* Styles communs pour les onglets du wizard de création de produits */
+
+.tabs-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm);
+  overflow-x: auto;
+  justify-content: center;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.tab-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+}
+
+.tab-item.active {
+  background: rgba(0, 102, 255, 0.1);
+  color: var(--primary-blue);
+  font-weight: 500;
+}
+
+.tab-item i {
+  font-size: 1.2rem;
+  margin-right: var(--spacing-xs);
+}
+
+.tab-label {
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tabs-navigation {
+    flex-direction: column;
+    padding: 0;
+  }
+  
+  .tab-item {
+    border-radius: 0;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  
+  .tab-item:last-child {
+    border-bottom: none;
+  }
+}

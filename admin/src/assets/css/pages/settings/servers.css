@@ -406,47 +406,64 @@
     transform: translateY(-1px);
 }
 
-/* Checkbox personnalisé */
-.checkbox-group {
+/* Styles pour les boutons d'action */
+.server-actions {
     display: flex;
-    flex-direction: column;
     gap: 0.5rem;
 }
 
-.checkbox-label {
+.server-action-btn {
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    color: var(--text-color);
-}
-
-.checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--glass-border);
+    justify-content: center;
+    border-radius: 50%;
     background: var(--glass-bg);
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    position: relative;
-    transition: all var(--transition-fast);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
 }
 
-.checkbox-label input[type="checkbox"]:checked {
-    background: var(--primary-blue);
+.server-action-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.server-action-btn.edit:hover {
+    color: var(--primary-blue);
     border-color: var(--primary-blue);
 }
 
-.checkbox-label input[type="checkbox"]:checked::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 12px;
+.server-action-btn.delete:hover {
+    color: #FF3B30;
+    border-color: #FF3B30;
+}
+
+.server-action-btn.test:hover {
+    color: #34C759;
+    border-color: #34C759;
+}
+
+/* Styles pour les formulaires de serveur */
+.server-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.server-form .form-group:last-child {
+    grid-column: span 2;
+}
+
+@media (max-width: 768px) {
+    .server-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .server-form .form-group:last-child {
+        grid-column: auto;
+    }
 }
 
 /* Responsive */
@@ -463,4 +480,160 @@
     .server-form {
         grid-template-columns: 1fr;
     }
+}
+
+/* Styles pour les statistiques des serveurs */
+.server-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding: var(--spacing-lg);
+}
+
+.server-stat-card {
+    background: var(--glass-bg);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.05);
+    transition: all var(--transition-fast);
+}
+
+.server-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px 0 rgba(0, 102, 255, 0.1);
+}
+
+.stat-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.stat-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(0, 102, 255, 0.1);
+    color: var(--primary-blue);
+    font-size: 1.25rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.stat-details {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.progress {
+    height: 0.5rem;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.5s ease;
+}
+
+.progress-bar.low {
+    background: linear-gradient(90deg, var(--success), var(--success-light));
+}
+
+.progress-bar.medium {
+    background: linear-gradient(90deg, var(--warning), var(--warning-light));
+}
+
+.progress-bar.high {
+    background: linear-gradient(90deg, var(--error), var(--error-light));
+}
+
+.last-updated {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* Mode sombre pour les statistiques */
+.dark .server-stat-card {
+    background: rgba(16, 20, 35, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+.dark .stat-header {
+    color: var(--text-muted);
+}
+
+.dark .stat-value {
+    color: var(--text-primary);
+}
+
+.dark .stat-details {
+    color: var(--text-muted);
+}
+
+.dark .server-details-container .header-box {
+    background: rgba(16, 20, 35, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark .last-updated {
+    color: var(--text-muted);
+}
+
+.dark .progress {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .progress-bar.low {
+    background: linear-gradient(90deg, var(--success), rgba(16, 185, 129, 0.7));
+}
+
+.dark .progress-bar.medium {
+    background: linear-gradient(90deg, var(--warning), rgba(245, 158, 11, 0.7));
+}
+
+.dark .progress-bar.high {
+    background: linear-gradient(90deg, var(--error), rgba(239, 68, 68, 0.7));
+}
+
+.dark .server-stat-card:hover {
+    border-color: rgba(0, 102, 255, 0.3);
+    box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.dark .server-stats-grid.table-box {
+    background: rgba(16, 20, 35, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+.dark .stat-header i {
+    color: var(--primary-blue);
+}
+
+.dark .server-status-online {
+    color: var(--success);
+}
+
+.dark .server-status-offline {
+    color: var(--error);
 }

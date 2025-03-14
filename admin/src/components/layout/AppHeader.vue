@@ -113,6 +113,12 @@
               </button>
             </div>
           </div>
+          <div class="notifications-footer">
+            <router-link to="/notifications" @click="closeNotifications">
+              {{ $t('topbar.notifications.view_all') }}
+              <i class="fas fa-arrow-right"></i>
+            </router-link>
+          </div>
         </div>
       </div>
 
@@ -262,6 +268,10 @@ const formatTime = (time: string | Date) => {
     addSuffix: true,
     locale: locale.value === 'fr' ? fr : enUS
   })
+}
+
+const closeNotifications = () => {
+  showNotifications.value = false
 }
 
 // Gestionnaire de clic en dehors des menus
@@ -603,6 +613,22 @@ onUnmounted(() => {
 .empty-notifications i {
   font-size: 2rem;
   margin-bottom: 1rem;
+}
+
+.notifications-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.notifications-footer a {
+  font-size: 0.875rem;
+  color: var(--primary-blue);
+  text-decoration: none;
+}
+
+.notifications-footer a:hover {
+  text-decoration: underline;
 }
 
 /* Profile */

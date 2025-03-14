@@ -24,16 +24,16 @@
         </div>
         
         <div class="form-group">
-          <label for="service">Service</label>
+          <label for="product">Produit</label>
           <select 
-            id="service" 
-            v-model="form.service_id" 
+            id="product" 
+            v-model="form.product_id" 
             class="form-control"
             required
           >
-            <option value="">Sélectionner un service</option>
-            <option v-for="service in services" :key="service.id" :value="service.id">
-              {{ service.name }}
+            <option value="">Sélectionner un produit</option>
+            <option v-for="product in products" :key="product.id" :value="product.id">
+              {{ product.name }}
             </option>
           </select>
         </div>
@@ -135,8 +135,8 @@
         </div>
         
         <div class="detail-row">
-          <div class="detail-label">Service:</div>
-          <div class="detail-value">{{ subscription.service_name }}</div>
+          <div class="detail-label">Produit:</div>
+          <div class="detail-value">{{ subscription.product_name }}</div>
         </div>
         
         <div class="detail-row">
@@ -252,7 +252,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useSubscriptionStore } from '@/stores/subscriptions'
 import { useClientsStore } from '@/stores/clients'
-import { useServiceStore } from '@/stores/services'
+import { useProductStore } from '@/stores/products'
 
 const props = defineProps({
   subscriptionId: {
@@ -271,13 +271,13 @@ const emit = defineEmits(['close', 'created', 'updated', 'cancelled', 'renewed']
 // Stores
 const subscriptionStore = useSubscriptionStore()
 const clientStore = useClientsStore()
-const serviceStore = useServiceStore()
+const productStore = useProductStore()
 
 // State
 const form = ref({
   id: null as number | null,
   client_id: '',
-  service_id: '',
+  product_id: '',
   start_date: new Date().toISOString().split('T')[0],
   end_date: '',
   price: 0,
@@ -294,7 +294,7 @@ const cancelReason = ref('')
 const isEditMode = computed(() => props.mode === 'edit')
 const isViewMode = computed(() => props.mode === 'view')
 const clients = computed(() => clientStore.clients)
-const services = computed(() => serviceStore.services)
+const products = computed(() => productStore.products)
 const subscription = computed(() => subscriptionStore.currentSubscription || {})
 
 // Methods
@@ -336,7 +336,7 @@ const loadSubscription = async () => {
       form.value = {
         id: sub.id,
         client_id: sub.client_id,
-        service_id: sub.service_id,
+        product_id: sub.product_id,
         start_date: sub.start_date.split('T')[0],
         end_date: sub.end_date ? sub.end_date.split('T')[0] : '',
         price: sub.price,
@@ -397,8 +397,8 @@ onMounted(async () => {
     await clientStore.fetchClients()
   }
   
-  if (!serviceStore.services.length) {
-    await serviceStore.fetchServices()
+  if (!productStore.products.length) {
+    await productStore.fetchProducts()
   }
   
   if (props.mode !== 'create') {

@@ -4,11 +4,29 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",
+    "deleting": "Suppression en cours",
     "edit": "Modifier",
     "loading": "Chargement...",
     "actions": "Actions",
     "select": "Sélectionner...",
-    "close": "Fermer"
+    "close": "Fermer",
+    "search": "Rechercher",
+    "view_all": "Voir tout",
+    "continue": "Continuer",
+    "add": "Ajouter",
+    "month": "Mois",
+    "months": "Mois",
+    "saving": "Enregistrement...",
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "retry": "Réessayer",
+    "error": "Erreur",
+    "error_occurred": "Une erreur est survenue",
+    "language": {
+      "select": "Sélectionner la langue",
+      "fr": "Français",
+      "en": "Anglais"
+    }
   },
   "login": {
     "welcome": "Bienvenue sur TechCMS",
@@ -30,120 +48,489 @@
     "errorForgot": "Une erreur est survenue lors de l'envoi des instructions",
     "copyright": " {year} TechCMS. Tous droits réservés."
   },
-  "services": {
-    "title": "Services",
-    "add": "Ajouter un service",
-    "edit": "Modifier le service",
-    "search": "Rechercher un service...",
+  "products_services": {
+    "title": "Produits/Services",
+    "description": "Gérez vos produits et services dans une interface unifiée",
+    "add": "Ajouter un produit/service",
+    "add_title": "Ajouter un produit/service",
+    "edit_title": "Modifier le produit/service",
+    "search": "Rechercher un produit/service...",
     "columns": {
       "name": "Nom",
       "description": "Description",
       "price": "Prix",
       "status": "Statut",
-      "clients": "Clients"
+      "clients": "Clients",
+      "type": "Type",
+      "group": "Groupe"
     },
     "status": {
-      "all": "Tous",
+      "all": "Tous les statuts",
       "active": "Actif",
       "inactive": "Inactif",
       "maintenance": "Maintenance"
+    },
+    "types": {
+      "all": "Tous les types",
+      "product": "Produit",
+      "service": "Service",
+      "shared_hosting": "Hébergement mutualisé",
+      "reseller_hosting": "Hébergement revendeur",
+      "server_vps": "Serveur / VPS",
+      "other": "Autre"
+    },
+    "groups": {
+      "all": "Tous les groupes",
+      "none": "Aucun groupe"
+    },
+    "modules": {
+      "none": "Aucun module",
+      "custom": "Module personnalisé",
+      "title": "Paramètres du module",
+      "description": "Configurez le module serveur pour votre produit",
+      "module_name": "Nom du module",
+      "module_name_help": "Sélectionnez le module serveur à utiliser pour ce produit",
+      "no_module_info": "Aucun module sélectionné. Ce produit ne sera pas automatiquement provisionné sur un serveur.",
+      "server_group": "Groupe de serveurs",
+      "no_server_group": "Aucun groupe de serveurs",
+      "shared_servers": "Serveurs d'hébergement mutualisé",
+      "reseller_servers": "Serveurs d'hébergement revendeur",
+      "vps_servers": "Serveurs VPS/Dédiés",
+      "server_group_help": "Sélectionnez le groupe de serveurs où ce produit sera provisionné",
+      "choose_module_info": "Choisissez un module pour voir les options de configuration supplémentaires",
+      "auto_setup_options": "Options de configuration automatique",
+      "auto_setup_on_order": "Configuration automatique à la commande",
+      "auto_setup_on_order_help": "Provisionner automatiquement le produit lorsque la commande est passée",
+      "auto_setup_on_payment": "Configuration automatique au paiement",
+      "auto_setup_on_payment_help": "Provisionner automatiquement le produit lorsque le paiement est reçu",
+      "auto_setup_on_pending_order": "Configuration automatique sur commande en attente",
+      "auto_setup_on_pending_order_help": "Provisionner automatiquement le produit lorsque la commande est marquée comme en attente",
+      "no_auto_setup": "Pas de configuration automatique",
+      "no_auto_setup_help": "Ne pas provisionner automatiquement le produit. Une configuration manuelle sera nécessaire.",
+      "errors": {
+        "server_group_required": "Un groupe de serveurs est requis lorsqu'un module est sélectionné",
+        "server_required": "Un serveur est requis pour ce module",
+        "cpanel_plan_required": "Un plan cPanel est requis",
+        "virtualizor_resources_required": "Vous devez configurer au moins une ressource pour Virtualizor",
+        "proxmox_resources_required": "Vous devez configurer au moins une ressource pour Proxmox"
+      },
+      "resources": {
+        "title": "Configuration des ressources",
+        "description": "Configurez les ressources qui seront allouées pour ce produit",
+        "cpu": "CPU (vCores)",
+        "cpu_help": "Nombre de cœurs de processeur virtuels",
+        "memory": "Mémoire RAM (Mo)",
+        "memory_help": "Quantité de mémoire en mégaoctets",
+        "disk_space": "Espace disque (Go)",
+        "disk_space_help": "Espace disque en gigaoctets",
+        "bandwidth": "Bande passante (Go)",
+        "bandwidth_help": "Bande passante mensuelle en gigaoctets",
+        "ips": "Adresses IP",
+        "ips_help": "Nombre d'adresses IP à allouer",
+        "virtualizor": {
+          "title": "Ressources Virtualizor",
+          "description": "Configurez les ressources spécifiques pour Virtualizor",
+          "virtualization": "Type de virtualisation",
+          "virtualization_help": "Sélectionnez le type de virtualisation",
+          "os_template": "Template OS",
+          "os_template_help": "Sélectionnez le template d'OS à utiliser"
+        },
+        "proxmox": {
+          "title": "Ressources Proxmox",
+          "description": "Configurez les ressources spécifiques pour Proxmox",
+          "container_type": "Type de conteneur",
+          "container_type_help": "Sélectionnez le type de conteneur (LXC ou VM)",
+          "storage": "Stockage",
+          "storage_help": "Sélectionnez le stockage Proxmox à utiliser",
+          "template": "Template",
+          "template_help": "Sélectionnez le template à utiliser pour la création"
+        }
+      }
+    },
+    "custom_fields": {
+      "title": "Champs personnalisés",
+      "description": "Configurez les champs personnalisés pour votre produit",
+      "list_title": "Liste des champs personnalisés",
+      "add_field": "Ajouter un champ personnalisé",
+      "no_fields": "Aucun champ personnalisé n'a encore été ajouté",
+      "add_first_field": "Ajoutez votre premier champ personnalisé"
+    },
+    "configurable_options": {
+      "title": "Options configurables",
+      "description": "Configurez des options personnalisables que les clients peuvent sélectionner lors de la commande de ce produit",
+      "empty_state": "Aucune option configurable n'a encore été ajoutée",
+      "add_first_option": "Ajoutez votre première option configurable",
+      "add_option": "Ajouter une option",
+      "new_option": "Nouvelle option",
+      "fields": {
+        "name": "Nom de l'option",
+        "type": "Type d'option",
+        "option_group": "Groupe d'options",
+        "description": "Description",
+        "description_help": "Cette description sera affichée aux clients lors de la commande",
+        "required": "Obligatoire",
+        "item_name": "Nom de l'élément",
+        "price": "Prix",
+        "setup_fee": "Frais de configuration",
+        "set_as_default": "Définir par défaut"
+      },
+      "types": {
+        "dropdown": "Liste déroulante",
+        "radio": "Bouton radio",
+        "checkbox": "Case à cocher",
+        "quantity": "Quantité",
+        "text": "Texte"
+      },
+      "no_group": "Aucun groupe",
+      "option_items": "Éléments d'option",
+      "errors": {
+        "name_required": "Le nom de l'option est requis",
+        "items_required": "Au moins un élément d'option est requis"
+      }
+    },
+    "upgrades": {
+      "title": "Mises à niveau & Rétrogradations",
+      "description": "Configurez les options de mise à niveau et de rétrogradation du produit",
+      "configuration_title": "Configuration",
+      "allow_downgrade": "Autoriser la rétrogradation",
+      "allow_downgrade_help": "Permettre aux clients de rétrograder vers un produit de niveau inférieur",
+      "upgrade_package_quantity": "Mise à niveau de la quantité du forfait",
+      "upgrade_package_quantity_help": "Permettre aux clients d'augmenter la quantité de leur forfait",
+      "products_title": "Produits disponibles",
+      "product_name": "Nom du produit",
+      "action": "Action",
+      "add": "Ajouter une mise à niveau",
+      "selected_upgrades": "Mises à niveau sélectionnées",
+      "remove": "Supprimer"
+    },
+    "freedomain": {
+      "title": "Domaine gratuit",
+      "description": "Configurez les options de domaine gratuit pour ce produit",
+      "configuration_title": "Configuration",
+      "enable_freedomain": "Activer le domaine gratuit",
+      "enable_freedomain_help": "Offrir un domaine gratuit avec ce produit",
+      "required_period": "Période de facturation requise",
+      "required_period_help": "Période de facturation minimale requise pour bénéficier d'un domaine gratuit",
+      "initial_order_only": "Commande initiale uniquement",
+      "initial_order_only_help": "Offrir un domaine gratuit uniquement sur la commande initiale, pas sur les renouvellements",
+      "available_tlds": "TLDs disponibles",
+      "tlds_help": "Sélectionnez les TLDs éligibles pour un domaine gratuit",
+      "selected_tlds": "TLDs sélectionnés"
+    },
+    "cross_sells": {
+      "title": "Ventes croisées",
+      "description": "Configurez les produits en vente croisée à proposer avec ce produit",
+      "configuration_title": "Configuration",
+      "show_on_checkout": "Afficher lors du paiement",
+      "show_on_checkout_help": "Afficher les produits en vente croisée pendant le processus de paiement",
+      "discount_percent": "Pourcentage de remise",
+      "discount_percent_help": "Appliquer une remise aux produits en vente croisée lorsqu'ils sont achetés ensemble",
+      "search_title": "Recherche de produits",
+      "search_products": "Rechercher des produits",
+      "search_placeholder": "Rechercher des produits à vendre en vente croisée",
+      "selected_products": "Produits sélectionnés",
+      "no_products_selected": "Aucun produit sélectionné",
+      "no_search_results": "Aucun produit correspondant à votre recherche",
+      "product_name": "Nom du produit",
+      "product_type": "Type de produit",
+      "product_price": "Prix",
+      "action": "Action",
+      "add": "Ajouter",
+      "remove": "Supprimer"
+    },
+    "other": {
+      "title": "Autres paramètres",
+      "description": "Configurez des paramètres supplémentaires pour ce produit",
+      "configuration_title": "Configuration",
+      "require_domain": "Domaine requis",
+      "require_domain_help": "Exiger qu'un domaine soit associé à ce produit",
+      "auto_setup": "Configuration automatique",
+      "auto_setup_help": "Provisionner automatiquement ce produit lors de la commande",
+      "stock_control": "Contrôle de stock",
+      "stock_control_help": "Activer le contrôle de stock pour ce produit",
+      "stock_quantity_help": "Définir la quantité disponible pour ce produit",
+      "hidden": "Masqué",
+      "hidden_help": "Masquer ce produit dans la liste des produits",
+      "featured": "Mis en avant",
+      "featured_help": "Marquer ce produit comme mis en avant",
+      "welcome_email_help": "Sélectionnez l'email de bienvenue à envoyer lorsque ce produit est commandé",
+      "welcome_email_none": "Pas d'email de bienvenue",
+      "welcome_email_product": "Email de bienvenue spécifique au produit",
+      "welcome_email_general": "Email de bienvenue général",
+      "welcome_email_both": "Les deux emails de bienvenue (produit et général)",
+      "notes_help": "Notes internes sur ce produit (non visibles par les clients)",
+      "notes_placeholder": "Entrez ici toutes les notes ou commentaires concernant ce produit..."
+    },
+    "links": {
+      "title": "Liens du produit",
+      "description": "Gérer les liens directs et les URLs promotionnelles pour ce produit",
+      "direct_links_title": "Liens de commande directe",
+      "direct_cart_link_placeholder": "Lien direct vers le panier",
+      "direct_cart_link_template_placeholder": "Lien direct vers le panier avec modèle",
+      "direct_cart_link_domain_placeholder": "Lien direct vers le panier avec domaine",
+      "group_cart_link_placeholder": "Lien vers le panier de groupe",
+      "product_links_title": "Liens promotionnels",
+      "url": "URL",
+      "visits": "Visites",
+      "actions": "Actions",
+      "add_link": "Ajouter un lien",
+      "url_placeholder": "Entrez l'URL promotionnelle",
+      "finalize_product": "Veuillez finaliser le produit avant de générer des liens",
+      "finalizing": "Finalisation du produit..."
+    },
+    "welcome_emails": {
+      "none": "Aucun email de bienvenue",
+      "hosting": "Email de bienvenue pour l'hébergement",
+      "general": "Email de bienvenue général"
+    },
+    "tabs": {
+      "type": "Type",
+      "details": "Details",
+      "pricing": "Tarification",
+      "module": "Module",
+      "custom_fields": "Champs personnalisés",
+      "configurable_options": "Options configurables",
+      "upgrades": "Mises à niveau",
+      "freedomain": "Domaine gratuit",
+      "cross_sells": "Ventes croisées",
+      "other": "Autres",
+      "links": "Liens"
     },
     "fields": {
       "name": "Nom",
       "description": "Description",
       "price": "Prix",
       "status": "Statut",
+      "type": "Type",
       "features": "Fonctionnalités",
       "featureName": "Nom de la fonctionnalité",
       "included": "Inclus",
-      "addFeature": "Ajouter une fonctionnalité"
+      "addFeature": "Ajouter une fonctionnalité",
+      "group": "Groupe"
+    },
+    "filters": {
+      "search": "Recherche",
+      "status": "Statut",
+      "type": "Type",
+      "price_range": "Gamme de prix",
+      "all_prices": "Tous les prix",
+      "price_low": "Prix bas (< 50€)",
+      "price_medium": "Prix moyen (50€ - 200€)",
+      "price_high": "Prix élevé (> 200€)",
+      "apply": "Appliquer les filtres",
+      "group": "Groupe"
+    },
+    "empty": {
+      "title": "Aucun produit ou service trouvé",
+      "description": "Commencez par ajouter un produit ou un service en cliquant sur le bouton ci-dessus."
     },
     "validation": {
       "nameRequired": "Le nom est obligatoire",
       "pricePositive": "Le prix doit être positif"
     },
     "success": {
-      "create": "Service créé",
-      "createMessage": "Le service {name} a été créé avec succès",
-      "update": "Service mis à jour",
-      "updateMessage": "Le service {name} a été mis à jour avec succès",
-      "delete": "Service supprimé",
-      "deleteMessage": "Le service {name} a été supprimé avec succès"
+      "create": "Produit/service créé",
+      "createMessage": "Le produit/service {name} a été créé avec succès",
+      "update": "Produit/service mis à jour",
+      "updateMessage": "Le produit/service {name} a été mis à jour avec succès",
+      "delete": "Produit/service supprimé",
+      "deleteMessage": "Le produit/service {name} a été supprimé avec succès"
     },
     "errors": {
       "fetch": "Erreur de chargement",
-      "fetchMessage": "Impossible de charger les services",
+      "fetchMessage": "Impossible de charger les produits/services",
       "create": "Erreur de création",
       "update": "Erreur de mise à jour",
-      "saveMessage": "Une erreur est survenue lors de l'enregistrement du service",
+      "saveMessage": "Une erreur est survenue lors de l'enregistrement du produit/service",
       "delete": "Erreur de suppression",
-      "deleteMessage": "Une erreur est survenue lors de la suppression du service"
+      "deleteMessage": "Une erreur est survenue lors de la suppression du produit/service",
+      "nameRequired": "Le nom est requis",
+      "pricePositive": "Le prix doit être positif",
+      "name_required": "Le nom est requis",
+      "group_required": "Le groupe est requis"
     },
     "confirm": {
-      "delete": "Êtes-vous sûr de vouloir supprimer le service {name} ?"
+      "delete": "Êtes-vous sûr de vouloir supprimer le produit/service {name} ?"
+    },
+    "pricing": {
+      "title": "Tarification",
+      "description": "Configurez les options de tarification pour votre produit",
+      "payment_type": "Type de paiement",
+      "free": "Gratuit",
+      "one_time": "Unique",
+      "recurring": "Récurrent",
+      "allow_multiple_quantities": "Autoriser les quantités multiples",
+      "multiple_quantities_no_help": "Les clients ne peuvent acheter qu'un seul exemplaire de ce produit à la fois",
+      "no": "Non",
+      "yes": "Oui",
+      "multiple_quantities_yes_help": "Les clients peuvent acheter plusieurs exemplaires de ce produit",
+      "auto_termination_days": "Jours avant résiliation automatique",
+      "auto_termination_days_help": "Nombre de jours après lesquels le produit sera automatiquement résilié. Laissez vide pour désactiver la résiliation automatique.",
+      "promotion_code": "Code de promotion",
+      "promotion_code_help": "Appliquer un code de promotion à ce produit par défaut",
+      "prorata_billing": "Facturation au prorata",
+      "prorata_billing_help": "Facturer aux clients uniquement les jours restants du cycle de facturation",
+      "private_billing_date": "Date de facturation privée",
+      "private_billing_date_help": "Définir une date de facturation spécifique pour ce produit, remplaçant la date de facturation du client",
+      "charge_next_month": "Facturer le mois suivant",
+      "charge_next_month_help": "Facturer au client le mois suivant au lieu du mois en cours",
+      "pricing_configuration": "Configuration de la tarification",
+      "system_default": "Paramètres par défaut",
+      "system_default_help": "Utiliser la configuration de tarification par défaut du système",
+      "product_specific": "Spécifique au produit",
+      "product_specific_help": "Utiliser une configuration de tarification spécifique pour ce produit",
+      "payment_options": "Options de paiement",
+      "option": "Option",
+      "monthly": "Mensuel",
+      "quarterly": "Trimestriel",
+      "semiannually": "Semestriel",
+      "annually": "Annuel",
+      "biennially": "Biennal",
+      "triennially": "Triennal",
+      "payment_options_help": "Configurez les options de paiement pour ce produit",
+      "enabled": "Activé",
+      "price": "Prix",
+      "setup_fee": "Frais d'installation",
+      "recurring_cycles_limit": "Limite de cycles récurrents",
+      "recurring_cycles_limit_help": "Nombre maximum de cycles de facturation pour ce produit. Laissez vide pour des cycles illimités."
+    },
+    "create_product": {
+      "title": "Créer un produit",
+      "description": "Créez un nouveau produit en suivant les étapes ci-dessous",
+      "step1_title": "Informations générales",
+      "step2_title": "Détails et tarification",
+      "step3_title": "Fonctionnalités et options",
+      "product_type": "Type de produit",
+      "select_type": "Sélectionnez un type de produit",
+      "type_help": "Choisissez le type de produit que vous souhaitez créer",
+      "type_other_help": "Créez un type de produit personnalisé non listé ci-dessus",
+      "types": {
+        "shared_hosting": "Hébergement mutualisé",
+        "reseller_hosting": "Hébergement revendeur",
+        "server_vps": "Serveur / VPS",
+        "other": "Autre"
+      },
+      "group": "Groupe",
+      "name": "Nom",
+      "slug": "Slug",
+      "slug_help": "Utilisé pour les URL. Laissez vide pour générer automatiquement à partir du nom.",
+      "module": "Module",
+      "no_module": "Aucun module",
+      "hidden": "Masqué",
+      "hidden_help": "Les produits masqués ne sont pas visibles pour les clients dans la boutique.",
+      "price": "Prix",
+      "setup_fee": "Frais d'installation",
+      "recurring": "Récurrent",
+      "billing_cycle": "Cycle de facturation",
+      "cycles": {
+        "monthly": "Mensuel",
+        "quarterly": "Trimestriel",
+        "semiannually": "Semestriel",
+        "annually": "Annuel",
+        "biennially": "Biennal"
+      },
+      "status": "Statut",
+      "statuses": {
+        "active": "Actif",
+        "inactive": "Inactif",
+        "draft": "Brouillon"
+      },
+      "features": "Fonctionnalités",
+      "no_features": "Aucune fonctionnalité ajoutée. Cliquez sur le bouton Ajouter pour commencer.",
+      "feature_name": "Nom de la fonctionnalité",
+      "feature_value": "Valeur",
+      "options": "Options",
+      "no_options": "Aucune option ajoutée. Cliquez sur le bouton Ajouter pour commencer.",
+      "option_name": "Nom de l'option",
+      "option_type": "Type d'option",
+      "option_types": {
+        "select": "Liste déroulante",
+        "radio": "Boutons radio",
+        "checkbox": "Case à cocher",
+        "quantity": "Quantité"
+      },
+      "required": "Obligatoire",
+      "option_choices": "Choix disponibles",
+      "choice_name": "Nom du choix",
+      "choice_price": "Prix supplémentaire",
+      "summary": "Résumé du produit",
+      "summary_description": "Vérifiez les détails de votre produit avant de l'enregistrer.",
+      "type_description": "Description du type de produit"
+    },
+    "details": {
+      "title": "Détails du produit",
+      "description": "Configurez les détails de votre produit",
+      "product_type": "Type de produit",
+      "product_group": "Groupe de produits",
+      "product_type_help": "Le type de produit détermine ses fonctionnalités et sa fonctionnalité",
+      "product_group_help": "Regroupez des produits similaires pour une meilleure organisation",
+      "product_name": "Nom du produit",
+      "product_name_help": "Entrez un nom descriptif pour votre produit",
+      "product_tagline": "Slogan du produit",
+      "product_tagline_help": "Une courte description qui apparaît dans les listes de produits",
+      "url": "URL",
+      "url_help": "URL personnalisée pour ce produit",
+      "module": "Module",
+      "module_help": "Sélectionnez un module pour gérer ce produit",
+      "product_short_description": "Description courte",
+      "product_short_description_help": "Brève description affichée dans les listes de produits",
+      "product_description": "Description complète",
+      "product_description_help": "Description détaillée du produit",
+      "product_color": "Couleur du produit",
+      "product_color_help": "Couleur utilisée pour l'image de marque et les éléments d'interface",
+      "welcome_email": "Email de bienvenue",
+      "welcome_email_help": "Modèle d'email envoyé aux clients après l'achat",
+      "advanced_options": "Options avancées",
+      "create_as_hidden": "Créer comme masqué",
+      "create_as_hidden_help": "Les produits masqués ne sont pas visibles dans la boutique",
+      "require_domain": "Domaine requis",
+      "require_domain_help": "Le client doit sélectionner un domaine lors de la commande de ce produit",
+      "stock_control": "Gestion des stocks",
+      "stock_control_help": "Suivre l'inventaire pour ce produit",
+      "apply_tax": "Appliquer la taxe",
+      "apply_tax_help": "Appliquer les taux de taxe à ce produit",
+      "featured": "Produit en vedette",
+      "featured_help": "Les produits en vedette sont mis en évidence dans la boutique",
+      "hide_other_products": "Masquer les autres produits",
+      "hide_other_products_help": "Lorsque ce produit est dans le panier, masquer les autres produits",
+      "select_group": "Sélectionner un groupe"
     }
   },
-  "products": {
-    "title": "Produits",
-    "actions": {
-      "add": "Ajouter un produit",
-      "add_feature": "Ajouter une fonctionnalité"
-    },
-    "modal": {
-      "add_title": "Ajouter un produit",
-      "edit_title": "Modifier le produit"
-    },
-    "columns": {
-      "name": "Nom",
-      "description": "Description",
-      "price": "Prix",
-      "status": "Statut"
-    },
-    "status": {
-      "active": "Actif",
-      "inactive": "Inactif"
-    },
+  "product_groups": {
+    "title": "Groupes de produits",
+    "add": "Créer un groupe",
+    "add_title": "Créer un nouveau groupe",
+    "edit_title": "Modifier le groupe",
     "fields": {
       "name": "Nom",
-      "description": "Description",
-      "price": "Prix",
-      "status": "Statut",
-      "features": "Fonctionnalités",
-      "feature_name": "Nom de la fonctionnalité",
-      "feature_included": "Inclus"
+      "slug": "Slug",
+      "description": "Description"
     },
-    "filters": {
-      "label": "Filtrer par statut",
-      "all": "Tous",
-      "active": "Actifs",
-      "inactive": "Inactifs"
+    "placeholders": {
+      "name": "Nom du groupe",
+      "slug": "slug-du-groupe",
+      "description": "Description du groupe"
     },
-    "search": {
-      "placeholder": "Rechercher un produit..."
-    },
+    "slug_help": "Le slug est utilisé dans les URLs. Utilisez uniquement des lettres minuscules, des chiffres et des tirets.",
     "empty": {
-      "message": "Aucun produit trouvé",
-      "action": "Ajouter un produit"
-    },
-    "validation": {
-      "name_required": "Le nom est obligatoire",
-      "description_required": "La description est obligatoire",
-      "price_positive": "Le prix doit être positif"
-    },
-    "confirm": {
-      "delete": "Êtes-vous sûr de vouloir supprimer ce produit ?"
+      "title": "Aucun groupe",
+      "message": "Vous n'avez pas encore de groupes de produits. Cliquez sur le bouton ci-dessus pour en créer un."
     },
     "success": {
-      "create": "Produit créé avec succès",
-      "update": "Produit mis à jour avec succès",
-      "delete": "Produit supprimé avec succès"
+      "create": "Le groupe a été créé avec succès",
+      "update": "Le groupe a été mis à jour avec succès",
+      "delete": "Le groupe a été supprimé avec succès"
     },
     "errors": {
-      "fetch": "Erreur lors du chargement des produits",
-      "create": "Erreur lors de la création du produit",
-      "update": "Erreur lors de la mise à jour du produit",
-      "delete": "Erreur lors de la suppression du produit"
-    }
+      "name_required": "Le nom est obligatoire",
+      "slug_required": "Le slug est obligatoire",
+      "slug_invalid": "Le slug n'est pas valide. Utilisez uniquement des lettres minuscules, des chiffres et des tirets.",
+      "create": "Une erreur est survenue lors de la création du groupe",
+      "update": "Une erreur est survenue lors de la mise à jour du groupe",
+      "delete": "Une erreur est survenue lors de la suppression du groupe",
+      "fetch": "Une erreur est survenue lors de la récupération des groupes"
+    },
+    "confirm_delete": "Êtes-vous sûr de vouloir supprimer ce groupe ? Tous les produits associés à ce groupe seront déplacés dans le groupe par défaut."
   },
   "invoices": {
     "title": "Factures",
@@ -211,6 +598,7 @@
   },
   "subscriptions": {
     "title": "Abonnements",
+    "description": "Gérez les abonnements de vos clients",
     "actions": {
       "add": "Ajouter un abonnement",
       "edit": "Modifier l'abonnement",
@@ -221,7 +609,7 @@
     "table": {
       "id": "ID",
       "client": "Client",
-      "service": "Service",
+      "product": "Produit",
       "startDate": "Date de début",
       "endDate": "Date de fin",
       "renewalDate": "Date de renouvellement",
@@ -231,6 +619,11 @@
       "actions": "Actions"
     },
     "filters": {
+      "search": "Recherche",
+      "status": "Statut",
+      "billing_cycle": "Cycle de facturation",
+      "all_cycles": "Tous les cycles",
+      "apply": "Appliquer les filtres",
       "all": "Tous",
       "active": "Actifs",
       "pending": "En attente",
@@ -258,7 +651,7 @@
     },
     "form": {
       "client": "Client",
-      "service": "Service",
+      "product": "Produit",
       "startDate": "Date de début",
       "endDate": "Date de fin",
       "price": "Prix",
@@ -455,14 +848,120 @@
     "replyPlaceholder": "Votre réponse...",
     "sendReply": "Envoyer"
   },
+  "clients": {
+    "title": "Clients",
+    "description": "Gérez vos clients et leurs services",
+    "add_new": "Ajouter un client",
+    "filters": {
+      "search": "Rechercher",
+      "search_placeholder": "Rechercher un client...",
+      "service_type": "Type de service",
+      "status": "Statut"
+    },
+    "services": {
+      "all": "Tous les services",
+      "hosting": "Hébergement",
+      "domain": "Nom de domaine",
+      "ssl": "Certificat SSL"
+    },
+    "table": {
+      "client": "Client",
+      "company": "Entreprise",
+      "email": "Email",
+      "phone": "Téléphone",
+      "status": "Statut",
+      "services": "Services",
+      "actions": "Actions"
+    },
+    "status": {
+      "all": "Tous les statuts",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "pending": "En attente"
+    },
+    "empty": {
+      "title": "Aucun client trouvé",
+      "description": "Vous n'avez pas encore de clients. Ajoutez-en un pour commencer."
+    },
+    "no_services": "Aucun service",
+    "form": {
+      "firstname": "Prénom",
+      "firstname_placeholder": "Entrez le prénom",
+      "lastname": "Nom",
+      "lastname_placeholder": "Entrez le nom",
+      "email": "Email",
+      "email_placeholder": "Entrez l'adresse email",
+      "phone": "Téléphone",
+      "phone_placeholder": "Entrez le numéro de téléphone",
+      "company": "Entreprise",
+      "company_placeholder": "Entrez le nom de l'entreprise",
+      "status": "Statut",
+      "address": "Adresse",
+      "address_placeholder": "Entrez l'adresse",
+      "postal_code": "Code postal",
+      "postal_code_placeholder": "Entrez le code postal",
+      "city": "Ville",
+      "city_placeholder": "Entrez la ville",
+      "country": "Pays",
+      "country_placeholder": "Entrez le pays",
+      "password": "Mot de passe",
+      "password_placeholder": "Entrez le mot de passe",
+      "password_optional": "(Optionnel)",
+      "password_leave_empty": "Laissez vide pour conserver le mot de passe actuel",
+      "address_title": "Adresse",
+      "personal_info": "Informations personnelles"
+    },
+    "actions": {
+      "view": "Voir les détails",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "confirm_delete": "Êtes-vous sûr de vouloir supprimer ce client ?",
+    "details": {
+      "title": "Détails du client",
+      "description": "Informations détaillées du client",
+      "personal_info": "Informations personnelles",
+      "address": "Adresse",
+      "services": "Services",
+      "no_services": "Ce client n'a aucun service actif",
+      "invoices": "Factures",
+      "no_invoices": "Aucune facture trouvée pour ce client",
+      "tab_info": "Informations",
+      "tab_services": "Services",
+      "tab_invoices": "Factures",
+      "error_loading": "Erreur lors du chargement des informations du client",
+      "error_deleting": "Erreur lors de la suppression du client",
+      "not_found": "Client non trouvé"
+    },
+    "edit": {
+      "title": "Modifier le client",
+      "description": "Mettre à jour les informations du client"
+    },
+    "add": {
+      "title": "Ajouter un client",
+      "description": "Créer un nouveau client"
+    },
+    "delete_modal": {
+      "title": "Supprimer le client",
+      "confirmation": "Êtes-vous sûr de vouloir supprimer ce client ?",
+      "warning": "Cette action est irréversible. Toutes les données associées à ce client seront supprimées."
+    },
+    "validation": {
+      "firstname_required": "Le prénom est requis",
+      "lastname_required": "Le nom est requis",
+      "email_required": "L'adresse email est requise",
+      "email_invalid": "L'adresse email n'est pas valide",
+      "password_required": "Le mot de passe est requis"
+    }
+  },
   "sidebar": {
     "menu": {
       "dashboard": "Tableau de bord",
       "clients": "Clients",
+      "services": "Services",
       "catalog": {
         "title": "Catalogue",
-        "services": "Services",
-        "products": "Produits"
+        "products_services": "Produits & Services"
       },
       "billing": {
         "title": "Facturation",
@@ -481,8 +980,20 @@
   },
   "settings": {
     "title": "Paramètres",
+    "description": "Configurez les paramètres de votre système",
+    "tabs": {
+      "home": "Accueil",
+      "general": "Général",
+      "notifications": "Notifications",
+      "security": "Sécurité",
+      "billing": "Facturation",
+      "servers": "Serveurs",
+      "integrations": "Intégrations",
+      "license": "Licence"
+    },
     "general": {
       "title": "Paramètres généraux",
+      "description": "Configurez les paramètres généraux de votre système",
       "siteName": "Nom du site",
       "siteDescription": "Description du site",
       "siteEmail": "Email du site",
@@ -504,6 +1015,7 @@
     },
     "security": {
       "title": "Paramètres de sécurité",
+      "description": "Configurez les paramètres de sécurité de votre système",
       "sessionTimeout": "Délai d'expiration de session (minutes)",
       "loginAttempts": "Nombre de tentatives de connexion avant blocage",
       "loginBlockTime": "Durée de blocage après tentatives échouées (minutes)",
@@ -519,6 +1031,7 @@
     },
     "billing": {
       "title": "Paramètres de facturation",
+      "description": "Configurez les paramètres de facturation de votre système",
       "invoicePrefix": "Préfixe des factures",
       "invoiceStartNumber": "Numéro de départ des factures",
       "invoiceFooter": "Pied de page des factures",
@@ -537,8 +1050,9 @@
       "bankIban": "IBAN",
       "bankSwift": "SWIFT/BIC"
     },
-    "integration": {
+    "integrations": {
       "title": "Paramètres d'intégration",
+      "description": "Configurez les intégrations avec des services externes",
       "mailDriver": "Service d'envoi d'emails",
       "mailHost": "Hôte SMTP",
       "mailPort": "Port SMTP",
@@ -572,20 +1086,17 @@
       "smsTestSent": "SMS de test envoyé avec succès",
       "smsTestError": "Une erreur est survenue lors de l'envoi du SMS de test"
     },
-    "tabs": {
-      "general": "Général",
-      "notifications": "Notifications",
-      "security": "Sécurité",
-      "billing": "Facturation",
-      "integrations": "Intégrations",
-      "license": "Licence"
-    },
     "license": {
       "title": "Gestion de Licence",
+      "description": "Gérez votre licence TechCMS et vérifiez son statut",
       "licenseKey": "Clé de licence",
       "licenseType": "Type de licence",
       "licenseStatus": "Statut de la licence",
       "licenseExpiration": "Date d'expiration",
+      "licenseDomain": "Domaine enregistré",
+      "licenseSupport": "Support jusqu'au",
+      "licenseRenew": "Renouveler la licence",
+      "licenseDeactivate": "Désactiver la licence",
       "active": "Active",
       "inactive": "Inactive",
       "free": "Gratuit",
@@ -594,6 +1105,239 @@
       "updateError": "Erreur lors de la mise à jour de la licence",
       "verifyingLicense": "Vérification de la licence...",
       "enterLicenseKey": "Veuillez entrer une clé de licence valide"
+    },
+    "servers": {
+      "title": "Gestion des Serveurs",
+      "description": "Configurez et gérez vos serveurs (cPanel, Proxmox, Virtualizor)",
+      "add": "Ajouter un serveur",
+      "edit": "Modifier le serveur",
+      "delete": "Supprimer le serveur",
+      "test": "Tester la connexion",
+      "name": "Nom du serveur",
+      "hostname": "Nom d'hôte",
+      "type": "Type de serveur",
+      "ipAddress": "Adresse IP",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "port": "Port",
+      "secure": "Connexion sécurisée",
+      "accessKey": "Clé d'accès API",
+      "active": "Actif",
+      "status": "Statut",
+      "load": "Charge",
+      "types": {
+        "cpanel": "cPanel",
+        "proxmox": "Proxmox",
+        "virtualizor": "Virtualizor"
+      },
+      "statuses": {
+        "online": "En ligne",
+        "offline": "Hors ligne",
+        "maintenance": "Maintenance"
+      },
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce serveur ?",
+      "testSuccess": "Connexion au serveur réussie",
+      "testError": "Échec de la connexion au serveur",
+      "saveSuccess": "Serveur enregistré avec succès",
+      "saveError": "Erreur lors de l'enregistrement du serveur",
+      "deleteSuccess": "Serveur supprimé avec succès",
+      "deleteError": "Erreur lors de la suppression du serveur"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "stats": {
+      "active_clients": "Clients actifs",
+      "active_services": "Services actifs",
+      "total_products": "Total des produits",
+      "monthly_revenue": "Revenu mensuel"
+    },
+    "recent_clients": {
+      "title": "Clients récents"
+    },
+    "recent_tickets": {
+      "title": "Tickets récents"
+    }
+  },
+  "topbar": {
+    "notifications": {
+      "title": "Notifications",
+      "mark_all_read": "Marquer tout comme lu",
+      "empty": "Aucune notification",
+      "view_all": "Voir toutes les notifications"
+    },
+    "profile": {
+      "my_profile": "Mon profil",
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
+    }
+  },
+  "services": {
+    "title": "Services",
+    "description": "Gérez les services de vos clients",
+    "add_new": "Ajouter un service",
+    "empty": {
+      "title": "Aucun service trouvé",
+      "message": "Vous n'avez pas encore de services. Commencez par en créer un."
+    },
+    "filters": {
+      "search": "Rechercher",
+      "search_placeholder": "Rechercher par domaine, nom de client...",
+      "status": "Statut",
+      "client": "Client",
+      "product": "Produit",
+      "all_clients": "Tous les clients",
+      "all_products": "Tous les produits"
+    },
+    "table": {
+      "client": "Client",
+      "product": "Produit",
+      "domain": "Domaine",
+      "status": "Statut",
+      "next_due_date": "Prochaine échéance",
+      "recurring_amount": "Montant récurrent",
+      "actions": "Actions"
+    },
+    "status": {
+      "all": "Tous les statuts",
+      "pending": "En attente",
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "cancelled": "Annulé",
+      "terminated": "Résilié",
+      "fraud": "Fraude"
+    },
+    "actions": {
+      "view": "Voir",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "activate": "Activer",
+      "suspend": "Suspendre",
+      "cancel": "Annuler",
+      "terminate": "Résilier"
+    },
+    "delete_modal": {
+      "title": "Supprimer le service",
+      "confirmation": "Êtes-vous sûr de vouloir supprimer ce service ?",
+      "warning": "Cette action est irréversible et supprimera toutes les données associées à ce service."
+    },
+    "create": {
+      "title": "Créer un service",
+      "description": "Ajoutez un nouveau service pour un client"
+    },
+    "edit": {
+      "title": "Modifier le service",
+      "description": "Modifiez les détails du service"
+    },
+    "details": {
+      "title": "Détails du service",
+      "description": "Consultez les informations détaillées du service",
+      "client": "Client",
+      "client_name": "Nom du client",
+      "client_email": "Email du client",
+      "product": "Produit",
+      "product_name": "Nom du produit",
+      "server": "Serveur",
+      "server_name": "Nom du serveur",
+      "billing": "Facturation",
+      "billing_cycle": "Cycle de facturation",
+      "next_due_date": "Prochaine échéance",
+      "recurring_amount": "Montant récurrent",
+      "setup_fee": "Frais d'installation",
+      "important_dates": "Dates importantes",
+      "created_at": "Date de création",
+      "suspension_date": "Date de suspension",
+      "cancellation_date": "Date d'annulation",
+      "termination_date": "Date de résiliation",
+      "login_details": "Identifiants de connexion",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "configuration": "Configuration personnalisée",
+      "notes": "Notes",
+      "unknown": "Inconnu",
+      "unknown_product": "Produit inconnu",
+      "not_set": "Non défini",
+      "no_server": "Aucun serveur associé",
+      "no_login_details": "Aucun identifiant de connexion défini",
+      "view_client": "Voir le client",
+      "view_product": "Voir le produit",
+      "view_server": "Voir le serveur",
+      "error_loading": "Erreur lors du chargement du service"
+    },
+    "form": {
+      "section": {
+        "client_product": "Client et produit",
+        "details": "Détails du service",
+        "billing": "Facturation",
+        "notes": "Notes",
+        "configurations": "Configurations personnalisées"
+      },
+      "client": "Client",
+      "select_client": "Sélectionner un client",
+      "product": "Produit",
+      "select_product": "Sélectionner un produit",
+      "domain": "Domaine",
+      "domain_placeholder": "exemple.com",
+      "username": "Nom d'utilisateur",
+      "username_placeholder": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "password_placeholder": "Mot de passe",
+      "server": "Serveur",
+      "select_server": "Sélectionner un serveur",
+      "status": "Statut",
+      "billing_cycle": "Cycle de facturation",
+      "next_due_date": "Prochaine échéance",
+      "recurring_amount": "Montant récurrent",
+      "amount_placeholder": "0.00",
+      "setup_fee": "Frais d'installation",
+      "fee_placeholder": "0.00",
+      "notes": "Notes",
+      "notes_placeholder": "Notes internes sur ce service...",
+      "config_name": "Nom",
+      "config_value": "Valeur",
+      "action": "Action",
+      "add_config": "Ajouter une configuration",
+      "errors": {
+        "client_required": "Le client est requis",
+        "product_required": "Le produit est requis",
+        "status_required": "Le statut est requis",
+        "invalid_date": "Format de date invalide",
+        "negative_amount": "Le montant ne peut pas être négatif",
+        "negative_fee": "Les frais ne peuvent pas être négatifs"
+      },
+      "success_create_title": "Service créé",
+      "success_create_message": "Le service a été créé avec succès",
+      "success_update_title": "Service mis à jour",
+      "success_update_message": "Le service a été mis à jour avec succès",
+      "error_loading": "Erreur lors du chargement des données",
+      "error_submit": "Erreur lors de l'enregistrement du service"
+    },
+    "billing_cycles": {
+      "monthly": "Mensuel",
+      "quarterly": "Trimestriel",
+      "semi_annually": "Semestriel",
+      "annually": "Annuel",
+      "biennially": "Biennal",
+      "triennially": "Triennal"
+    },
+    "status_change": {
+      "activate_title": "Activer le service",
+      "suspend_title": "Suspendre le service",
+      "cancel_title": "Annuler le service",
+      "terminate_title": "Résilier le service",
+      "activate_confirmation": "Êtes-vous sûr de vouloir activer ce service ?",
+      "suspend_confirmation": "Êtes-vous sûr de vouloir suspendre ce service ?",
+      "cancel_confirmation": "Êtes-vous sûr de vouloir annuler ce service ?",
+      "terminate_confirmation": "Êtes-vous sûr de vouloir résilier ce service ? Cette action est irréversible.",
+      "notes": "Notes",
+      "notes_placeholder": "Raison du changement de statut...",
+      "success_title": "Statut modifié",
+      "activate_success": "Le service a été activé avec succès",
+      "suspend_success": "Le service a été suspendu avec succès",
+      "cancel_success": "Le service a été annulé avec succès",
+      "terminate_success": "Le service a été résilié avec succès",
+      "error": "Erreur lors du changement de statut",
+      "invalid_action": "Action invalide"
     }
   }
 }

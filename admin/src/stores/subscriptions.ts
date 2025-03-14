@@ -5,7 +5,7 @@ import { useNotificationStore } from './notifications'
 interface Subscription {
   id: number
   client_id: number
-  service_id: number
+  product_id: number
   start_date: string
   end_date: string | null
   renewal_date: string | null
@@ -17,7 +17,7 @@ interface Subscription {
   created_at: string
   updated_at: string | null
   client_name?: string
-  service_name?: string
+  product_name?: string
 }
 
 export const useSubscriptionStore = defineStore('subscriptions', {
@@ -51,7 +51,7 @@ export const useSubscriptionStore = defineStore('subscriptions', {
         if (subscription.status !== 'active' || !subscription.renewal_date) return false
         
         const renewalDate = new Date(subscription.renewal_date)
-        return renewalDate > today && renewalDate <= thirtyDaysFromNow
+        return renewalDate >= today && renewalDate <= thirtyDaysFromNow
       })
     }
   },
@@ -63,163 +63,158 @@ export const useSubscriptionStore = defineStore('subscriptions', {
       
       try {
         const response = await axios.get('/api/v1/subscriptions')
-        this.subscriptions = response.data.subscriptions
-      } catch (error: any) {
-        console.error('Erreur lors du chargement des abonnements:', error)
-        this.error = error.response?.data?.message || 'Erreur lors du chargement des abonnements'
-        const notificationStore = useNotificationStore()
-        notificationStore.addNotification({
-          title: 'Erreur',
-          message: this.error,
-          type: 'error'
-        })
+        
+        if (response.data && response.data.subscriptions) {
+          this.subscriptions = response.data.subscriptions
+        } else {
+          this.subscriptions = []
+        }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Erreur lors de la récupération des abonnements'
+        useNotificationStore().addNotification(this.error, 'error')
       } finally {
         this.loading = false
       }
     },
-
+    
     async fetchSubscription(id: number) {
       this.loading = true
       this.error = null
       
       try {
         const response = await axios.get(`/api/v1/subscriptions/${id}`)
-        this.currentSubscription = response.data.subscription
-        return response.data.subscription
-      } catch (error: any) {
-        console.error(`Erreur lors du chargement de l'abonnement ${id}:`, error)
-        this.error = error.response?.data?.message || `Erreur lors du chargement de l'abonnement ${id}`
-        const notificationStore = useNotificationStore()
-        notificationStore.addNotification({
-          title: 'Erreur',
-          message: this.error,
-          type: 'error'
-        })
-        return null
+        
+        if (response.data && response.data.subscription) {
+          this.currentSubscription = response.data.subscription
+          
+          // Mettre à jour l'abonnement dans la liste si présent
+          const index = this.subscriptions.findIndex(s => s.id === id)
+          if (index !== -1) {
+            this.subscriptions[index] = response.data.subscription
+          }
+        }
+      } catch (error) {
+        this.error = error.response?.data?.message || `Erreur lors de la récupération de l'abonnement #${id}`
+        useNotificationStore().addNotification(this.error, 'error')
       } finally {
         this.loading = false
       }
     },
-
+    
     async createSubscription(subscription: Partial<Subscription>) {
       this.loading = true
       this.error = null
       
       try {
         const response = await axios.post('/api/v1/subscriptions', subscription)
-        this.subscriptions.unshift(response.data.subscription)
-        const notificationStore = useNotificationStore()
-        notificationStore.addNotification({
-          title: 'Succès',
-          message: 'Abonnement créé avec succès',
-          type: 'success'
-        })
-        return response.data.subscription
-      } catch (error: any) {
-        console.error('Erreur lors de la création de l\'abonnement:', error)
+        
+        if (response.data && response.data.subscription) {
+          this.subscriptions.push(response.data.subscription)
+          useNotificationStore().addNotification('Abonnement créé avec succès', 'success')
+          return response.data.subscription
+        }
+      } catch (error) {
         this.error = error.response?.data?.message || 'Erreur lors de la création de l\'abonnement'
-        const notificationStore = useNotificationStore()
-        notificationStore.addNotification({
-          title: 'Erreur',
-          message: this.error,
-          type: 'error'
-        })
+        useNotificationStore().addNotification(this.error, 'error')
         return null
       } finally {
         this.loading = false
       }
     },
-
+    
     async updateSubscription(subscription: Partial<Subscription>) {
+      if (!subscription.id) {
+        this.error = 'ID d\'abonnement manquant'
+        useNotificationStore().addNotification(this.error, 'error')
+        return null
+      }
+      
       this.loading = true
       this.error = null
       
       try {
         const response = await axios.put(`/api/v1/subscriptions/${subscription.id}`, subscription)
-        const index = this.subscriptions.findIndex(s => s.id === subscription.id)
-        if (index !== -1) {
-          this.subscriptions[index] = response.data.subscription
+        
+        if (response.data && response.data.subscription) {
+          // Mettre à jour l'abonnement dans la liste
+          const index = this.subscriptions.findIndex(s => s.id === subscription.id)
+          if (index !== -1) {
+            this.subscriptions[index] = response.data.subscription
+          }
+          
+          // Mettre à jour l'abonnement courant si c'est celui qui est modifié
+          if (this.currentSubscription && this.currentSubscription.id === subscription.id) {
+            this.currentSubscription = response.data.subscription
+          }
+          
+          useNotificationStore().addNotification('Abonnement mis à jour avec succès', 'success')
+          return response.data.subscription
         }
-        const notificationStore = useNotificationStore()
-        notificationStore.addNotification({
-          title: 'Succès',
-          message: 'Abonnement mis à jour avec succès',
-          type: 'success'
-        })
-        return response.data.subscription
-      } catch (error: any) {
-        console.error(`Erreur lors de la mise à jour de l'abonnement ${subscription.id}:`, error)
-        this.error = error.response?.data?.message || `Erreur lors de la mise à jour de l'abonnement ${subscription.id}`
-        const notificationStore = useNotificationStore()
-        notificationStore.addNotification({
-          title: 'Erreur',
-          message: this.error,
-          type: 'error'
-        })
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Erreur lors de la mise à jour de l\'abonnement'
+        useNotificationStore().addNotification(this.error, 'error')
         return null
       } finally {
         this.loading = false
       }
     },
-
-    async cancelSubscription(id: number, reason: string) {
+    
+    async cancelSubscription(id: number, reason: string = '') {
       this.loading = true
       this.error = null
       
       try {
-        const response = await axios.put(`/api/v1/subscriptions/${id}/cancel`, { reason })
-        const index = this.subscriptions.findIndex(s => s.id === id)
-        if (index !== -1) {
-          this.subscriptions[index] = response.data.subscription
+        const response = await axios.post(`/api/v1/subscriptions/${id}/cancel`, { reason })
+        
+        if (response.data && response.data.subscription) {
+          // Mettre à jour l'abonnement dans la liste
+          const index = this.subscriptions.findIndex(s => s.id === id)
+          if (index !== -1) {
+            this.subscriptions[index] = response.data.subscription
+          }
+          
+          // Mettre à jour l'abonnement courant si c'est celui qui est annulé
+          if (this.currentSubscription && this.currentSubscription.id === id) {
+            this.currentSubscription = response.data.subscription
+          }
+          
+          useNotificationStore().addNotification('Abonnement annulé avec succès', 'success')
+          return response.data.subscription
         }
-        const notificationStore = useNotificationStore()
-        notificationStore.addNotification({
-          title: 'Succès',
-          message: 'Abonnement annulé avec succès',
-          type: 'success'
-        })
-        return response.data.subscription
-      } catch (error: any) {
-        console.error(`Erreur lors de l'annulation de l'abonnement ${id}:`, error)
-        this.error = error.response?.data?.message || `Erreur lors de l'annulation de l'abonnement ${id}`
-        const notificationStore = useNotificationStore()
-        notificationStore.addNotification({
-          title: 'Erreur',
-          message: this.error,
-          type: 'error'
-        })
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Erreur lors de l\'annulation de l\'abonnement'
+        useNotificationStore().addNotification(this.error, 'error')
         return null
       } finally {
         this.loading = false
       }
     },
-
+    
     async renewSubscription(id: number) {
       this.loading = true
       this.error = null
       
       try {
-        const response = await axios.put(`/api/v1/subscriptions/${id}/renew`)
-        const index = this.subscriptions.findIndex(s => s.id === id)
-        if (index !== -1) {
-          this.subscriptions[index] = response.data.subscription
+        const response = await axios.post(`/api/v1/subscriptions/${id}/renew`)
+        
+        if (response.data && response.data.subscription) {
+          // Mettre à jour l'abonnement dans la liste
+          const index = this.subscriptions.findIndex(s => s.id === id)
+          if (index !== -1) {
+            this.subscriptions[index] = response.data.subscription
+          }
+          
+          // Mettre à jour l'abonnement courant si c'est celui qui est renouvelé
+          if (this.currentSubscription && this.currentSubscription.id === id) {
+            this.currentSubscription = response.data.subscription
+          }
+          
+          useNotificationStore().addNotification('Abonnement renouvelé avec succès', 'success')
+          return response.data.subscription
         }
-        const notificationStore = useNotificationStore()
-        notificationStore.addNotification({
-          title: 'Succès',
-          message: 'Abonnement renouvelé avec succès',
-          type: 'success'
-        })
-        return response.data.subscription
-      } catch (error: any) {
-        console.error(`Erreur lors du renouvellement de l'abonnement ${id}:`, error)
-        this.error = error.response?.data?.message || `Erreur lors du renouvellement de l'abonnement ${id}`
-        const notificationStore = useNotificationStore()
-        notificationStore.addNotification({
-          title: 'Erreur',
-          message: this.error,
-          type: 'error'
-        })
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Erreur lors du renouvellement de l\'abonnement'
+        useNotificationStore().addNotification(this.error, 'error')
         return null
       } finally {
         this.loading = false

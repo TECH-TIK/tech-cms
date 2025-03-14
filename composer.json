@@ -1,11 +1,11 @@
 {
     "require": {
-        "ably/ably-php": "^1.1"
+        "ably/ably-php": "^1.1",
+        "phpseclib/phpseclib": "^3.0"
     },
     "autoload": {
         "classmap": [
             "includes/",
-            "admin/includes/",
             "api/"
         ]
     }

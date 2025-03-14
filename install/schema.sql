@@ -51,48 +51,44 @@ CREATE TABLE `clients` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `services`
---
-
-CREATE TABLE `services` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `client_id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `status` enum('pending','active','suspended','terminated') NOT NULL DEFAULT 'pending',
-  `billing_cycle` enum('monthly','quarterly','semiannually','annually') NOT NULL,
-  `price` decimal(10,2) NOT NULL,
-  `next_due_date` date NOT NULL,
-  `notes` text DEFAULT NULL,
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `suspended_at` datetime DEFAULT NULL,
-  `terminated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `client_id` (`client_id`),
-  KEY `product_id` (`product_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `products`
 --
 
 CREATE TABLE `products` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `slug` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL,
-  `category` varchar(100) DEFAULT NULL,
-  `price_monthly` decimal(10,2) DEFAULT NULL,
-  `price_quarterly` decimal(10,2) DEFAULT NULL,
-  `price_semiannually` decimal(10,2) DEFAULT NULL,
-  `price_annually` decimal(10,2) DEFAULT NULL,
-  `status` enum('active','inactive') NOT NULL DEFAULT 'active',
+  `group_id` int(11) DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `setup_fee` decimal(10,2) DEFAULT 0,
+  `recurring` tinyint(1) DEFAULT 0,
+  `billing_cycle` enum('monthly','quarterly','semi_annually','annually','biennially','triennially') DEFAULT 'monthly',
+  `product_type` varchar(50) DEFAULT 'other',
+  `status` enum('active','inactive','maintenance') NOT NULL DEFAULT 'active',
+  `features` text DEFAULT NULL,
+  `options` text DEFAULT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `group_id` (`group_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `product_groups`
+--
+
+CREATE TABLE `product_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -104,7 +100,7 @@ CREATE TABLE `products` (
 CREATE TABLE `invoices` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `client_id` int(11) NOT NULL,
-  `service_id` int(11) DEFAULT NULL,
+  `product_id` int(11) DEFAULT NULL,
   `number` varchar(50) NOT NULL,
   `status` enum('draft','unpaid','paid','cancelled') NOT NULL DEFAULT 'draft',
   `date` date NOT NULL,
@@ -116,7 +112,7 @@ CREATE TABLE `invoices` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
-  KEY `service_id` (`service_id`)
+  KEY `product_id` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -152,22 +148,6 @@ CREATE TABLE `ticket_replies` (
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `ticket_id` (`ticket_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `service_history`
---
-
-CREATE TABLE `service_history` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `service_id` int(11) NOT NULL,
-  `action` varchar(50) NOT NULL,
-  `description` text NOT NULL,
-  `created_at` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `service_id` (`service_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -387,7 +367,7 @@ CREATE TABLE `api_tokens` (
 CREATE TABLE `subscriptions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `client_id` int(11) NOT NULL,
-  `service_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
   `renewal_date` date DEFAULT NULL,
@@ -400,7 +380,7 @@ CREATE TABLE `subscriptions` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
-  KEY `service_id` (`service_id`)
+  KEY `product_id` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -409,22 +389,15 @@ CREATE TABLE `subscriptions` (
 -- Contraintes pour les tables
 --
 
-ALTER TABLE `services`
-  ADD CONSTRAINT `services_client_id_foreign` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `services_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
-
 ALTER TABLE `invoices`
   ADD CONSTRAINT `invoices_client_id_foreign` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `invoices_service_id_foreign` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `invoices_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE SET NULL;
 
 ALTER TABLE `tickets`
   ADD CONSTRAINT `tickets_client_id_foreign` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `ticket_replies`
   ADD CONSTRAINT `ticket_replies_ticket_id_foreign` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE;
-
-ALTER TABLE `service_history`
-  ADD CONSTRAINT `service_history_service_id_foreign` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `payments`
   ADD CONSTRAINT `payments_invoice_id_fk` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE CASCADE,
@@ -438,4 +411,64 @@ ALTER TABLE `payment_history`
 
 ALTER TABLE `subscriptions`
   ADD CONSTRAINT `subscriptions_client_id_fk` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `subscriptions_service_id_fk` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `subscriptions_product_id_fk` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `products`
+  ADD CONSTRAINT `products_group_id_fk` FOREIGN KEY (`group_id`) REFERENCES `product_groups` (`id`) ON DELETE SET NULL;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `services`
+--
+
+CREATE TABLE `services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `status` enum('pending','active','suspended','cancelled','terminated','fraud') NOT NULL DEFAULT 'pending',
+  `domain` varchar(255) DEFAULT NULL,
+  `server_id` int(11) DEFAULT NULL,
+  `username` varchar(100) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `next_due_date` date DEFAULT NULL,
+  `billing_cycle` enum('monthly','quarterly','semi_annually','annually','biennially','triennially') DEFAULT 'monthly',
+  `recurring_amount` decimal(10,2) DEFAULT 0.00,
+  `setup_fee` decimal(10,2) DEFAULT 0.00,
+  `renewal_price` decimal(10,2) DEFAULT NULL,
+  `cancellation_date` datetime DEFAULT NULL,
+  `suspension_date` datetime DEFAULT NULL,
+  `termination_date` datetime DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`),
+  KEY `product_id` (`product_id`),
+  KEY `server_id` (`server_id`),
+  KEY `status` (`status`),
+  KEY `next_due_date` (`next_due_date`),
+  CONSTRAINT `services_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `services_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `services_ibfk_3` FOREIGN KEY (`server_id`) REFERENCES `servers` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `service_configurations`
+--
+
+CREATE TABLE `service_configurations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `option_name` varchar(255) NOT NULL,
+  `option_value` text DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `service_id_option_name` (`service_id`, `option_name`),
+  KEY `service_id` (`service_id`),
+  CONSTRAINT `service_configurations_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

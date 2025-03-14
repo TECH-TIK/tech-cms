@@ -1,6 +1,6 @@
 /* Sidebar */
 .sidebar {
-    width: 280px;
+    width: var(--sidebar-width, 280px);
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -9,9 +9,13 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
-    transition: all 0.3s ease;
-    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: fixed;
+    top: var(--header-height, 64px);
+    left: 0;
+    bottom: 0;
     overflow: hidden;
+    z-index: 100;
 }
 
 .sidebar::before {
@@ -53,6 +57,8 @@
 
 .sidebar-nav {
     flex: 1;
+    overflow-y: auto; /* Permet le défilement uniquement dans la navigation si nécessaire */
+    max-height: calc(100vh - 120px); /* Hauteur maximale calculée en fonction de la hauteur de l'écran moins l'en-tête */
 }
 
 .sidebar-nav ul {
@@ -161,16 +167,51 @@
 /* Responsive */
 @media (max-width: 768px) {
     .sidebar {
-        position: fixed;
-        left: -280px;
-        top: 0;
-        bottom: 0;
-        z-index: 1000;
-        margin: 0;
+        left: calc(-1 * var(--sidebar-width, 280px));
+        box-shadow: none;
+        transform: translateX(0);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
     }
 
-    .sidebar.open {
+    body.sidebar-open .sidebar {
         left: 0;
         box-shadow: 0 0 50px rgba(0, 102, 255, 0.15);
+        transform: translateX(0);
     }
+    
+    /* Overlay pour fermer la sidebar en cliquant à l'extérieur */
+    body.sidebar-open::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 90;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    body.sidebar-open::after {
+        opacity: 1;
+    }
+}
+
+/* Ajout de styles pour gérer le scroll de la sidebar */
+.sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(0, 102, 255, 0.2);
+    border-radius: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 102, 255, 0.4);
 }

@@ -1,3 +1,5 @@
+@import '@/assets/css/layouts/boxes.css';
+
 /* Variables */
 :root {
     --spacing-xs: 0.25rem;
@@ -339,6 +341,3 @@ body {
     color: #666;
     min-width: 45px;
 }
-
-/* Import standardized box layouts */
-@import '@/assets/css/layouts/boxes.css';

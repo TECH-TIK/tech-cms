@@ -1,0 +1,46 @@
+/* Styles pour le header */
+:root {
+  --header-height: 64px;
+}
+
+header {
+  display: block;
+  width: 100%;
+  height: var(--header-height, 64px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  height: 100%;
+  width: 100%;
+  padding: 0 1.5rem;
+}
+
+/* Styles pour le mode sombre */
+.dark .top-bar {
+  background-color: #1f2937;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Assurer que le header est toujours visible */
+.visible-header {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Styles responsive */
+@media (max-width: 768px) {
+  .top-bar {
+    padding: 0 1rem;
+  }
+}

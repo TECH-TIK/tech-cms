@@ -1,61 +1,169 @@
 <template>
   <div class="view-container">
     <div class="header-box">
-      <h1 class="page-title">Gestion de Licence</h1>
-      <p class="page-description">
-        Gérez votre licence TechCMS pour accéder à toutes les fonctionnalités et mises à jour.
-      </p>
+      <div>
+        <h1>{{ t('settings.license.title') }}</h1>
+        <div class="page-description">
+          {{ t('settings.license.description') }}
+        </div>
+      </div>
     </div>
 
-    <div class="content-box">
-      <div v-if="loading" class="loading-spinner">
-        <i class="fas fa-spinner fa-spin"></i> Chargement...
+    <div class="settings-section">
+      <div v-if="loading" class="loading-state">
+        <div class="loading-state-icon">
+          <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <div class="loading-state-text">{{ t('common.loading') }}</div>
       </div>
       
       <div v-else class="license-container">
-        <div class="license-status">
-          <h3>Statut de la Licence</h3>
+        <!-- Informations sur la licence -->
+        <div class="settings-group">
+          <h3>{{ t('settings.license.information') }}</h3>
           
-          <div v-if="licenseInfo" class="status-box">
-            <div class="status-badge" :class="licenseInfo.is_valid ? 'status-active' : 'status-inactive'">
-              {{ licenseInfo.is_valid ? 'Active' : 'Inactive' }}
+          <div v-if="licenseInfo.valid" class="license-info">
+            <div class="license-status valid">
+              <i class="fas fa-check-circle"></i>
+              {{ t('settings.license.valid') }}
             </div>
             
-            <div class="license-key">
-              <strong>Clé de licence:</strong> {{ licenseInfo.key || 'Non définie' }}
+            <div class="license-details">
+              <div class="license-detail">
+                <div class="detail-label">{{ t('settings.license.licenseKey') }}</div>
+                <div class="detail-value">{{ maskLicenseKey(licenseInfo.key) }}</div>
+              </div>
+              
+              <div class="license-detail">
+                <div class="detail-label">{{ t('settings.license.registeredTo') }}</div>
+                <div class="detail-value">{{ licenseInfo.registeredTo }}</div>
+              </div>
+              
+              <div class="license-detail">
+                <div class="detail-label">{{ t('settings.license.email') }}</div>
+                <div class="detail-value">{{ licenseInfo.email }}</div>
+              </div>
+              
+              <div class="license-detail">
+                <div class="detail-label">{{ t('settings.license.plan') }}</div>
+                <div class="detail-value">
+                  <span class="plan-badge">{{ licenseInfo.plan }}</span>
+                </div>
+              </div>
+              
+              <div class="license-detail">
+                <div class="detail-label">{{ t('settings.license.expiresAt') }}</div>
+                <div class="detail-value">
+                  {{ licenseInfo.expiresAt ? formatDate(licenseInfo.expiresAt) : t('common.never') }}
+                </div>
+              </div>
+              
+              <div class="license-detail">
+                <div class="detail-label">{{ t('settings.license.supportUntil') }}</div>
+                <div class="detail-value">
+                  {{ licenseInfo.supportUntil ? formatDate(licenseInfo.supportUntil) : t('common.never') }}
+                </div>
+              </div>
             </div>
           </div>
           
-          <div v-else class="status-box">
-            <div class="status-badge status-inactive">Non configurée</div>
-            <p>Aucune licence n'est actuellement configurée.</p>
+          <div v-else class="license-info">
+            <div class="license-status invalid">
+              <i class="fas fa-exclamation-circle"></i>
+              {{ t('settings.license.invalid') }}
+            </div>
+            
+            <div class="license-message">
+              {{ licenseInfo.message || t('settings.license.noLicense') }}
+            </div>
+          </div>
+          
+          <div class="license-actions">
+            <button 
+              class="btn btn-primary" 
+              @click="showLicenseModal = true"
+            >
+              {{ licenseInfo.valid ? t('settings.license.update') : t('settings.license.activate') }}
+            </button>
+            
+            <button 
+              v-if="licenseInfo.valid"
+              class="btn btn-secondary" 
+              @click="checkLicenseStatus"
+              :disabled="checkingStatus"
+            >
+              <i v-if="checkingStatus" class="fas fa-spinner fa-spin" />
+              <i v-else class="fas fa-sync-alt"></i>
+              {{ t('settings.license.check') }}
+            </button>
           </div>
         </div>
         
-        <div class="license-form">
-          <h3>Mettre à jour la Licence</h3>
+        <!-- Fonctionnalités de la licence -->
+        <div v-if="licenseInfo.valid" class="settings-group">
+          <h3>{{ t('settings.license.features') }}</h3>
           
-          <form @submit.prevent="updateLicense">
+          <div class="license-features">
+            <div 
+              v-for="(feature, index) in licenseFeatures" 
+              :key="index"
+              class="license-feature"
+            >
+              <div class="feature-icon">
+                <i 
+                  :class="feature.enabled ? 'fas fa-check enabled' : 'fas fa-times disabled'"
+                ></i>
+              </div>
+              <div class="feature-details">
+                <div class="feature-name">{{ feature.name }}</div>
+                <div class="feature-description">{{ feature.description }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal pour activer/mettre à jour la licence -->
+    <div v-if="showLicenseModal" class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>{{ licenseInfo.valid ? t('settings.license.updateLicense') : t('settings.license.activateLicense') }}</h3>
+          <button class="btn-close" @click="closeLicenseModal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="saveLicense">
             <div class="form-group">
-              <label for="licenseKey">Clé de Licence</label>
+              <label class="form-label">{{ t('settings.license.licenseKey') }}</label>
               <input 
                 type="text" 
-                id="licenseKey" 
-                v-model="licenseKey" 
-                placeholder="Entrez votre clé de licence" 
                 class="form-control"
+                v-model="licenseKey"
                 required
+                placeholder="XXXX-XXXX-XXXX-XXXX"
               />
+              <div class="form-text">
+                {{ t('settings.license.licenseKeyHelp') }}
+              </div>
             </div>
             
-            <div v-if="error" class="error-message">
-              {{ error }}
-            </div>
-            
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary" :disabled="loading">
-                <i v-if="loading" class="fas fa-spinner fa-spin"></i>
-                {{ loading ? 'Mise à jour...' : 'Mettre à jour la licence' }}
+            <div class="modal-actions">
+              <button 
+                type="button"
+                class="btn btn-secondary"
+                @click="closeLicenseModal"
+              >
+                {{ t('common.cancel') }}
+              </button>
+              <button 
+                type="submit"
+                class="btn btn-primary"
+                :disabled="savingLicense"
+              >
+                <i v-if="savingLicense" class="fas fa-spinner fa-spin" />
+                {{ t('common.save') }}
               </button>
             </div>
           </form>
@@ -66,167 +174,157 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useLicenseStore } from '@/stores/license'
+import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useSettingsStore } from '@/stores/settings'
+import { useNotificationStore } from '@/stores/notifications'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
+import '@/assets/css/components/common-layout.css'
+import '@/assets/css/pages/settings.css'
 
-const licenseStore = useLicenseStore()
-const licenseKey = ref('')
-const loading = ref(false)
-const error = ref<string | null>(null)
+const { t } = useI18n()
+const settingsStore = useSettingsStore()
+const notificationStore = useNotificationStore()
 
-const licenseInfo = ref(licenseStore.licenseInfo)
-
-onMounted(async () => {
-  loading.value = true
-  try {
-    await licenseStore.fetchLicenseInfo()
-    licenseInfo.value = licenseStore.licenseInfo
-  } catch (err) {
-    console.error('Erreur lors du chargement des informations de licence', err)
-  } finally {
-    loading.value = false
-  }
+// État
+const loading = ref(true)
+const licenseInfo = ref({
+  valid: false,
+  key: '',
+  registeredTo: '',
+  email: '',
+  plan: '',
+  expiresAt: null,
+  supportUntil: null,
+  message: ''
 })
+const licenseKey = ref('')
+const showLicenseModal = ref(false)
+const savingLicense = ref(false)
+const checkingStatus = ref(false)
 
-const updateLicense = async () => {
-  if (!licenseKey.value) {
-    error.value = 'Veuillez entrer une clé de licence'
-    return
+// Fonctionnalités de la licence
+const licenseFeatures = computed(() => [
+  {
+    name: t('settings.license.features.multipleUsers'),
+    description: t('settings.license.features.multipleUsersDesc'),
+    enabled: true
+  },
+  {
+    name: t('settings.license.features.api'),
+    description: t('settings.license.features.apiDesc'),
+    enabled: true
+  },
+  {
+    name: t('settings.license.features.whiteLabel'),
+    description: t('settings.license.features.whiteLabelDesc'),
+    enabled: licenseInfo.value.plan === 'Professional' || licenseInfo.value.plan === 'Enterprise'
+  },
+  {
+    name: t('settings.license.features.multipleServers'),
+    description: t('settings.license.features.multipleServersDesc'),
+    enabled: licenseInfo.value.plan === 'Professional' || licenseInfo.value.plan === 'Enterprise'
+  },
+  {
+    name: t('settings.license.features.advancedReporting'),
+    description: t('settings.license.features.advancedReportingDesc'),
+    enabled: licenseInfo.value.plan === 'Enterprise'
+  },
+  {
+    name: t('settings.license.features.prioritySupport'),
+    description: t('settings.license.features.prioritySupportDesc'),
+    enabled: licenseInfo.value.plan === 'Enterprise'
   }
-  
-  loading.value = true
-  error.value = null
-  
+])
+
+// Méthodes
+const fetchLicenseInfo = async () => {
   try {
-    const result = await licenseStore.updateLicense(licenseKey.value)
-    if (result && result.success) {
-      licenseInfo.value = licenseStore.licenseInfo
-      licenseKey.value = ''
-    } else {
-      error.value = result?.message || 'Erreur lors de la mise à jour de la licence'
+    loading.value = true
+    const response = await settingsStore.fetchLicenseInfo()
+    
+    if (response) {
+      licenseInfo.value = response
     }
-  } catch (err: any) {
-    error.value = err.message || 'Une erreur est survenue'
+  } catch (error) {
+    console.error('Erreur lors du chargement des informations de licence:', error)
+    notificationStore.notificationError(t('settings.loadError'))
   } finally {
     loading.value = false
   }
 }
+
+const saveLicense = async () => {
+  try {
+    savingLicense.value = true
+    
+    const response = await settingsStore.activateLicense(licenseKey.value)
+    
+    if (response) {
+      licenseInfo.value = response
+      notificationStore.success(t('settings.license.activationSuccess'))
+      closeLicenseModal()
+    }
+  } catch (error) {
+    console.error('Erreur lors de l\'activation de la licence:', error)
+    notificationStore.notificationError(t('settings.license.activationError'))
+  } finally {
+    savingLicense.value = false
+  }
+}
+
+const checkLicenseStatus = async () => {
+  try {
+    checkingStatus.value = true
+    
+    const response = await settingsStore.checkLicenseStatus()
+    
+    if (response) {
+      licenseInfo.value = response
+      notificationStore.success(t('settings.license.checkSuccess'))
+    }
+  } catch (error) {
+    console.error('Erreur lors de la vérification de la licence:', error)
+    notificationStore.notificationError(t('settings.license.checkError'))
+  } finally {
+    checkingStatus.value = false
+  }
+}
+
+const closeLicenseModal = () => {
+  showLicenseModal.value = false
+  
+  // Réinitialiser la clé de licence
+  setTimeout(() => {
+    licenseKey.value = ''
+  }, 300)
+}
+
+const maskLicenseKey = (key) => {
+  if (!key) return ''
+  
+  const parts = key.split('-')
+  if (parts.length < 2) return key
+  
+  return parts[0] + '-XXXX-XXXX-' + parts[parts.length - 1]
+}
+
+const formatDate = (dateString) => {
+  try {
+    const date = new Date(dateString)
+    return format(date, 'dd MMM yyyy', { locale: fr })
+  } catch (error) {
+    return dateString
+  }
+}
+
+// Cycle de vie
+onMounted(async () => {
+  await fetchLicenseInfo()
+})
 </script>
 
 <style scoped>
-.license-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.license-status, .license-form {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.status-box {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 0.35rem 0.75rem;
-  border-radius: 50px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.status-active {
-  background-color: #d1e7dd;
-  color: #0f5132;
-}
-
-.status-inactive {
-  background-color: #f8d7da;
-  color: #842029;
-}
-
-.license-key {
-  font-family: monospace;
-  margin-top: 0.5rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.form-control {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.error-message {
-  color: #dc3545;
-  margin: 1rem 0;
-  padding: 0.75rem;
-  background-color: #f8d7da;
-  border-radius: 4px;
-}
-
-.form-actions {
-  margin-top: 1.5rem;
-}
-
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background-color: #0d6efd;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #0b5ed7;
-}
-
-.btn:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  font-size: 1.25rem;
-  color: #6c757d;
-}
-
-@media (min-width: 768px) {
-  .license-container {
-    flex-direction: row;
-  }
-  
-  .license-status, .license-form {
-    flex: 1;
-  }
-}
+/* Supprimer les styles existants */
 </style>

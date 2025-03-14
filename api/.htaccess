@@ -1,0 +1,4 @@
+# Configuration générale
+php_value display_errors On
+php_value log_errors On
+php_value error_log /home/cmstechcms/public_html/error_log

@@ -44,7 +44,8 @@
               @click="emit('row-click', row)"
             >
               <td v-for="column in columns" :key="column.key">
-                {{ column.formatter ? column.formatter(row[column.key]) : row[column.key] }}
+                <span v-if="column.formatter" v-html="column.formatter(row[column.key], row)"></span>
+                <template v-else>{{ row[column.key] }}</template>
               </td>
             </tr>
           </template>
@@ -61,7 +62,7 @@ interface Column {
   key: string;
   label: string;
   sortable?: boolean;
-  formatter?: (value: any) => string;
+  formatter?: (value: any, row: any) => string;
 }
 
 interface Props {

@@ -51,6 +51,17 @@ export const useSettingsStore = defineStore('settings', () => {
       autoReminders: true,
       reminderDays: [7, 3, 1]
     },
+    notifications: {
+      enableEmailNotifications: false,
+      smtpHost: '',
+      smtpPort: 587,
+      smtpSecurity: 'tls',
+      smtpUsername: '',
+      smtpPassword: '',
+      emailFrom: '',
+      emailFromName: '',
+      notificationTypes: []
+    },
     integrations: {
       smtp: {
         host: '',
@@ -70,6 +81,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const generalSettings = computed(() => settings.value.general)
   const securitySettings = computed(() => settings.value.security)
   const billingSettings = computed(() => settings.value.billing)
+  const notificationSettings = computed(() => settings.value.notifications)
   const integrationSettings = computed(() => settings.value.integrations)
 
   // Actions
@@ -157,6 +169,34 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
+  const fetchNotificationSettings = async () => {
+    try {
+      loading.value = true
+      const response = await axios.get('/api/v1/settings/notifications')
+      settings.value.notifications = response.data
+      return response.data
+    } catch (err) {
+      error.value = err
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const updateNotificationSettings = async (newSettings) => {
+    try {
+      loading.value = true
+      const response = await axios.post('/api/v1/settings/notifications', newSettings)
+      settings.value.notifications = response.data
+      return response.data
+    } catch (err) {
+      error.value = err
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   const fetchIntegrationSettings = async () => {
     try {
       loading.value = true
@@ -189,6 +229,19 @@ export const useSettingsStore = defineStore('settings', () => {
     try {
       loading.value = true
       const response = await axios.post('/api/v1/settings/integrations/smtp/test')
+      return response.data
+    } catch (err) {
+      error.value = err
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const testEmailNotification = async () => {
+    try {
+      loading.value = true
+      const response = await axios.post('/api/v1/settings/notifications/test-email')
       return response.data
     } catch (err) {
       error.value = err
@@ -235,6 +288,153 @@ export const useSettingsStore = defineStore('settings', () => {
     // Implémenter la logique de notification d'erreur
   }
 
+  // Méthodes pour les webhooks
+  const saveWebhook = async (webhookData) => {
+    try {
+      loading.value = true
+      
+      let response
+      if (webhookData.id) {
+        // Mise à jour d'un webhook existant
+        response = await axios.put(`/api/v1/settings/webhooks/${webhookData.id}`, webhookData)
+      } else {
+        // Création d'un nouveau webhook
+        response = await axios.post('/api/v1/settings/webhooks', webhookData)
+      }
+      
+      if (response.data.success) {
+        showSuccessMessage('Webhook sauvegardé avec succès')
+        return response.data.webhook
+      }
+      
+      return null
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du webhook:', error)
+      showErrorMessage('Erreur lors de la sauvegarde du webhook')
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  const deleteWebhook = async (webhookId) => {
+    try {
+      loading.value = true
+      
+      const response = await axios.delete(`/api/v1/settings/webhooks/${webhookId}`)
+      
+      if (response.data.success) {
+        showSuccessMessage('Webhook supprimé avec succès')
+        return true
+      }
+      
+      return false
+    } catch (error) {
+      console.error('Erreur lors de la suppression du webhook:', error)
+      showErrorMessage('Erreur lors de la suppression du webhook')
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  const toggleWebhookStatus = async (webhookId, active) => {
+    try {
+      loading.value = true
+      
+      const response = await axios.patch(`/api/v1/settings/webhooks/${webhookId}/status`, {
+        active
+      })
+      
+      if (response.data.success) {
+        showSuccessMessage(`Webhook ${active ? 'activé' : 'désactivé'} avec succès`)
+        return true
+      }
+      
+      return false
+    } catch (error) {
+      console.error('Erreur lors du changement de statut du webhook:', error)
+      showErrorMessage('Erreur lors du changement de statut du webhook')
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Méthodes pour la licence
+  const fetchLicenseInfo = async () => {
+    try {
+      loading.value = true
+      
+      const response = await axios.get('/api/v1/settings/license')
+      
+      if (response.data.success) {
+        return response.data.license
+      }
+      
+      return {
+        valid: false,
+        message: response.data.message || 'Erreur lors de la récupération des informations de licence'
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des informations de licence:', error)
+      showErrorMessage('Erreur lors de la récupération des informations de licence')
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  const activateLicense = async (licenseKey) => {
+    try {
+      loading.value = true
+      
+      const response = await axios.post('/api/v1/settings/license/activate', {
+        licenseKey
+      })
+      
+      if (response.data.success) {
+        showSuccessMessage('Licence activée avec succès')
+        return response.data.license
+      }
+      
+      return {
+        valid: false,
+        message: response.data.message || 'Erreur lors de l\'activation de la licence'
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'activation de la licence:', error)
+      showErrorMessage('Erreur lors de l\'activation de la licence')
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  const checkLicenseStatus = async () => {
+    try {
+      loading.value = true
+      
+      const response = await axios.get('/api/v1/settings/license/check')
+      
+      if (response.data.success) {
+        showSuccessMessage('Statut de la licence vérifié avec succès')
+        return response.data.license
+      }
+      
+      return {
+        valid: false,
+        message: response.data.message || 'Erreur lors de la vérification du statut de la licence'
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification du statut de la licence:', error)
+      showErrorMessage('Erreur lors de la vérification du statut de la licence')
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
   // Méthodes pour les paramètres d'intégration
   const fetchLicenseSettings = async () => {
     const licenseStore = useLicenseStore()
@@ -258,6 +458,8 @@ export const useSettingsStore = defineStore('settings', () => {
       settings.value.security = { ...settings.value.security, ...data.data }
     } else if (data.type === 'billing') {
       settings.value.billing = { ...settings.value.billing, ...data.data }
+    } else if (data.type === 'notifications') {
+      settings.value.notifications = { ...settings.value.notifications, ...data.data }
     } else if (data.type === 'integration') {
       settings.value.integrations = { ...settings.value.integrations, ...data.data }
     }
@@ -267,14 +469,12 @@ export const useSettingsStore = defineStore('settings', () => {
     // État
     settings,
     loading,
-    error,
     
     // Getters
-    allSettings,
     generalSettings,
     securitySettings,
     billingSettings,
-    integrationSettings,
+    notificationSettings,
     
     // Actions
     fetchGeneralSettings,
@@ -283,14 +483,22 @@ export const useSettingsStore = defineStore('settings', () => {
     updateSecuritySettings,
     fetchBillingSettings,
     updateBillingSettings,
+    fetchNotificationSettings,
+    updateNotificationSettings,
     fetchIntegrationSettings,
     updateIntegrationSettings,
     testSmtpConnection,
+    testEmailNotification,
     generateApiKey,
     deleteApiKey,
-    fetchLicenseSettings,
-    updateLicenseSettings,
-    showSuccessMessage,
-    showErrorMessage
+    saveWebhook,
+    deleteWebhook,
+    toggleWebhookStatus,
+    fetchLicenseInfo,
+    activateLicense,
+    checkLicenseStatus,
+    
+    // Temps réel
+    handleSettingsUpdate
   }
 })

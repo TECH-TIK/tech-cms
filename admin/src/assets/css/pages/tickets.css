@@ -1,3 +1,5 @@
+@import '@/assets/css/layouts/boxes.css';
+
 /* Variables */
 :root {
     --spacing-xs: 0.25rem;
@@ -852,6 +854,3 @@
     color: var(--text-muted);
     margin-bottom: 2rem;
 }
-
-/* Import standardized box layouts */
-@import '@/assets/css/layouts/boxes.css';

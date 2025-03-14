@@ -25,23 +25,24 @@
           </router-link>
         </li>
 
+        <li :class="{ active: route.name && route.name.toString().includes('service') }">
+          <router-link to="/services">
+            <i class="fas fa-server"></i>
+            <span>{{ $t('sidebar.menu.services') }}</span>
+          </router-link>
+        </li>
+
         <li class="has-submenu" :class="{ 'submenu-open': openSubmenus.includes('catalogue') }">
-          <a href="#" class="menu-toggle" :class="{ active: route.name === 'services' || route.name === 'products' }" @click.prevent="toggleSubmenu('catalogue')">
+          <a href="#" class="menu-toggle" :class="{ active: route.name === 'products' }" @click.prevent="toggleSubmenu('catalogue')">
             <i class="fas fa-cube"></i>
             <span>{{ $t('sidebar.menu.catalog.title') }}</span>
             <i class="fas fa-chevron-right menu-arrow"></i>
           </a>
           <ul class="submenu" :class="{ show: openSubmenus.includes('catalogue') }">
-            <li :class="{ active: route.name === 'services' }">
-              <router-link to="/services">
-                <i class="fas fa-cogs"></i>
-                <span>{{ $t('sidebar.menu.catalog.services') }}</span>
-              </router-link>
-            </li>
             <li :class="{ active: route.name === 'products' }">
               <router-link to="/products">
-                <i class="fas fa-box"></i>
-                <span>{{ $t('sidebar.menu.catalog.products') }}</span>
+                <i class="fas fa-cogs"></i>
+                <span>{{ $t('sidebar.menu.catalog.products_services') }}</span>
               </router-link>
             </li>
           </ul>
@@ -110,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/stores/notifications'
@@ -126,7 +127,7 @@ const toggleSubmenu = (menu: string) => {
   console.log('Tentative d\'ouverture du sous-menu:', menu)
   const index = openSubmenus.value.indexOf(menu)
   
-  // Si le menu n’était pas ouvert, l’ouvrir
+  // Si le menu n'était pas ouvert, l'ouvrir
   if (index === -1) {
     // Fermer tous les autres sous-menus
     openSubmenus.value = [menu]
@@ -148,7 +149,7 @@ onMounted(() => {
   const name = route.name?.toString() || ''
   let menuToOpen = ''
   
-  if (name === 'services' || name === 'products') {
+  if (name === 'products') {
     menuToOpen = 'catalogue'
   } else if (name === 'invoices' || name === 'payments' || name === 'subscriptions') {
     menuToOpen = 'billing'
@@ -160,20 +161,47 @@ onMounted(() => {
   if (menuToOpen && !openSubmenus.value.includes(menuToOpen)) {
     openSubmenus.value.push(menuToOpen)
   }
+  
+  // Ajouter un écouteur pour fermer la sidebar quand on clique en dehors sur mobile
+  document.addEventListener('click', handleOutsideClick)
+})
+
+onBeforeUnmount(() => {
+  // Nettoyer l'écouteur d'événements lors de la destruction du composant
+  document.removeEventListener('click', handleOutsideClick)
 })
 
 const toggleSidebar = () => {
-  document.body.classList.toggle('sidebar-collapsed')
+  document.body.classList.toggle('sidebar-open')
+}
+
+// Fonction pour fermer la sidebar quand on clique en dehors sur mobile
+const handleOutsideClick = (event) => {
+  // Vérifier si la sidebar est ouverte et si on est en mode mobile
+  if (document.body.classList.contains('sidebar-open') && window.innerWidth <= 768) {
+    // Vérifier si le clic est en dehors de la sidebar
+    const sidebar = document.querySelector('.sidebar')
+    const sidebarToggle = document.querySelector('.sidebar-toggle')
+    
+    if (sidebar && !sidebar.contains(event.target) && 
+        sidebarToggle && !sidebarToggle.contains(event.target)) {
+      // Fermer la sidebar
+      document.body.classList.remove('sidebar-open')
+    }
+  }
 }
 </script>
 
 <style scoped>
 .sidebar {
   @apply fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-30 transition-all duration-300;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-header {
   @apply flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700;
+  flex-shrink: 0; /* Empêche l'en-tête de se rétrécir */
 }
 
 .logo {
@@ -189,7 +217,10 @@ const toggleSidebar = () => {
 }
 
 .sidebar-nav {
-  @apply p-4 h-[calc(100% - 4rem)] overflow-y-auto;
+  @apply p-4;
+  flex: 1;
+  overflow-y: auto; /* Permet le défilement si nécessaire */
+  height: calc(100vh - 4rem); /* Calcule la hauteur disponible */
 }
 
 .sidebar-nav ul {
@@ -249,7 +280,7 @@ const toggleSidebar = () => {
     @apply transform -translate-x-full;
   }
 
-  .sidebar-collapsed .sidebar {
+  .sidebar-open .sidebar {
     @apply translate-x-0;
   }
 }

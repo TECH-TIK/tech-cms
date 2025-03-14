@@ -1,0 +1,219 @@
+/* 
+ * Styles pour les checkboxes et toggles
+ * Ce fichier centralise tous les styles des éléments de formulaire de type checkbox et toggle
+ */
+
+/* Styles de base pour les checkboxes */
+.form-checkbox,
+.checkbox-label,
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.form-checkbox input[type="checkbox"],
+.checkbox-label input[type="checkbox"],
+.form-check-input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.form-checkbox input[type="checkbox"]:checked,
+.checkbox-label input[type="checkbox"]:checked,
+.form-check-input:checked[type="checkbox"] {
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+  border-color: var(--primary-blue);
+}
+
+.form-checkbox input[type="checkbox"]:checked::after,
+.checkbox-label input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+}
+
+.form-check-input:checked[type="checkbox"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.form-checkbox input[type="checkbox"]:focus,
+.checkbox-label input[type="checkbox"]:focus,
+.form-check-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.3);
+}
+
+.form-check-label {
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+/* Groupe de checkboxes */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Styles pour les toggles */
+.toggle-switch,
+.status-toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.toggle-switch input,
+.status-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider,
+.status-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: var(--transition-fast);
+  border-radius: 24px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-slider:before,
+.status-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: var(--transition-fast);
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .toggle-slider,
+input:checked + .status-slider {
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+}
+
+input:checked + .toggle-slider:before,
+input:checked + .status-slider:before {
+  transform: translateX(26px);
+}
+
+/* Tailles alternatives pour les toggles */
+.toggle-switch.toggle-sm,
+.status-toggle.toggle-sm {
+  width: 40px;
+  height: 20px;
+}
+
+.toggle-switch.toggle-sm .toggle-slider:before,
+.status-toggle.toggle-sm .status-slider:before {
+  height: 14px;
+  width: 14px;
+}
+
+input:checked + .toggle-sm .toggle-slider:before,
+input:checked + .toggle-sm .status-slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-switch.toggle-lg,
+.status-toggle.toggle-lg {
+  width: 60px;
+  height: 30px;
+}
+
+.toggle-switch.toggle-lg .toggle-slider:before,
+.status-toggle.toggle-lg .status-slider:before {
+  height: 24px;
+  width: 24px;
+}
+
+input:checked + .toggle-lg .toggle-slider:before,
+input:checked + .toggle-lg .status-slider:before {
+  transform: translateX(30px);
+}
+
+/* Styles pour les états désactivés */
+.form-checkbox input[type="checkbox"]:disabled,
+.checkbox-label input[type="checkbox"]:disabled,
+.form-check-input:disabled,
+.toggle-switch input:disabled + .toggle-slider,
+.status-toggle input:disabled + .status-slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animation d'apparition pour le checkmark */
+@keyframes checkmark-appear {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.form-checkbox input[type="checkbox"]:checked::after,
+.checkbox-label input[type="checkbox"]:checked::after {
+  animation: checkmark-appear 0.3s ease-out forwards;
+}
+
+/* Styles pour les radios */
+.form-check-input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.form-check-input:checked[type="radio"] {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3E%3Ccircle r='2' fill='%23fff'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}

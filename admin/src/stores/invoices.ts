@@ -4,7 +4,7 @@ import { useNotificationStore } from './notifications'
 
 interface Invoice {
   id: number
-  service_id: number
+  product_id: number
   amount: number
   due_date: string
   paid_at: string | null

@@ -4,6 +4,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
+    "deleting": "Deleting",
     "edit": "Edit",
     "loading": "Loading...",
     "actions": "Actions",
@@ -11,16 +12,16 @@
     "close": "Close",
     "search": "Search",
     "view_all": "View all",
-    "client": "Client",
-    "email": "Email",
-    "status": "Status",
-    "date": "Date",
-    "profile": "Profile",
-    "settings": "Settings",
-    "logout": "Logout",
-    "notifications": "Notifications",
-    "notifications.mark_all_read": "Mark all as read",
-    "notifications.empty": "No notifications",
+    "continue": "Continue",
+    "add": "Add",
+    "month": "Month",
+    "months": "Months",
+    "saving": "Saving...",
+    "create": "Create",
+    "update": "Update",
+    "retry": "Retry",
+    "error": "Error",
+    "error_occurred": "An error occurred",
     "language": {
       "select": "Select language",
       "fr": "French",
@@ -29,7 +30,7 @@
   },
   "login": {
     "welcome": "Welcome to TechCMS",
-    "subtitle": "Log in to access your admin panel",
+    "subtitle": "Log in to access your administration area",
     "email": "Email",
     "emailPlaceholder": "Your email address",
     "password": "Password",
@@ -47,14 +48,814 @@
     "errorForgot": "An error occurred while sending instructions",
     "copyright": " {year} TechCMS. All rights reserved."
   },
+  "products_services": {
+    "title": "Products/Services",
+    "description": "Manage your products and services in a unified interface",
+    "add": "Add product/service",
+    "add_title": "Add product/service",
+    "edit_title": "Edit product/service",
+    "search": "Search for a product/service...",
+    "columns": {
+      "name": "Name",
+      "description": "Description",
+      "price": "Price",
+      "status": "Status",
+      "clients": "Clients",
+      "type": "Type",
+      "group": "Group"
+    },
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive",
+      "maintenance": "Maintenance"
+    },
+    "types": {
+      "all": "All types",
+      "product": "Product",
+      "service": "Service",
+      "shared_hosting": "Shared hosting",
+      "reseller_hosting": "Reseller hosting",
+      "server_vps": "Server / VPS",
+      "other": "Other"
+    },
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "price": "Price",
+      "status": "Status",
+      "type": "Type",
+      "features": "Features",
+      "featureName": "Feature name",
+      "included": "Included",
+      "addFeature": "Add feature",
+      "group": "Group"
+    },
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "type": "Type",
+      "price_range": "Price range",
+      "all_prices": "All prices",
+      "price_low": "Low price (< €50)",
+      "price_medium": "Medium price (€50 - €200)",
+      "price_high": "High price (> €200)",
+      "apply": "Apply filters",
+      "group": "Group"
+    },
+    "groups": {
+      "all": "All groups",
+      "none": "No group"
+    },
+    "empty": {
+      "title": "No products or services found",
+      "description": "Start by adding a product or service by clicking the button above."
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "pricePositive": "Price must be positive"
+    },
+    "success": {
+      "create": "Product/service created",
+      "createMessage": "The product/service {name} has been successfully created",
+      "update": "Product/service updated",
+      "updateMessage": "The product/service {name} has been successfully updated",
+      "delete": "Product/service deleted",
+      "deleteMessage": "The product/service {name} has been successfully deleted"
+    },
+    "errors": {
+      "fetch": "Loading error",
+      "fetchMessage": "Unable to load products/services",
+      "create": "Creation error",
+      "update": "Update error",
+      "saveMessage": "An error occurred while saving the product/service",
+      "delete": "Deletion error",
+      "deleteMessage": "An error occurred while deleting the product/service",
+      "nameRequired": "Name is required",
+      "pricePositive": "Price must be positive",
+      "name_required": "Name is required",
+      "group_required": "Group is required"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete the product/service {name}?"
+    },
+    "pricing": {
+      "title": "Pricing",
+      "description": "Configure pricing options for your product",
+      "payment_type": "Payment Type",
+      "free": "Free",
+      "one_time": "One Time",
+      "recurring": "Recurring",
+      "allow_multiple_quantities": "Allow Multiple Quantities",
+      "multiple_quantities_no_help": "Clients can only purchase one of this product at a time",
+      "no": "No",
+      "yes": "Yes",
+      "multiple_quantities_yes_help": "Clients can purchase multiple quantities of this product",
+      "auto_termination_days": "Auto Termination Days",
+      "auto_termination_days_help": "Number of days after which the product will be automatically terminated. Leave empty for no auto termination.",
+      "promotion_code": "Promotion Code",
+      "promotion_code_help": "Apply a promotion code to this product by default",
+      "prorata_billing": "Prorata Billing",
+      "prorata_billing_help": "Charge clients only for the remaining days in the billing cycle",
+      "private_billing_date": "Private Billing Date",
+      "private_billing_date_help": "Set a specific billing date for this product, overriding the client's billing date",
+      "charge_next_month": "Charge Next Month",
+      "charge_next_month_help": "Charge the client for the next month instead of the current month",
+      "pricing_configuration": "Pricing Configuration",
+      "system_default": "System Default",
+      "system_default_help": "Use the system default pricing configuration",
+      "product_specific": "Product Specific",
+      "product_specific_help": "Use a specific pricing configuration for this product",
+      "payment_options": "Payment Options",
+      "option": "Option",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semiannually": "Semiannually",
+      "annually": "Annually",
+      "biennially": "Biennially",
+      "triennially": "Triennially",
+      "payment_options_help": "Configure payment options for this product",
+      "enabled": "Enabled",
+      "price": "Price",
+      "setup_fee": "Setup Fee",
+      "recurring_cycles_limit": "Recurring Cycles Limit",
+      "recurring_cycles_limit_help": "Maximum number of billing cycles for this product. Leave empty for unlimited cycles."
+    },
+    "create_product": {
+      "title": "Create a product",
+      "description": "Create a new product by following the steps below",
+      "step1_title": "General information",
+      "step2_title": "Details and pricing",
+      "step3_title": "Features and options",
+      "product_type": "Product type",
+      "select_type": "Select a product type",
+      "type_help": "Choose the type of product you want to create",
+      "type_other_help": "Create a custom product type not listed above",
+      "type_description": "Description of the product type",
+      "types": {
+        "shared_hosting": "Shared hosting",
+        "reseller_hosting": "Reseller hosting",
+        "server_vps": "Server / VPS",
+        "other": "Other"
+      },
+      "group": "Group",
+      "name": "Name",
+      "slug": "Slug",
+      "slug_help": "Used for URLs. Leave empty to generate automatically from the name.",
+      "module": "Module",
+      "no_module": "No module",
+      "hidden": "Hidden",
+      "hidden_help": "Hidden products are not visible to customers in the store.",
+      "price": "Price",
+      "setup_fee": "Setup fee",
+      "recurring": "Recurring",
+      "billing_cycle": "Billing cycle",
+      "cycles": {
+        "monthly": "Monthly",
+        "quarterly": "Quarterly",
+        "semiannually": "Semiannually",
+        "annually": "Annually",
+        "biennially": "Biennially"
+      },
+      "status": "Status",
+      "statuses": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "draft": "Draft"
+      },
+      "features": "Features",
+      "no_features": "No features added. Click the Add button to start.",
+      "feature_name": "Feature name",
+      "feature_value": "Value",
+      "options": "Options",
+      "no_options": "No options added. Click the Add button to start.",
+      "option_name": "Option name",
+      "option_type": "Option type",
+      "option_types": {
+        "select": "Select",
+        "radio": "Radio",
+        "checkbox": "Checkbox",
+        "quantity": "Quantity"
+      },
+      "required": "Required",
+      "option_choices": "Available choices",
+      "choice_name": "Choice name",
+      "choice_price": "Additional price",
+      "summary": "Product summary",
+      "summary_description": "Check the details of your product before saving."
+    },
+    "details": {
+      "title": "Product Details",
+      "description": "Configure the details of your product",
+      "product_type": "Product Type",
+      "product_group": "Product Group",
+      "product_type_help": "The type of product determines its features and functionality",
+      "product_group_help": "Group similar products together for better organization",
+      "product_name": "Product Name",
+      "product_name_help": "Enter a descriptive name for your product",
+      "product_tagline": "Product Tagline",
+      "product_tagline_help": "A short description that appears in product listings",
+      "url": "URL",
+      "url_help": "Custom URL for this product",
+      "module": "Module",
+      "module_help": "Select a module to handle this product",
+      "product_short_description": "Short Description",
+      "product_short_description_help": "Brief description displayed in product listings",
+      "product_description": "Full Description",
+      "product_description_help": "Detailed description of the product",
+      "product_color": "Product Color",
+      "product_color_help": "Color used for product branding and UI elements",
+      "welcome_email": "Welcome Email",
+      "welcome_email_help": "Email template sent to customers after purchase",
+      "advanced_options": "Advanced Options",
+      "create_as_hidden": "Create as Hidden",
+      "create_as_hidden_help": "Hidden products are not visible in the store",
+      "require_domain": "Require Domain",
+      "require_domain_help": "Customer must select a domain when ordering this product",
+      "stock_control": "Stock Control",
+      "stock_control_help": "Track inventory for this product",
+      "apply_tax": "Apply Tax",
+      "apply_tax_help": "Apply tax rates to this product",
+      "featured": "Featured Product",
+      "featured_help": "Featured products are highlighted in the store",
+      "hide_other_products": "Hide Other Products",
+      "hide_other_products_help": "When this product is in the cart, hide other products",
+      "select_group": "Select a group"
+    },
+    "modules": {
+      "none": "No module",
+      "custom": "Custom module",
+      "title": "Module Settings",
+      "description": "Configure the server module for your product",
+      "module_name": "Module Name",
+      "module_name_help": "Select the server module to use for this product",
+      "no_module_info": "No module selected. This product will not be automatically provisioned on any server.",
+      "server_group": "Server Group",
+      "no_server_group": "No server group",
+      "shared_servers": "Shared Hosting Servers",
+      "reseller_servers": "Reseller Hosting Servers",
+      "vps_servers": "VPS/Dedicated Servers",
+      "server_group_help": "Select the server group where this product will be provisioned",
+      "choose_module_info": "Choose a module to see additional configuration options",
+      "auto_setup_options": "Auto Setup Options",
+      "auto_setup_on_order": "Auto Setup On Order",
+      "auto_setup_on_order_help": "Automatically provision the product when the order is placed",
+      "auto_setup_on_payment": "Auto Setup On Payment",
+      "auto_setup_on_payment_help": "Automatically provision the product when payment is received",
+      "auto_setup_on_pending_order": "Auto Setup On Pending Order",
+      "auto_setup_on_pending_order_help": "Automatically provision the product when the order is marked as pending",
+      "no_auto_setup": "No Auto Setup",
+      "no_auto_setup_help": "Do not automatically provision the product. Manual setup will be required.",
+      "errors": {
+        "server_group_required": "A server group is required when a module is selected",
+        "server_required": "A server is required for this module",
+        "cpanel_plan_required": "A cPanel plan is required",
+        "virtualizor_resources_required": "You must configure at least one resource for Virtualizor",
+        "proxmox_resources_required": "You must configure at least one resource for Proxmox"
+      },
+      "resources": {
+        "title": "Resource Configuration",
+        "description": "Configure the resources that will be allocated for this product",
+        "cpu": "CPU (vCores)",
+        "cpu_help": "Number of virtual processor cores",
+        "memory": "RAM Memory (MB)",
+        "memory_help": "Amount of memory in megabytes",
+        "disk_space": "Disk Space (GB)",
+        "disk_space_help": "Disk space in gigabytes",
+        "bandwidth": "Bandwidth (GB)",
+        "bandwidth_help": "Monthly bandwidth in gigabytes",
+        "ips": "IP Addresses",
+        "ips_help": "Number of IP addresses to allocate",
+        "virtualizor": {
+          "title": "Virtualizor Resources",
+          "description": "Configure specific resources for Virtualizor",
+          "virtualization": "Virtualization Type",
+          "virtualization_help": "Select the virtualization type",
+          "os_template": "OS Template",
+          "os_template_help": "Select the OS template to use"
+        },
+        "proxmox": {
+          "title": "Proxmox Resources",
+          "description": "Configure specific resources for Proxmox",
+          "container_type": "Container Type",
+          "container_type_help": "Select the container type (LXC or VM)",
+          "storage": "Storage",
+          "storage_help": "Select Proxmox storage to use",
+          "template": "Template",
+          "template_help": "Select the template to use for creation"
+        }
+      }
+    },
+    "custom_fields": {
+      "title": "Custom Fields",
+      "description": "Configure custom fields for your product",
+      "list_title": "Custom Fields List",
+      "add_field": "Add Custom Field",
+      "no_fields": "No custom fields have been added yet",
+      "add_first_field": "Add your first custom field"
+    },
+    "configurable_options": {
+      "title": "Configurable Options",
+      "description": "Configure customizable options that clients can select when ordering this product",
+      "empty_state": "No configurable options have been added yet",
+      "add_first_option": "Add your first configurable option",
+      "add_option": "Add Option",
+      "new_option": "New Option",
+      "fields": {
+        "name": "Option Name",
+        "type": "Option Type",
+        "option_group": "Option Group",
+        "description": "Description",
+        "description_help": "This description will be shown to customers when ordering",
+        "required": "Required",
+        "item_name": "Item Name",
+        "price": "Price",
+        "setup_fee": "Setup Fee",
+        "set_as_default": "Set as Default"
+      },
+      "types": {
+        "dropdown": "Dropdown",
+        "radio": "Radio",
+        "checkbox": "Checkbox",
+        "quantity": "Quantity",
+        "text": "Text"
+      },
+      "no_group": "No Group",
+      "option_items": "Option Items",
+      "errors": {
+        "name_required": "Option name is required",
+        "items_required": "At least one option item is required"
+      }
+    },
+    "upgrades": {
+      "title": "Upgrades & Downgrades",
+      "description": "Configure product upgrade and downgrade options",
+      "configuration_title": "Configuration",
+      "allow_downgrade": "Allow Downgrade",
+      "allow_downgrade_help": "Allow customers to downgrade to a lower-tier product",
+      "upgrade_package_quantity": "Upgrade Package Quantity",
+      "upgrade_package_quantity_help": "Allow customers to upgrade the quantity of their package",
+      "products_title": "Available Products",
+      "product_name": "Product Name",
+      "action": "Action",
+      "add": "Add Upgrade",
+      "selected_upgrades": "Selected Upgrades",
+      "remove": "Remove"
+    },
+    "freedomain": {
+      "title": "Free Domain",
+      "description": "Configure free domain options for this product",
+      "configuration_title": "Configuration",
+      "enable_freedomain": "Enable Free Domain",
+      "enable_freedomain_help": "Offer a free domain with this product",
+      "required_period": "Required Billing Period",
+      "required_period_help": "Minimum billing period required to qualify for a free domain",
+      "initial_order_only": "Initial Order Only",
+      "initial_order_only_help": "Only offer free domain on the initial order, not on renewals",
+      "available_tlds": "Available TLDs",
+      "tlds_help": "Select which TLDs are eligible for free domain",
+      "selected_tlds": "Selected TLDs"
+    },
+    "cross_sells": {
+      "title": "Cross-Sells",
+      "description": "Configure cross-sell products to offer with this product",
+      "configuration_title": "Configuration",
+      "show_on_checkout": "Show on Checkout",
+      "show_on_checkout_help": "Display cross-sell products during checkout process",
+      "discount_percent": "Discount Percentage",
+      "discount_percent_help": "Apply a discount to cross-sell products when purchased together",
+      "search_title": "Product Search",
+      "search_products": "Search Products",
+      "search_placeholder": "Search for products to cross-sell",
+      "selected_products": "Selected Products",
+      "no_products_selected": "No products selected",
+      "no_search_results": "No products found matching your search",
+      "product_name": "Product Name",
+      "product_type": "Product Type",
+      "product_price": "Price",
+      "action": "Action",
+      "add": "Add",
+      "remove": "Remove"
+    },
+    "other": {
+      "title": "Other Settings",
+      "description": "Configure additional settings for this product",
+      "configuration_title": "Configuration",
+      "require_domain": "Require Domain",
+      "require_domain_help": "Require a domain to be associated with this product",
+      "auto_setup": "Auto Setup",
+      "auto_setup_help": "Automatically provision this product when ordered",
+      "stock_control": "Stock Control",
+      "stock_control_help": "Enable stock control for this product",
+      "stock_quantity_help": "Set the available quantity for this product",
+      "hidden": "Hidden",
+      "hidden_help": "Hide this product from the product listing",
+      "featured": "Featured",
+      "featured_help": "Mark this product as featured",
+      "welcome_email_help": "Select welcome email to send when this product is ordered",
+      "welcome_email_none": "No welcome email",
+      "welcome_email_product": "Product-specific welcome email",
+      "welcome_email_general": "General welcome email",
+      "welcome_email_both": "Both product and general welcome emails",
+      "notes_help": "Internal notes about this product (not visible to customers)",
+      "notes_placeholder": "Enter any notes or comments about this product here..."
+    },
+    "links": {
+      "title": "Product Links",
+      "description": "Manage direct links and promotional URLs for this product",
+      "direct_links_title": "Direct Order Links",
+      "direct_cart_link_placeholder": "Direct cart link",
+      "direct_cart_link_template_placeholder": "Direct cart link with template",
+      "direct_cart_link_domain_placeholder": "Direct cart link with domain",
+      "group_cart_link_placeholder": "Group cart link",
+      "product_links_title": "Promotional Links",
+      "url": "URL",
+      "visits": "Visits",
+      "actions": "Actions",
+      "add_link": "Add Link",
+      "url_placeholder": "Enter promotional URL",
+      "finalize_product": "Please finalize the product before generating links",
+      "finalizing": "Finalizing product..."
+    },
+    "welcome_emails": {
+      "none": "No welcome email",
+      "hosting": "Hosting welcome email",
+      "general": "General welcome email"
+    },
+    "tabs": {
+      "type": "Type",
+      "details": "Details",
+      "pricing": "Pricing",
+      "module": "Module",
+      "custom_fields": "Custom Fields",
+      "configurable_options": "Configurable Options",
+      "upgrades": "Upgrades",
+      "freedomain": "Free Domain",
+      "cross_sells": "Cross-Sells",
+      "other": "Other",
+      "links": "Links"
+    }
+  },
+  "product_groups": {
+    "title": "Product groups",
+    "add": "Create a group",
+    "add_title": "Create a new group",
+    "edit_title": "Edit group",
+    "fields": {
+      "name": "Name",
+      "slug": "Slug",
+      "description": "Description"
+    },
+    "placeholders": {
+      "name": "Group name",
+      "slug": "group-slug",
+      "description": "Group description"
+    },
+    "slug_help": "The slug is used in URLs. Use only lowercase letters, numbers and hyphens.",
+    "empty": {
+      "title": "No groups",
+      "message": "You don't have any groups yet. Click the button above to create one."
+    },
+    "success": {
+      "create": "Group created successfully",
+      "update": "Group updated successfully",
+      "delete": "Group deleted successfully"
+    },
+    "errors": {
+      "name_required": "Name is required",
+      "slug_required": "Slug is required",
+      "slug_invalid": "The slug is not valid. Use only lowercase letters, numbers and hyphens.",
+      "create": "An error occurred while creating the group",
+      "update": "An error occurred while updating the group",
+      "delete": "An error occurred while deleting the group",
+      "fetch": "An error occurred while retrieving groups"
+    },
+    "confirm_delete": "Are you sure you want to delete this group? All products associated with this group will be moved to the default group."
+  },
+  "invoices": {
+    "title": "Invoices",
+    "actions": {
+      "add": "Add invoice",
+      "edit": "Edit invoice",
+      "view": "View invoice",
+      "delete": "Delete invoice",
+      "mark_paid": "Mark as paid"
+    },
+    "modal": {
+      "add_title": "Add invoice",
+      "edit_title": "Edit invoice",
+      "view_title": "Invoice details"
+    },
+    "columns": {
+      "number": "Number",
+      "client": "Client",
+      "service": "Service",
+      "amount": "Amount",
+      "due_date": "Due date",
+      "paid_date": "Payment date",
+      "status": "Status",
+      "created_at": "Creation date"
+    },
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled",
+      "deleted": "Deleted"
+    },
+    "filters": {
+      "label": "Filter by status",
+      "all": "All",
+      "pending": "Pending",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled"
+    },
+    "search": {
+      "placeholder": "Search for an invoice..."
+    },
+    "empty": {
+      "message": "No invoices found",
+      "action": "Add an invoice"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this invoice?",
+      "mark_paid": "Are you sure you want to mark this invoice as paid?"
+    },
+    "success": {
+      "create": "Invoice successfully created",
+      "update": "Invoice successfully updated",
+      "delete": "Invoice successfully deleted",
+      "mark_paid": "Invoice successfully marked as paid"
+    },
+    "errors": {
+      "fetch": "Error loading invoices",
+      "create": "Error creating invoice",
+      "update": "Error updating invoice",
+      "delete": "Error deleting invoice",
+      "mark_paid": "Error marking invoice as paid"
+    }
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "description": "Manage your customers subscriptions",
+    "actions": {
+      "add": "Add subscription",
+      "edit": "Edit subscription",
+      "view": "View subscription",
+      "cancel": "Cancel subscription",
+      "renew": "Renew subscription"
+    },
+    "table": {
+      "id": "ID",
+      "client": "Client",
+      "product": "Product",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "renewalDate": "Renewal date",
+      "price": "Price",
+      "billingCycle": "Billing cycle",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "billing_cycle": "Billing cycle",
+      "all_cycles": "All cycles",
+      "apply": "Apply filters",
+      "all": "All",
+      "active": "Active",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "search": {
+      "placeholder": "Search for a subscription..."
+    },
+    "empty": {
+      "title": "No subscriptions found",
+      "message": "You don't have any subscriptions yet. Start by creating one."
+    },
+    "statuses": {
+      "active": "Active",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "billingCycles": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semiAnnual": "Semi-annual",
+      "annual": "Annual"
+    },
+    "form": {
+      "client": "Client",
+      "product": "Product",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "price": "Price",
+      "billingCycle": "Billing cycle",
+      "status": "Status",
+      "autoRenew": "Auto-renewal",
+      "notes": "Notes",
+      "cancelReason": "Cancellation reason"
+    },
+    "confirm": {
+      "cancel": "Are you sure you want to cancel this subscription?",
+      "renew": "Are you sure you want to renew this subscription?"
+    },
+    "success": {
+      "create": "Subscription created successfully",
+      "update": "Subscription updated successfully",
+      "cancel": "Subscription cancelled successfully",
+      "renew": "Subscription renewed successfully"
+    },
+    "errors": {
+      "fetch": "Error loading subscriptions",
+      "fetchOne": "Error loading subscription",
+      "create": "Error creating subscription",
+      "update": "Error updating subscription",
+      "cancel": "Error cancelling subscription",
+      "renew": "Error renewing subscription"
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "actions": {
+      "add": "Add payment",
+      "edit": "Edit payment",
+      "view": "View payment",
+      "delete": "Delete payment",
+      "refund": "Refund"
+    },
+    "modal": {
+      "add_title": "Add payment",
+      "edit_title": "Edit payment",
+      "view_title": "Payment details"
+    },
+    "columns": {
+      "id": "ID",
+      "invoice": "Invoice",
+      "client": "Client",
+      "amount": "Amount",
+      "date": "Payment date",
+      "method": "Method",
+      "transaction_id": "Transaction ID",
+      "status": "Status",
+      "notes": "Notes",
+      "created_at": "Creation date"
+    },
+    "status": {
+      "completed": "Completed",
+      "pending": "Pending",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "methods": {
+      "card": "Credit card",
+      "bank_transfer": "Bank transfer",
+      "paypal": "PayPal",
+      "cash": "Cash",
+      "check": "Check"
+    },
+    "fields": {
+      "transaction_id_help": "Transaction reference number (optional)"
+    },
+    "filters": {
+      "label": "Filter by status",
+      "all": "All",
+      "completed": "Completed",
+      "pending": "Pending",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "search": {
+      "placeholder": "Search for a payment..."
+    },
+    "empty": {
+      "message": "No payment found",
+      "action": "Add a payment"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this payment?"
+    },
+    "refund": {
+      "title": "Refund payment",
+      "reason": "Refund reason",
+      "reason_placeholder": "Please indicate the reason for the refund",
+      "confirm": "Confirm refund",
+      "error_title": "Refund error",
+      "error_reason_required": "Refund reason is required"
+    },
+    "success": {
+      "create": "Payment successfully created",
+      "update": "Payment successfully updated",
+      "delete": "Payment successfully deleted",
+      "refund": "Refund successfully processed"
+    },
+    "errors": {
+      "fetch": "Error loading payments",
+      "create": "Error creating payment",
+      "update": "Error updating payment",
+      "delete": "Error deleting payment",
+      "refund": "Error processing refund"
+    }
+  },
+  "tickets": {
+    "title": "Tickets",
+    "actions": {
+      "add": "Add ticket",
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "view": "View"
+    },
+    "modal": {
+      "add_title": "Add a ticket",
+      "edit_title": "Edit ticket",
+      "view_title": "Ticket details"
+    },
+    "fields": {
+      "client": "Client",
+      "subject": "Subject",
+      "message": "Message",
+      "priority": "Priority",
+      "status": "Status"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "status": {
+      "open": "Open",
+      "pending": "Pending",
+      "closed": "Closed",
+      "resolved": "Resolved"
+    },
+    "filters": {
+      "all": "All",
+      "open": "Open",
+      "pending": "Pending",
+      "closed": "Closed",
+      "resolved": "Resolved"
+    },
+    "table": {
+      "id": "ID",
+      "subject": "Subject",
+      "client": "Client",
+      "priority": "Priority",
+      "status": "Status",
+      "lastReply": "Last reply",
+      "createdAt": "Created at",
+      "actions": "Actions"
+    },
+    "search": {
+      "placeholder": "Search for a ticket..."
+    },
+    "empty": {
+      "message": "No tickets found",
+      "description": "Create a new ticket or modify your filters"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Delete ticket",
+        "message": "Are you sure you want to delete this ticket? This action is irreversible."
+      }
+    },
+    "success": {
+      "create": "Ticket created successfully",
+      "update": "Ticket updated successfully",
+      "delete": "Ticket deleted successfully",
+      "close": "Ticket closed successfully",
+      "reopen": "Ticket reopened successfully",
+      "reply": "Your reply has been added successfully"
+    },
+    "errors": {
+      "create": "An error occurred while creating the ticket",
+      "update": "An error occurred while updating the ticket",
+      "delete": "An error occurred while deleting the ticket",
+      "fetch": "An error occurred while retrieving tickets",
+      "close": "An error occurred while closing the ticket",
+      "reopen": "An error occurred while reopening the ticket",
+      "reply": "An error occurred while adding your reply"
+    },
+    "selectClient": "Select a client",
+    "noMessages": "No messages for this ticket",
+    "addReply": "Add a reply",
+    "replyPlaceholder": "Your reply...",
+    "sendReply": "Send"
+  },
   "sidebar": {
     "menu": {
       "dashboard": "Dashboard",
       "clients": "Clients",
+      "services": "Services",
       "catalog": {
         "title": "Catalog",
-        "services": "Services",
-        "products": "Products"
+        "products_services": "Products & Services"
       },
       "billing": {
         "title": "Billing",
@@ -71,12 +872,178 @@
       "logout": "Logout"
     }
   },
+  "settings": {
+    "title": "Settings",
+    "description": "Configure your system settings",
+    "tabs": {
+      "home": "Home",
+      "general": "General",
+      "notifications": "Notifications",
+      "security": "Security",
+      "billing": "Billing",
+      "servers": "Servers",
+      "integrations": "Integrations",
+      "license": "License"
+    },
+    "general": {
+      "title": "General settings",
+      "description": "Configure the general settings of your system",
+      "siteName": "Site name",
+      "siteDescription": "Site description",
+      "siteEmail": "Site email",
+      "sitePhone": "Site phone",
+      "siteAddress": "Site address",
+      "siteUrl": "Site URL",
+      "logo": "Logo",
+      "favicon": "Favicon",
+      "timezone": "Timezone",
+      "dateFormat": "Date format",
+      "timeFormat": "Time format",
+      "language": "Language",
+      "currency": "Currency",
+      "currencySymbol": "Currency symbol",
+      "currencyPosition": "Currency symbol position",
+      "decimalSeparator": "Decimal separator",
+      "thousandSeparator": "Thousand separator",
+      "decimalPlaces": "Number of decimal places"
+    },
+    "security": {
+      "title": "Security settings",
+      "description": "Configure the security settings of your system",
+      "sessionTimeout": "Session timeout (minutes)",
+      "loginAttempts": "Number of login attempts before blocking",
+      "loginBlockTime": "Blocking time after failed attempts (minutes)",
+      "passwordMinLength": "Minimum password length",
+      "passwordRequireUppercase": "Require uppercase in password",
+      "passwordRequireLowercase": "Require lowercase in password",
+      "passwordRequireNumber": "Require number in password",
+      "passwordRequireSpecial": "Require special character in password",
+      "passwordExpiration": "Password expiration (days, 0 = never)",
+      "twoFactorAuth": "Two-factor authentication",
+      "twoFactorAuthRequired": "Require two-factor authentication",
+      "apiTokenExpiration": "API token expiration (days, 0 = never)"
+    },
+    "billing": {
+      "title": "Billing settings",
+      "description": "Configure the billing settings of your system",
+      "invoicePrefix": "Invoice prefix",
+      "invoiceStartNumber": "Invoice start number",
+      "invoiceFooter": "Invoice footer",
+      "invoiceTerms": "Invoice terms",
+      "invoiceDueDays": "Default payment due days",
+      "invoiceAutoReminder": "Send automatic reminders",
+      "invoiceReminderDays": "Days before due date for reminder",
+      "taxEnabled": "Enable tax",
+      "taxName": "Tax name",
+      "taxRate": "Tax rate (%)",
+      "taxNumber": "Tax number",
+      "paymentMethods": "Payment methods",
+      "bankTransfer": "Bank transfer",
+      "bankName": "Bank name",
+      "bankAccount": "Bank account",
+      "bankIban": "IBAN",
+      "bankSwift": "SWIFT/BIC"
+    },
+    "integrations": {
+      "title": "Integration settings",
+      "description": "Configure integrations with external services",
+      "mailDriver": "Email service",
+      "mailHost": "SMTP host",
+      "mailPort": "SMTP port",
+      "mailUsername": "SMTP username",
+      "mailPassword": "SMTP password",
+      "mailEncryption": "SMTP encryption",
+      "mailFromAddress": "From address",
+      "mailFromName": "From name",
+      "smsEnabled": "Enable SMS",
+      "smsProvider": "SMS provider",
+      "smsApiKey": "SMS API key",
+      "smsFromNumber": "SMS from number",
+      "pushEnabled": "Enable push notifications",
+      "pushProvider": "Push notification provider",
+      "pushApiKey": "Push notification API key",
+      "googleAnalyticsId": "Google Analytics ID",
+      "recaptchaSiteKey": "reCAPTCHA site key",
+      "recaptchaSecretKey": "reCAPTCHA secret key"
+    },
+    "actions": {
+      "save": "Save settings",
+      "reset": "Reset settings",
+      "testEmail": "Test email sending",
+      "testSms": "Test SMS sending"
+    },
+    "messages": {
+      "saved": "Settings saved successfully",
+      "error": "An error occurred while saving settings",
+      "emailTestSent": "Email test sent successfully",
+      "emailTestError": "An error occurred while sending email test",
+      "smsTestSent": "SMS test sent successfully",
+      "smsTestError": "An error occurred while sending SMS test"
+    },
+    "license": {
+      "title": "License Management",
+      "description": "Manage your TechCMS license and check its status",
+      "licenseKey": "License key",
+      "licenseType": "License type",
+      "licenseStatus": "License status",
+      "licenseExpiration": "Expiration date",
+      "licenseDomain": "Registered domain",
+      "licenseSupport": "Support until",
+      "licenseRenew": "Renew license",
+      "licenseDeactivate": "Deactivate license",
+      "active": "Active",
+      "inactive": "Inactive",
+      "free": "Free",
+      "pro": "Pro",
+      "updateSuccess": "License updated successfully",
+      "updateError": "Error updating license",
+      "verifyingLicense": "Verifying license...",
+      "enterLicenseKey": "Please enter a valid license key"
+    },
+    "servers": {
+      "title": "Server Management",
+      "description": "Configure and manage your servers (cPanel, Proxmox, Virtualizor)",
+      "add": "Add server",
+      "edit": "Edit server",
+      "delete": "Delete server",
+      "test": "Test connection",
+      "name": "Server name",
+      "hostname": "Hostname",
+      "type": "Server type",
+      "ipAddress": "IP address",
+      "username": "Username",
+      "password": "Password",
+      "port": "Port",
+      "secure": "Secure connection",
+      "accessKey": "API access key",
+      "active": "Active",
+      "status": "Status",
+      "load": "Load",
+      "types": {
+        "cpanel": "cPanel",
+        "proxmox": "Proxmox",
+        "virtualizor": "Virtualizor"
+      },
+      "statuses": {
+        "online": "Online",
+        "offline": "Offline",
+        "maintenance": "Maintenance"
+      },
+      "confirmDelete": "Are you sure you want to delete this server?",
+      "testSuccess": "Connection to server successful",
+      "testError": "Failed to connect to server",
+      "saveSuccess": "Server saved successfully",
+      "saveError": "Error saving server",
+      "deleteSuccess": "Server deleted successfully",
+      "deleteError": "Error deleting server"
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "stats": {
       "active_clients": "Active clients",
       "active_services": "Active services",
-      "total_products": "Products",
+      "total_products": "Total products",
       "monthly_revenue": "Monthly revenue"
     },
     "recent_clients": {
@@ -86,16 +1053,43 @@
       "title": "Recent tickets"
     }
   },
+  "topbar": {
+    "notifications": {
+      "title": "Notifications",
+      "mark_all_read": "Mark all as read",
+      "empty": "No notifications",
+      "view_all": "View all notifications"
+    },
+    "profile": {
+      "my_profile": "My profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    }
+  },
   "clients": {
     "title": "Clients",
+    "description": "Manage your clients and their services",
     "add_new": "Add client",
-    "description": "Manage your client accounts and their information",
     "filters": {
       "search": "Search",
-      "search_placeholder": "Search clients...",
-      "status": "Status",
+      "search_placeholder": "Search for a client...",
       "service_type": "Service type",
-      "apply": "Apply filters"
+      "status": "Status"
+    },
+    "services": {
+      "all": "All services",
+      "hosting": "Hosting",
+      "domain": "Domain name",
+      "ssl": "SSL Certificate"
+    },
+    "table": {
+      "client": "Client",
+      "company": "Company",
+      "email": "Email",
+      "phone": "Phone",
+      "status": "Status",
+      "services": "Services",
+      "actions": "Actions"
     },
     "status": {
       "all": "All statuses",
@@ -103,334 +1097,247 @@
       "inactive": "Inactive",
       "pending": "Pending"
     },
-    "services": {
-      "all": "All services",
-      "hosting": "Hosting",
-      "domain": "Domain",
-      "ssl": "SSL"
+    "empty": {
+      "title": "No clients found",
+      "description": "You don't have any clients yet. Start by adding one."
+    },
+    "no_services": "No services",
+    "form": {
+      "firstname": "First name",
+      "firstname_placeholder": "Enter first name",
+      "lastname": "Last name",
+      "lastname_placeholder": "Enter last name",
+      "email": "Email",
+      "email_placeholder": "Enter email address",
+      "phone": "Phone",
+      "phone_placeholder": "Enter phone number",
+      "company": "Company",
+      "company_placeholder": "Enter company name",
+      "status": "Status",
+      "address": "Address",
+      "address_placeholder": "Enter address",
+      "postal_code": "Postal code",
+      "postal_code_placeholder": "Enter postal code",
+      "city": "City",
+      "city_placeholder": "Enter city",
+      "country": "Country",
+      "country_placeholder": "Enter country",
+      "password": "Password",
+      "password_placeholder": "Enter password",
+      "password_optional": "(Optional)",
+      "password_leave_empty": "Leave empty to keep current password",
+      "address_title": "Address",
+      "personal_info": "Personal information"
+    },
+    "actions": {
+      "view": "View details",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "confirm_delete": "Are you sure you want to delete this client?",
+    "details": {
+      "title": "Client details",
+      "description": "Detailed client information",
+      "personal_info": "Personal information",
+      "address": "Address",
+      "services": "Services",
+      "no_services": "This client has no active services",
+      "invoices": "Invoices",
+      "no_invoices": "No invoices found for this client",
+      "tab_info": "Information",
+      "tab_services": "Services",
+      "tab_invoices": "Invoices",
+      "error_loading": "Error loading client information",
+      "error_deleting": "Error deleting client",
+      "not_found": "Client not found"
+    },
+    "edit": {
+      "title": "Edit client",
+      "description": "Update client information"
+    },
+    "add": {
+      "title": "Add client",
+      "description": "Create a new client"
+    },
+    "delete_modal": {
+      "title": "Delete client",
+      "confirmation": "Are you sure you want to delete this client?",
+      "warning": "This action is irreversible. All data associated with this client will be deleted."
+    },
+    "validation": {
+      "firstname_required": "First name is required",
+      "lastname_required": "Last name is required",
+      "email_required": "Email address is required",
+      "email_invalid": "Email address is invalid",
+      "password_required": "Password is required"
     }
   },
   "services": {
     "title": "Services",
-    "add": "Add a service",
-    "edit": "Edit service",
-    "description": "Manage your service offerings and their configurations",
-    "search": "Search for a service...",
-    "columns": {
-      "name": "Name",
-      "description": "Description",
-      "price": "Price",
-      "status": "Status",
-      "clients": "Clients"
-    },
-    "status": {
-      "all": "All",
-      "active": "Active",
-      "inactive": "Inactive",
-      "maintenance": "Maintenance"
-    },
-    "filters": {
-      "search": "Search",
-      "status": "Status",
-      "price_range": "Price range",
-      "all_prices": "All prices",
-      "price_low": "Low (< €10)",
-      "price_medium": "Medium (€10 - €50)",
-      "price_high": "High (> €50)",
-      "apply": "Apply filters"
-    },
-    "fields": {
-      "name": "Name",
-      "description": "Description",
-      "price": "Price",
-      "status": "Status",
-      "features": "Features",
-      "featureName": "Feature name",
-      "included": "Included",
-      "addFeature": "Add a feature"
-    },
-    "validation": {
-      "nameRequired": "Name is required",
-      "pricePositive": "Price must be positive"
-    },
-    "success": {
-      "create": "Service created",
-      "createMessage": "The service {name} has been created successfully",
-      "update": "Service updated",
-      "updateMessage": "The service {name} has been updated successfully",
-      "delete": "Service deleted",
-      "deleteMessage": "The service {name} has been deleted successfully"
-    },
-    "errors": {
-      "fetch": "Error loading",
-      "fetchMessage": "Unable to load services",
-      "create": "Error creating",
-      "update": "Error updating",
-      "saveMessage": "An error occurred while saving the service",
-      "delete": "Error deleting",
-      "deleteMessage": "An error occurred while deleting the service"
-    },
-    "confirm": {
-      "delete": "Are you sure you want to delete the service {name}?"
-    }
-  },
-  "invoices": {
-    "title": "Invoices",
-    "description": "Manage your invoices and billing documents",
-    "actions": {
-      "add": "Add invoice"
-    },
-    "search": {
-      "placeholder": "Search invoices..."
-    },
-    "table": {
-      "id": "ID",
-      "client": "Client",
-      "date": "Date",
-      "dueDate": "Due date",
-      "amount": "Amount",
-      "status": "Status",
-      "actions": "Actions"
-    },
-    "filters": {
-      "search": "Search",
-      "status": "Status",
-      "date_range": "Date range",
-      "all_time": "All time",
-      "this_month": "This month",
-      "last_month": "Last month",
-      "this_year": "This year",
-      "apply": "Apply filters"
-    },
-    "status": {
-      "all": "All",
-      "paid": "Paid",
-      "unpaid": "Unpaid",
-      "overdue": "Overdue",
-      "cancelled": "Cancelled"
-    }
-  },
-  "products": {
-    "title": "Products",
-    "description": "Manage your product catalog and their features",
-    "actions": {
-      "add": "Add a product",
-      "add_feature": "Add a feature"
-    },
-    "modal": {
-      "add_title": "Add a product",
-      "edit_title": "Edit product"
-    },
-    "columns": {
-      "name": "Name",
-      "description": "Description",
-      "price": "Price",
-      "status": "Status"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "fields": {
-      "name": "Name",
-      "description": "Description",
-      "price": "Price",
-      "status": "Status",
-      "features": "Features",
-      "feature_name": "Feature name",
-      "feature_included": "Included"
-    },
-    "filters": {
-      "search": "Search",
-      "status": "Status",
-      "price_range": "Price range",
-      "all_prices": "All prices",
-      "price_low": "Low (< €10)",
-      "price_medium": "Medium (€10 - €50)",
-      "price_high": "High (> €50)",
-      "apply": "Apply filters",
-      "all": "All",
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "search": {
-      "placeholder": "Search for a product..."
-    },
+    "description": "Manage your client services",
+    "add_new": "Add Service",
     "empty": {
-      "message": "No products found",
-      "action": "Add a product"
-    },
-    "validation": {
-      "name_required": "Name is required",
-      "description_required": "Description is required",
-      "price_positive": "Price must be positive"
-    },
-    "confirm": {
-      "delete": "Are you sure you want to delete this product?"
-    },
-    "success": {
-      "create": "Product created successfully",
-      "update": "Product updated successfully",
-      "delete": "Product deleted successfully"
-    },
-    "errors": {
-      "fetch": "Error loading products",
-      "create": "Error creating product",
-      "update": "Error updating product",
-      "delete": "Error deleting product"
-    }
-  },
-  "payments": {
-    "title": "Payments",
-    "description": "Track and manage all payment transactions",
-    "actions": {
-      "add": "Add payment"
-    },
-    "search": {
-      "placeholder": "Search payments..."
-    },
-    "table": {
-      "id": "ID",
-      "client": "Client",
-      "date": "Date",
-      "amount": "Amount",
-      "method": "Method",
-      "status": "Status",
-      "actions": "Actions"
+      "title": "No services found",
+      "message": "You don't have any services yet. Start by creating one."
     },
     "filters": {
       "search": "Search",
+      "search_placeholder": "Search by domain, client name...",
       "status": "Status",
-      "payment_method": "Payment method",
-      "all_methods": "All methods",
-      "apply": "Apply filters"
+      "client": "Client",
+      "product": "Product",
+      "all_clients": "All clients",
+      "all_products": "All products"
     },
-    "methods": {
-      "card": "Credit card",
-      "bank_transfer": "Bank transfer",
-      "paypal": "PayPal"
+    "table": {
+      "client": "Client",
+      "product": "Product",
+      "domain": "Domain",
+      "status": "Status",
+      "next_due_date": "Next Due Date",
+      "recurring_amount": "Recurring Amount",
+      "actions": "Actions"
     },
     "status": {
-      "all": "All",
-      "completed": "Completed",
+      "all": "All statuses",
       "pending": "Pending",
-      "failed": "Failed",
-      "refunded": "Refunded"
-    }
-  },
-  "subscriptions": {
-    "title": "Subscriptions",
-    "description": "Manage recurring subscriptions and billing cycles",
+      "active": "Active",
+      "suspended": "Suspended",
+      "cancelled": "Cancelled",
+      "terminated": "Terminated",
+      "fraud": "Fraud"
+    },
     "actions": {
-      "add": "Add subscription"
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "activate": "Activate",
+      "suspend": "Suspend",
+      "cancel": "Cancel",
+      "terminate": "Terminate"
     },
-    "search": {
-      "placeholder": "Search subscriptions..."
+    "delete_modal": {
+      "title": "Delete Service",
+      "confirmation": "Are you sure you want to delete this service?",
+      "warning": "This action is irreversible and will delete all data associated with this service."
     },
-    "table": {
-      "id": "ID",
+    "create": {
+      "title": "Create Service",
+      "description": "Add a new service for a client"
+    },
+    "edit": {
+      "title": "Edit Service",
+      "description": "Modify service details"
+    },
+    "details": {
+      "title": "Service Details",
+      "description": "View detailed information about the service",
       "client": "Client",
-      "service": "Service",
-      "startDate": "Start date",
-      "renewalDate": "Renewal date",
-      "price": "Price",
-      "billingCycle": "Billing cycle",
-      "status": "Status",
-      "actions": "Actions"
+      "client_name": "Client Name",
+      "client_email": "Client Email",
+      "product": "Product",
+      "product_name": "Product Name",
+      "server": "Server",
+      "server_name": "Server Name",
+      "billing": "Billing",
+      "billing_cycle": "Billing Cycle",
+      "next_due_date": "Next Due Date",
+      "recurring_amount": "Recurring Amount",
+      "setup_fee": "Setup Fee",
+      "important_dates": "Important Dates",
+      "created_at": "Created At",
+      "suspension_date": "Suspension Date",
+      "cancellation_date": "Cancellation Date",
+      "termination_date": "Termination Date",
+      "login_details": "Login Details",
+      "username": "Username",
+      "password": "Password",
+      "configuration": "Custom Configuration",
+      "notes": "Notes",
+      "unknown": "Unknown",
+      "unknown_product": "Unknown Product",
+      "not_set": "Not set",
+      "no_server": "No server associated",
+      "no_login_details": "No login details defined",
+      "view_client": "View client",
+      "view_product": "View product",
+      "view_server": "View server",
+      "error_loading": "Error loading service"
     },
-    "filters": {
-      "search": "Search",
+    "form": {
+      "section": {
+        "client_product": "Client and Product",
+        "details": "Service Details",
+        "billing": "Billing",
+        "notes": "Notes",
+        "configurations": "Custom Configurations"
+      },
+      "client": "Client",
+      "select_client": "Select a client",
+      "product": "Product",
+      "select_product": "Select a product",
+      "domain": "Domain",
+      "domain_placeholder": "example.com",
+      "username": "Username",
+      "username_placeholder": "Username",
+      "password": "Password",
+      "password_placeholder": "Password",
+      "server": "Server",
+      "select_server": "Select a server",
       "status": "Status",
-      "billing_cycle": "Billing cycle",
-      "all_cycles": "All cycles",
-      "apply": "Apply filters"
+      "billing_cycle": "Billing Cycle",
+      "next_due_date": "Next Due Date",
+      "recurring_amount": "Recurring Amount",
+      "amount_placeholder": "0.00",
+      "setup_fee": "Setup Fee",
+      "fee_placeholder": "0.00",
+      "notes": "Notes",
+      "notes_placeholder": "Internal notes about this service...",
+      "config_name": "Name",
+      "config_value": "Value",
+      "action": "Action",
+      "add_config": "Add Configuration",
+      "errors": {
+        "client_required": "Client is required",
+        "product_required": "Product is required",
+        "status_required": "Status is required",
+        "invalid_date": "Invalid date format",
+        "negative_amount": "Amount cannot be negative",
+        "negative_fee": "Fee cannot be negative"
+      },
+      "success_create_title": "Service Created",
+      "success_create_message": "Service has been created successfully",
+      "success_update_title": "Service Updated",
+      "success_update_message": "Service has been updated successfully",
+      "error_loading": "Error loading data",
+      "error_submit": "Error saving service"
     },
-    "billingCycles": {
+    "billing_cycles": {
       "monthly": "Monthly",
       "quarterly": "Quarterly",
-      "semiAnnual": "Semi-annual",
-      "annual": "Annual"
+      "semi_annually": "Semi-Annually",
+      "annually": "Annually",
+      "biennially": "Biennially",
+      "triennially": "Triennially"
     },
-    "status": {
-      "all": "All",
-      "active": "Active",
-      "pending": "Pending",
-      "cancelled": "Cancelled",
-      "expired": "Expired"
-    }
-  },
-  "tickets": {
-    "title": "Tickets",
-    "description": "Handle support requests and client communications",
-    "actions": {
-      "add": "Add ticket"
-    },
-    "search": {
-      "placeholder": "Search tickets..."
-    },
-    "table": {
-      "id": "ID",
-      "client": "Client",
-      "subject": "Subject",
-      "date": "Date",
-      "lastUpdate": "Last update",
-      "status": "Status",
-      "priority": "Priority",
-      "actions": "Actions"
-    },
-    "filters": {
-      "search": "Search",
-      "status": "Status",
-      "priority": "Priority",
-      "apply": "Apply filters"
-    },
-    "priority": {
-      "all": "All priorities",
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High",
-      "urgent": "Urgent"
-    },
-    "status": {
-      "all": "All",
-      "open": "Open",
-      "in_progress": "In progress",
-      "waiting": "Waiting for client",
-      "resolved": "Resolved",
-      "closed": "Closed"
-    }
-  },
-  "settings": {
-    "messages": {
-      "saved": "Settings saved successfully",
-      "error": "An error occurred while saving settings",
-      "emailTestSent": "Test email sent successfully",
-      "emailTestError": "An error occurred while sending test email",
-      "smsTestSent": "Test SMS sent successfully",
-      "smsTestError": "An error occurred while sending test SMS"
-    },
-    "tabs": {
-      "general": "General",
-      "notifications": "Notifications",
-      "security": "Security",
-      "billing": "Billing",
-      "integrations": "Integrations",
-      "license": "License"
-    },
-    "license": {
-      "title": "License Management",
-      "licenseKey": "License Key",
-      "licenseType": "License Type",
-      "licenseStatus": "License Status",
-      "licenseExpiration": "Expiration Date",
-      "active": "Active",
-      "inactive": "Inactive",
-      "free": "Free",
-      "pro": "Professional",
-      "updateSuccess": "License updated successfully",
-      "updateError": "Error updating license",
-      "verifyingLicense": "Verifying license...",
-      "enterLicenseKey": "Please enter a valid license key"
+    "status_change": {
+      "activate_title": "Activate Service",
+      "suspend_title": "Suspend Service",
+      "cancel_title": "Cancel Service",
+      "terminate_title": "Terminate Service",
+      "activate_confirmation": "Are you sure you want to activate this service?",
+      "suspend_confirmation": "Are you sure you want to suspend this service?",
+      "cancel_confirmation": "Are you sure you want to cancel this service?",
+      "terminate_confirmation": "Are you sure you want to terminate this service? This action is irreversible.",
+      "notes": "Notes",
+      "notes_placeholder": "Reason for status change...",
+      "success_title": "Status Changed",
+      "activate_success": "Service has been activated successfully",
+      "suspend_success": "Service has been suspended successfully",
+      "cancel_success": "Service has been cancelled successfully",
+      "terminate_success": "Service has been terminated successfully",
+      "error": "Error changing status",
+      "invalid_action": "Invalid action"
     }
   }
 }

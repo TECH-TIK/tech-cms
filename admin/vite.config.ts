@@ -14,11 +14,12 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    chunkSizeWarningLimit: 700, // Augmenter la limite d'avertissement pour les chunks
     rollupOptions: {
       output: {
         manualChunks: {
           'vendor': ['vue', 'vue-router', 'pinia', 'vue-i18n'],
-          'charts': ['chart.js']
+          'utils': ['date-fns', 'axios', 'crypto-js', 'md5', 'chart.js', 'vue-chartjs', '@headlessui/vue']
         }
       }
     }
