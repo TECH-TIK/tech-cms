@@ -5,9 +5,10 @@
         <h1 class="page-title">{{ $t('tickets.title') }}</h1>
         <span class="page-description">{{ $t('tickets.description') }}</span>
       </div>
-      <button class="btn btn-primary" @click="openCreateModal">
-        <i class="fas fa-plus"></i> {{ $t('tickets.actions.add') }}
-      </button>
+      <router-link to="/tickets/create" class="btn btn-gradient">
+        <i class="fas fa-plus"></i>
+        {{ $t('tickets.actions.add') }}
+      </router-link>
     </div>
 
     <div class="filter-box">
@@ -17,8 +18,8 @@
           <div class="filter-input-wrapper">
             <i class="fas fa-search"></i>
             <input 
-              type="text" 
               v-model="searchQuery" 
+              type="text" 
               class="filter-input" 
               :placeholder="$t('tickets.search.placeholder')"
             />
@@ -29,14 +30,16 @@
           <label class="filter-label">{{ $t('tickets.filters.status') }}</label>
           <div class="filter-input-wrapper">
             <i class="fas fa-ticket-alt"></i>
-            <select v-model="currentStatusFilter" class="filter-input">
-              <option v-for="status in statusFilters" :key="status.value" :value="status.value">
-                {{ status.label }} ({{ getFilteredTicketsCount(status.value) }})
-              </option>
+            <select v-model="statusFilter" class="filter-input">
+              <option value="">{{ $t('tickets.status.all') }}</option>
+              <option value="open">{{ $t('tickets.status.open') }}</option>
+              <option value="pending">{{ $t('tickets.status.pending') }}</option>
+              <option value="resolved">{{ $t('tickets.status.resolved') }}</option>
+              <option value="closed">{{ $t('tickets.status.closed') }}</option>
             </select>
           </div>
         </div>
-        
+
         <div class="filter-group">
           <label class="filter-label">{{ $t('tickets.filters.priority') }}</label>
           <div class="filter-input-wrapper">
@@ -51,177 +54,250 @@
           </div>
         </div>
         
+        <!-- Nouveau filtre pour départements -->
         <div class="filter-group">
-          <label class="filter-label">&nbsp;</label>
+          <label class="filter-label">{{ $t('tickets.filters.department') }}</label>
           <div class="filter-input-wrapper">
-            <button @click="applyFilters" class="btn btn-gradient filter-button">
-              <i class="fas fa-filter"></i>
-              {{ $t('tickets.filters.apply') }}
-            </button>
+            <i class="fas fa-sitemap"></i>
+            <select v-model="departmentFilter" class="filter-input">
+              <option value="">{{ $t('tickets.departments.all') }}</option>
+              <option value="unassigned">{{ $t('tickets.departments.unassigned') }}</option>
+              <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+                {{ dept.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Nouveau filtre pour assignation -->
+        <div class="filter-group">
+          <label class="filter-label">{{ $t('tickets.filters.assigned_to') }}</label>
+          <div class="filter-input-wrapper">
+            <i class="fas fa-user-check"></i>
+            <select v-model="assignedToFilter" class="filter-input">
+              <option value="">{{ $t('tickets.assigned_to.all') }}</option>
+              <option value="unassigned">{{ $t('tickets.assigned_to.unassigned') }}</option>
+              <option v-for="admin in admins" :key="admin.id" :value="admin.id">
+                {{ admin.username }}
+              </option>
+            </select>
           </div>
         </div>
       </div>
+      
+      <!-- Actions supplémentaires -->
+      <div class="filter-actions">
+        <button class="btn btn-secondary" @click="resetFilters">
+          <i class="fas fa-undo"></i>
+          {{ $t('common.reset_filters') }}
+        </button>
+        <router-link to="/ticket-departments" class="btn btn-primary">
+          <i class="fas fa-cog"></i>
+          {{ $t('tickets.departments.manage') }}
+        </router-link>
+      </div>
     </div>
 
-    <div class="table-box">
-      <table v-if="!loading && filteredTickets.length > 0" class="tickets-table">
+    <!-- Liste des tickets -->
+    <div v-if="loading" class="loading-state box">
+      <div class="spinner"></div>
+      <p>{{ t('common.loading') }}</p>
+    </div>
+
+    <div v-else-if="filteredTickets.length === 0" class="empty-state box">
+      <div class="empty-icon">
+        <i class="fas fa-ticket-alt"></i>
+      </div>
+      <h3 class="empty-title">{{ t('tickets.empty.title') }}</h3>
+      <p class="empty-description">{{ t('tickets.empty.description') }}</p>
+    </div>
+
+    <div v-else class="table-box">
+      <table class="data-table">
         <thead>
           <tr>
-            <th>{{ $t('tickets.table.id') }}</th>
-            <th>{{ $t('tickets.table.subject') }}</th>
-            <th>{{ $t('tickets.table.client') }}</th>
-            <th>{{ $t('tickets.table.priority') }}</th>
-            <th>{{ $t('tickets.table.status') }}</th>
-            <th>{{ $t('tickets.table.lastReply') }}</th>
-            <th>{{ $t('tickets.table.createdAt') }}</th>
-            <th>{{ $t('tickets.table.actions') }}</th>
+            <th>ID</th>
+            <th>{{ t('tickets.table.subject') }}</th>
+            <th>{{ t('tickets.table.client') }}</th>
+            <th>{{ t('tickets.table.department') }}</th>
+            <th>{{ t('tickets.table.assigned_to') }}</th>
+            <th>{{ t('tickets.table.priority') }}</th>
+            <th>{{ t('tickets.table.status') }}</th>
+            <th>{{ t('tickets.table.last_reply') }}</th>
+            <th>{{ t('tickets.table.created_at') }}</th>
+            <th>{{ t('tickets.table.actions') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="ticket in filteredTickets" :key="ticket.id">
+          <tr v-for="ticket in paginatedTickets" :key="ticket.id" @click="viewTicketDetails(ticket.id as number)">
             <td>#{{ ticket.id }}</td>
             <td class="subject-cell">{{ ticket.subject }}</td>
             <td>{{ ticket.client_name }}</td>
             <td>
-              <span :class="['priority-badge', getPriorityClass(ticket.priority)]">
+              <span v-if="ticket.department_name" class="department-badge">
+                {{ ticket.department_name }}
+              </span>
+              <span v-else class="unassigned-badge">{{ t('tickets.departments.none') }}</span>
+            </td>
+            <td>
+              <span v-if="ticket.assigned_to_name" class="assigned-badge">
+                {{ ticket.assigned_to_name }}
+              </span>
+              <span v-else class="unassigned-badge">{{ t('tickets.assigned_to.none') }}</span>
+            </td>
+            <td>
+              <span :class="`priority-badge priority-${ticket.priority}`">
                 {{ getPriorityLabel(ticket.priority) }}
               </span>
             </td>
             <td>
-              <span :class="['status-badge', getStatusClass(ticket.status)]">
+              <span :class="`status-badge status-${ticket.status}`">
                 {{ getStatusLabel(ticket.status) }}
               </span>
             </td>
             <td>{{ formatDate(ticket.last_reply) }}</td>
             <td>{{ formatDate(ticket.created_at) }}</td>
-            <td class="actions-cell">
-              <button class="btn btn-sm btn-info" @click="openViewModal(ticket)">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="btn btn-sm btn-primary" @click="openEditModal(ticket)">
-                <i class="fas fa-edit"></i>
-              </button>
-              
-              <template v-if="ticket.status === 'closed' || ticket.status === 'resolved'">
-                <button class="btn btn-sm btn-success" @click="handleReopen(ticket)">
-                  <i class="fas fa-redo"></i>
+            <td class="actions">
+              <div class="action-buttons">
+                <button class="btn-icon" :title="t('tickets.actions.view')" @click.stop="viewTicketDetails(ticket.id as number)">
+                  <i class="fas fa-eye"></i>
                 </button>
-              </template>
-              
-              <template v-else>
-                <button class="btn btn-sm btn-warning" @click="handleClose(ticket)">
-                  <i class="fas fa-check"></i>
+                <button class="btn-icon" :title="t('tickets.actions.edit')" @click.stop="editTicket(ticket.id as number)">
+                  <i class="fas fa-edit"></i>
                 </button>
-              </template>
-              
-              <button class="btn btn-sm btn-danger" @click="confirmDelete(ticket)">
-                <i class="fas fa-trash"></i>
-              </button>
+                <button 
+                  v-if="ticket.status === 'closed' || ticket.status === 'resolved'"
+                  class="btn-icon success-icon"
+                  :title="t('tickets.actions.reopen')"
+                  @click.stop="reopenTicket(ticket.id as number)"
+>
+                  <i class="fas fa-unlock"></i>
+                </button>
+                <button 
+                  v-else
+                  class="btn-icon warning-icon"
+                  :title="t('tickets.actions.close')"
+                  @click.stop="closeTicket(ticket.id as number)"
+>
+                  <i class="fas fa-lock"></i>
+                </button>
+                <button class="btn-icon danger-icon" :title="t('tickets.actions.delete')" @click.stop="deleteTicket(ticket.id as number)">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
+</div>
 
-      <div v-else-if="!loading && filteredTickets.length === 0" class="empty-state">
-        <i class="fas fa-ticket-alt empty-icon"></i>
-        <h3>{{ $t('tickets.empty.message') }}</h3>
-        <p>{{ $t('tickets.empty.description') }}</p>
-        <button class="btn btn-primary" @click="openCreateModal">
-          <i class="fas fa-plus"></i> {{ $t('tickets.actions.add') }}
-        </button>
-      </div>
-
-      <div v-else class="loading-container">
-        <i class="fas fa-spinner fa-spin"></i>
-        <p>{{ $t('common.loading') }}</p>
-      </div>
+    <!-- Pagination -->
+    <div v-if="totalPages > 1" class="pagination">
+      <a
+        v-for="page in totalPages"
+        :key="page"
+        :class="['page-link', { active: page === currentPage }]"
+        @click="changePage(page)"
+      >
+        {{ page }}
+      </a>
     </div>
-
-    <!-- Modal pour créer/éditer un ticket -->
-    <TicketModal
-      v-if="showModal"
-      :ticket="selectedTicket"
-      :mode="modalMode"
-      @close="closeModal"
-      @created="handleCreated"
-      @updated="handleUpdated"
-      class="modal-box"
-    />
-
-    <!-- Modal de confirmation de suppression -->
-    <Modal
-      v-if="showDeleteConfirm"
-      :title="$t('tickets.confirm.delete.title')"
-      class="modal-box"
-    >
-      <p>{{ $t('tickets.confirm.delete.message') }}</p>
-      <template #footer>
-        <button class="btn btn-danger" @click="handleDelete">
-          {{ $t('common.confirm') }}
-        </button>
-        <button class="btn btn-secondary" @click="showDeleteConfirm = false">
-          {{ $t('common.cancel') }}
-        </button>
-      </template>
-    </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useTicketStore } from '@/stores/tickets'
-import { useClientsStore } from '@/stores/clients'
+import { ApiService } from '@/services/api'
 import { useNotificationStore } from '@/stores/notifications'
-import TicketModal from '@/components/tickets/TicketModal.vue'
-import Modal from '@/components/common/Modal.vue'
+import { useTicketStore } from '@/stores/tickets'
+import { Ticket } from '@/types/ticket'
+import logger from '@/services/logger'
+
+interface Department {
+  id: number;
+  name: string;
+  email: string | null;
+  active: boolean;
+}
+
+interface Admin {
+  id: number;
+  username: string;
+}
 
 const { t } = useI18n()
+const router = useRouter()
 const ticketStore = useTicketStore()
-const clientsStore = useClientsStore()
 const notificationStore = useNotificationStore()
 
 // État local
-const loading = ref(true)
-const tickets = ref([])
+const loading = ref(false)
 const searchQuery = ref('')
-const currentStatusFilter = ref('all')
+const statusFilter = ref('')
 const priorityFilter = ref('')
-const showModal = ref(false)
-const modalMode = ref('create')
-const selectedTicket = ref(null)
-const showDeleteConfirm = ref(false)
-const ticketToDelete = ref(null)
+const departmentFilter = ref('')
+const assignedToFilter = ref('')
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+// Utiliser directement les tickets du store
+const tickets = computed(() => ticketStore.tickets)
+const departments = ref<Department[]>([])
+const admins = ref<Admin[]>([])
 
-// Filtres de statut disponibles
-const statusFilters = [
-  { value: 'all', label: t('tickets.filters.all') },
-  { value: 'open', label: t('tickets.filters.open') },
-  { value: 'pending', label: t('tickets.filters.pending') },
-  { value: 'closed', label: t('tickets.filters.closed') },
-  { value: 'resolved', label: t('tickets.filters.resolved') }
-]
+// Watched for automatic filtering
+watch([searchQuery, statusFilter, priorityFilter, departmentFilter, assignedToFilter], () => {
+  currentPage.value = 1
+})
 
-// Tickets filtrés en fonction de la recherche et du filtre de statut
-const filteredTickets = computed(() => {
-  let result = [...tickets.value]
+// Computed
+const filteredTickets = computed<Ticket[]>(() => {
+  const query = searchQuery.value.toLowerCase()
+  let result = tickets.value
   
-  // Filtre par statut
-  if (currentStatusFilter.value !== 'all') {
-    result = result.filter(ticket => ticket.status === currentStatusFilter.value)
-  }
-  
-  // Filtre par recherche
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
+  // Filtrer par termes de recherche
+  if (query) {
     result = result.filter(ticket => 
-      ticket.subject.toLowerCase().includes(query) || 
+      ticket.subject.toLowerCase().includes(query) ||
       ticket.client_name.toLowerCase().includes(query) ||
       ticket.id.toString().includes(query)
     )
   }
   
-  // Filtre par priorité
+  // Filtrer par statut
+  if (statusFilter.value) {
+    result = result.filter(ticket => ticket.status === statusFilter.value)
+  }
+  
+  // Filtrer par priorité
+  if (priorityFilter.value) {
+    result = result.filter(ticket => ticket.priority === priorityFilter.value)
+  }
+  
+  // Filtrer par département
+  if (departmentFilter.value) {
+    if (departmentFilter.value === 'unassigned') {
+      result = result.filter(ticket => !ticket.department_id);
+    } else {
+      result = result.filter(ticket => 
+        ticket.department_id === parseInt(departmentFilter.value)
+      );
+    }
+  }
+  
+  // Filtrer par assignation
+  if (assignedToFilter.value) {
+    if (assignedToFilter.value === 'unassigned') {
+      result = result.filter(ticket => !ticket.assigned_to);
+    } else {
+      result = result.filter(ticket => 
+        ticket.assigned_to === parseInt(assignedToFilter.value)
+      );
+    }
+  }
+  
+  // Filtrer par priorité
   if (priorityFilter.value) {
     result = result.filter(ticket => ticket.priority === priorityFilter.value)
   }
@@ -229,202 +305,278 @@ const filteredTickets = computed(() => {
   return result
 })
 
-// Obtenir le nombre de tickets pour chaque filtre
-const getFilteredTicketsCount = (status) => {
-  if (status === 'all') {
-    return tickets.value.length
+// Calcul du nombre total de pages à partir des tickets filtrés
+const totalPages = computed<number>(() => {
+  return Math.ceil(filteredTickets.value.length / itemsPerPage.value)
+})
+
+const paginatedTickets = computed<Ticket[]>(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filteredTickets.value.slice(start, end)
+})
+
+// Méthodes
+async function refreshTickets() {
+  loading.value = true
+  
+  try {
+    // Charger les tickets depuis l'API avec les nouveaux filtres
+    const params: Record<string, string> = {}
+    
+    if (statusFilter.value) params.status = statusFilter.value
+    if (priorityFilter.value) params.priority = priorityFilter.value
+    if (departmentFilter.value) params.department_id = departmentFilter.value
+    if (assignedToFilter.value) params.assigned_to = assignedToFilter.value
+    
+    // Utiliser la méthode fetchTickets du store avec les filtres
+    await ticketStore.fetchTickets(params)
+    
+    // Récupérer les départements via le service API centralisé
+    const response = await ApiService.routes.admin.ticket.list(params)
+    
+    // Extraction des départements de la réponse
+    if (response.data) {
+      // Structure standard (sans wrapper data)
+      if (response.data.departments !== undefined) {
+        departments.value = response.data.departments || []
+      } 
+      // Structure avec wrapper data (ancienne version)
+      else if (response.data.data && response.data.data.departments !== undefined) {
+        departments.value = response.data.data.departments || []
+      }
+      else {
+        departments.value = []
+      }
+      
+      // Journaliser l'information sur l'état des données
+      if (ticketStore.tickets.length === 0) {
+        logger.info('Aucun ticket trouvé, affichage d\'une liste vide', { filtres: params })
+      } else {
+        logger.info(`${ticketStore.tickets.length} tickets chargés avec succès`)
+      }
+    } else {
+      // Pas de données du tout
+      logger.error('Aucune donnée reçue de l\'API', { response })
+      departments.value = []
+      notificationStore.showError(t('tickets.errors.unexpected_format'))
+    }
+    
+    // Récupérer la liste des administrateurs pour les assignations via le service API centralisé
+    try {
+      const adminsResponse = await ApiService.routes.admin.admins.list()
+      admins.value = adminsResponse.data.data?.admins || adminsResponse.data?.admins || []
+    } catch (error) {
+      logger.error('[TICKETS] Erreur lors du chargement des administrateurs', { error })
+      notificationStore.showError(t('tickets.errors.admins_load_failed'))
+    }
+  } catch (error: any) {
+    notificationStore.showError(t('tickets.errors.fetch_failed'))
+    // Journalisation détaillée de l'erreur avec plus d'informations pour le débogage
+    if (error.response) {
+      // La requête a été faite et le serveur a répondu avec un code d'erreur
+      logger.error('Erreur API (réponse du serveur)', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+        headers: error.response.headers
+      })
+    } else if (error.request) {
+      // La requête a été faite mais pas de réponse reçue
+      logger.error('Erreur API (pas de réponse)', {
+        request: error.request
+      })
+    } else {
+      // Une erreur s'est produite lors de la configuration de la requête
+      logger.error('Erreur lors de la configuration de la requête', {
+        message: error.message,
+        stack: error.stack
+      })
+    }
+  } finally {
+    loading.value = false
   }
-  return tickets.value.filter(ticket => ticket.status === status).length
 }
 
-// Formater la date pour l'affichage
-const formatDate = (dateString) => {
+function resetFilters() {
+  searchQuery.value = ''
+  statusFilter.value = ''
+  priorityFilter.value = ''
+  departmentFilter.value = ''
+  assignedToFilter.value = ''
+  refreshTickets()
+}
+
+const changePage = (page: number) => {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const viewTicketDetails = (ticketId: number) => {
+  router.push({ name: 'ticket-details', params: { id: ticketId.toString() } })
+}
+
+const editTicket = (ticketId: number) => {
+  router.push({ name: 'edit-ticket', params: { id: ticketId.toString() } })
+}
+
+const closeTicket = async (ticketId: number) => {
+  try {
+    await ticketStore.closeTicket(ticketId)
+    await refreshTickets()
+  } catch (error) {
+    logger.error('[TicketsView] Erreur lors de la fermeture', { ticketId, error });
+  }
+}
+
+const reopenTicket = async (ticketId: number) => {
+  try {
+    await ticketStore.reopenTicket(ticketId)
+    await refreshTickets()
+  } catch (error) {
+    logger.error('[TicketsView] Erreur lors de la réouverture', { ticketId, error });
+  }
+}
+
+const deleteTicket = async (ticketId: number) => {
+  if (confirm(t('tickets.confirm_delete'))) {
+    try {
+      await ticketStore.deleteTicket(ticketId)
+      await refreshTickets()
+    } catch (error) {
+      logger.error('[TicketsView] Erreur lors de la suppression', { ticketId, error });
+    }
+  }
+}
+
+const formatDate = (dateString: string) => {
   if (!dateString) return '-'
   const date = new Date(dateString)
-  return new Intl.DateTimeFormat('fr-FR', { 
-    day: '2-digit', 
-    month: '2-digit', 
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   }).format(date)
 }
 
-// Obtenir la classe CSS pour la priorité
-const getPriorityClass = (priority) => {
-  return `priority-${priority}`
-}
-
-// Obtenir la classe CSS pour le statut
-const getStatusClass = (status) => {
-  return `status-${status}`
-}
-
-// Obtenir le libellé traduit pour la priorité
-const getPriorityLabel = (priority) => {
+const getPriorityLabel = (priority: string) => {
   return t(`tickets.priority.${priority}`)
 }
 
-// Obtenir le libellé traduit pour le statut
-const getStatusLabel = (status) => {
+const getStatusLabel = (status: string) => {
   return t(`tickets.status.${status}`)
 }
 
-// Rafraîchir la liste des tickets
-const refreshTickets = async () => {
-  loading.value = true
-  try {
-    const response = await ticketStore.fetchTickets()
-    tickets.value = response
-  } catch (error) {
-    console.error('Error fetching tickets:', error)
-    notificationStore.addNotification({
-      title: t('common.error'),
-      message: t('tickets.errors.fetch'),
-      type: 'error'
-    })
-  } finally {
-    loading.value = false
-  }
-}
-
-// Ouvrir le modal de création
-const openCreateModal = () => {
-  selectedTicket.value = null
-  modalMode.value = 'create'
-  showModal.value = true
-}
-
-// Ouvrir le modal de visualisation
-const openViewModal = (ticket) => {
-  selectedTicket.value = ticket
-  modalMode.value = 'view'
-  showModal.value = true
-}
-
-// Ouvrir le modal d'édition
-const openEditModal = (ticket) => {
-  selectedTicket.value = ticket
-  modalMode.value = 'edit'
-  showModal.value = true
-}
-
-// Fermer le modal
-const closeModal = () => {
-  showModal.value = false
-  selectedTicket.value = null
-}
-
-// Gérer la création d'un ticket
-const handleCreated = () => {
-  refreshTickets()
-  closeModal()
-  notificationStore.addNotification({
-    title: t('common.success'),
-    message: t('tickets.success.create'),
-    type: 'success'
-  })
-}
-
-// Gérer la mise à jour d'un ticket
-const handleUpdated = () => {
-  refreshTickets()
-  closeModal()
-  notificationStore.addNotification({
-    title: t('common.success'),
-    message: t('tickets.success.update'),
-    type: 'success'
-  })
-}
-
-// Ouvrir la confirmation de suppression
-const confirmDelete = (ticket) => {
-  ticketToDelete.value = ticket
-  showDeleteConfirm.value = true
-}
-
-// Gérer la suppression d'un ticket
-const handleDelete = async () => {
-  if (!ticketToDelete.value) return
-  
-  try {
-    await ticketStore.deleteTicket(ticketToDelete.value.id)
-    notificationStore.addNotification({
-      title: t('common.success'),
-      message: t('tickets.success.delete'),
-      type: 'success'
-    })
-    refreshTickets()
-  } catch (error) {
-    console.error('Error deleting ticket:', error)
-    notificationStore.addNotification({
-      title: t('common.error'),
-      message: t('tickets.errors.delete'),
-      type: 'error'
-    })
-  } finally {
-    showDeleteConfirm.value = false
-    ticketToDelete.value = null
-  }
-}
-
-// Gérer la fermeture d'un ticket
-const handleClose = async (ticket) => {
-  try {
-    await ticketStore.closeTicket(ticket.id)
-    notificationStore.addNotification({
-      title: t('common.success'),
-      message: t('tickets.success.close'),
-      type: 'success'
-    })
-    refreshTickets()
-  } catch (error) {
-    console.error('Error closing ticket:', error)
-    notificationStore.addNotification({
-      title: t('common.error'),
-      message: t('tickets.errors.close'),
-      type: 'error'
-    })
-  }
-}
-
-// Gérer la réouverture d'un ticket
-const handleReopen = async (ticket) => {
-  try {
-    await ticketStore.reopenTicket(ticket.id)
-    notificationStore.addNotification({
-      title: t('common.success'),
-      message: t('tickets.success.reopen'),
-      type: 'success'
-    })
-    refreshTickets()
-  } catch (error) {
-    console.error('Error reopening ticket:', error)
-    notificationStore.addNotification({
-      title: t('common.error'),
-      message: t('tickets.errors.reopen'),
-      type: 'error'
-    })
-  }
-}
-
-// Appliquer les filtres
-const applyFilters = () => {
-  // À implémenter
-}
-
-// Lifecycle
+// Cycle de vie
 onMounted(async () => {
-  try {
-    await clientsStore.fetchClients()
-    await refreshTickets()
-  } catch (error) {
-    console.error('Error initializing tickets view:', error)
-  }
+  await refreshTickets()
+  
+  // Initialiser les écouteurs temps réel pour les tickets
+  ticketStore.initRealtimeListeners()
+  logger.info('[TicketsView] Écouteurs temps réel initialisés')
 })
 </script>
 
-<style>
+<style scoped>
+/* Utiliser les styles existants du fichier CSS */
 @import '@/assets/css/pages/tickets.css';
 @import '@/assets/css/components/common-layout.css';
+
+/* Styles de base pour la vue */
+.tickets-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Styles pour les filtres */
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+/* Badges pour départements et assignations */
+.department-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.assigned-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.unassigned-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  background-color: #f5f5f5;
+  color: #757575;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+/* Styles additionnels spécifiques */
+
+/* Styles additionnels */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* Alignement du texte dans les cellules du tableau */
+.data-table th, .data-table td {
+  text-align: center;
+}
+
+/* Garder l'alignement à gauche pour les colonnes de texte */
+.data-table th:nth-child(1),
+.data-table th:nth-child(2),
+.data-table th:nth-child(3),
+.data-table td:nth-child(1),
+.data-table td:nth-child(2),
+.data-table td:nth-child(3) {
+  text-align: left;
+}
+
+.subject-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-badge, .priority-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
 </style>

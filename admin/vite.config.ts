@@ -22,7 +22,14 @@ export default defineConfig({
           'utils': ['date-fns', 'axios', 'crypto-js', 'md5', 'chart.js', 'vue-chartjs', '@headlessui/vue']
         }
       }
-    }
+    },
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
   },
   server: {
     proxy: {

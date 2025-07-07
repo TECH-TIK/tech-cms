@@ -10,6 +10,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -44,13 +45,14 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { t } = useI18n()
 
 // Données du graphique
 const chartData = computed(() => ({
-  labels: ['Aujourd\'hui', '7 Jours', '30 Jours', 'Cette année'],
+  labels: [t('dashboard.chart.today'), t('dashboard.chart.week'), t('dashboard.chart.month'), t('dashboard.chart.year')],
   datasets: [
     {
-      label: 'Revenus',
+      label: t('dashboard.chart.revenue'),
       data: [props.data.today, props.data.week, props.data.month, props.data.year],
       borderColor: 'rgb(75, 192, 192)',
       tension: 0.1
@@ -59,7 +61,10 @@ const chartData = computed(() => ({
 }))
 
 // Options du graphique
-const chartOptions = {
+// Import explicite du type ChartOptions requis
+import type { ChartOptions } from 'chart.js'
+
+const chartOptions: ChartOptions<'line'> = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
@@ -68,18 +73,25 @@ const chartOptions = {
     },
     title: {
       display: true,
-      text: 'Évolution des revenus'
+      text: t('dashboard.chart.evolution')
     }
   },
   scales: {
     y: {
       beginAtZero: true,
       ticks: {
-        callback: (value: number) => {
+        // Le callback doit prendre un type générique pour satisfaire l'interface
+        callback: (value: number | string, _index: number, _ticks: any) => {
+          // Conversion du paramètre en nombre si c'est une chaîne
+          const numValue = typeof value === 'string' ? parseFloat(value) : value;
+          
+          // Vérifier que c'est bien un nombre avant le formatage
+          if (isNaN(numValue)) return '';
+          
           return new Intl.NumberFormat('fr-FR', {
             style: 'currency',
             currency: 'EUR'
-          }).format(value)
+          }).format(numValue)
         }
       }
     }

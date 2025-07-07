@@ -118,7 +118,7 @@
                 :required="!isEditMode"
               >
               <div v-if="errors.password" class="form-error">{{ errors.password }}</div>
-              <small class="form-text text-muted" v-if="isEditMode">
+              <small v-if="isEditMode" class="form-text text-muted">
                 {{ t('clients.form.password_leave_empty') }}
               </small>
             </div>
@@ -203,6 +203,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useClientsStore } from '@/stores/clients'
+import logger from '@/services/logger'
 
 // Route et router
 const route = useRoute()
@@ -252,17 +253,17 @@ const fetchClient = async () => {
   try {
     // S'assurer que la liste des clients est chargée
     if (clientsStore.clients.length === 0) {
-      console.log('Chargement de la liste des clients...')
+      logger.debug('Chargement de la liste des clients...')
       await clientsStore.fetchClients()
     }
     
-    console.log('Récupération du client avec ID:', clientId.value)
+    logger.debug('Récupération du client', { clientId: clientId.value })
     const id = clientId.value as number;
     const client = await clientsStore.getClient(id)
-    console.log('Client récupéré:', client)
+    logger.debug('Client récupéré', { client })
     
     if (client) {
-      console.log('Préremplissage du formulaire avec les données du client')
+      logger.debug('Préremplissage du formulaire avec les données du client')
       // Remplir le formulaire avec les données du client
       form.value = {
         ...form.value,
@@ -278,14 +279,14 @@ const fetchClient = async () => {
         country: client.country || '',
         status: client.status || 'active'
       }
-      console.log('Formulaire mis à jour:', form.value)
+      logger.debug('Formulaire mis à jour', { form: form.value })
     } else {
-      console.error('Aucun client retourné par getClient')
+      logger.warn('Aucun client retourné par getClient')
       
       // Essayons d'obtenir le client depuis le store s'il existe déjà
       const existingClient = clientsStore.clients.find(c => c.id === clientId.value)
       if (existingClient) {
-        console.log('Client trouvé dans le store:', existingClient)
+        logger.debug('Client trouvé dans le store', { existingClient })
         form.value = {
           ...form.value,
           firstname: existingClient.firstname || '',
@@ -303,7 +304,7 @@ const fetchClient = async () => {
       }
     }
   } catch (error) {
-    console.error('Erreur lors de la récupération du client:', error)
+    logger.error('Erreur lors de la récupération du client', { error })
   }
 }
 
@@ -366,19 +367,20 @@ const handleSubmit = async () => {
     } else {
       // Mode création
       const newClient = await clientsStore.createClient(form.value)
-      console.log('Nouveau client créé:', newClient)
+      logger.debug('Nouveau client créé', { newClient })
       
       if (newClient && newClient.id) {
-        console.log('Redirection vers la page de détails du client:', newClient.id)
+        logger.debug('Redirection vers la page de détails du client', { clientId: newClient.id })
         router.push({ name: 'client-details', params: { id: newClient.id.toString() } })
       } else {
-        console.error('Impossible de rediriger: ID du client non disponible')
+        logger.error('Impossible de rediriger: ID du client non disponible', { newClient })
         // Rediriger vers la liste des clients si l'ID n'est pas disponible
         router.push({ name: 'clients' })
       }
     }
   } catch (error) {
-    console.error('Erreur lors de la soumission du formulaire:', error)
+    logger.error('Erreur lors de la soumission du formulaire', { error })
+    // Note: Les messages d'erreur dans la console restent en français pour le debug
   } finally {
     isSubmitting.value = false
   }
@@ -441,7 +443,7 @@ onMounted(fetchClient)
 .form-control:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+  box-shadow: 0 0 0 0.2rem rgb(var(--primary-color-rgb), 0.25);
 }
 
 .form-text {

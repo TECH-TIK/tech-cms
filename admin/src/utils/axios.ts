@@ -1,8 +1,9 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
+import logger from '@/services/logger'
 
-console.log('[AXIOS] Configuration de l\'instance Axios')
+logger.debug('[AXIOS] Configuration de l\'instance Axios')
 
 const instance = axios.create({
   baseURL: '',  
@@ -16,7 +17,7 @@ const instance = axios.create({
 // Intercepteur de requêtes
 instance.interceptors.request.use(
   (config) => {
-    console.log('[AXIOS] Requête sortante:', config.method?.toUpperCase(), config.url)
+    logger.debug('[AXIOS] Requête sortante', { method: config.method?.toUpperCase(), url: config.url })
     
     // Supprimer les doubles slashes dans l'URL sauf après http(s):
     if (config.url) {
@@ -26,7 +27,7 @@ instance.interceptors.request.use(
     return config
   },
   (error) => {
-    console.error('[AXIOS] Erreur de requête:', error)
+    logger.error('[AXIOS] Erreur de requête', { error })
     return Promise.reject(error)
   }
 )
@@ -37,16 +38,16 @@ let isLoggingOut = false
 // Intercepteur de réponses
 instance.interceptors.response.use(
   (response) => {
-    console.log('[AXIOS] Réponse reçue:', response.status, response.config.url)
+    logger.debug('[AXIOS] Réponse reçue', { status: response.status, url: response.config.url })
     return response
   },
   async (error) => {
-    console.error('[AXIOS] Erreur de réponse:', error.response?.status, error.config.url)
+    logger.error('[AXIOS] Erreur de réponse', { status: error.response?.status, url: error.config.url, error })
     
     const authStore = useAuthStore()
 
     if (error.response?.status === 401) {
-      console.log('[AXIOS] Erreur 401 détectée', error.config.url)
+      logger.warn('[AXIOS] Erreur 401 détectée', { url: error.config.url })
       
       // Ne pas déconnecter si c'est une vérification d'authentification
       // ou si on est déjà en train de se déconnecter
@@ -56,7 +57,7 @@ instance.interceptors.response.use(
           !error.config.url?.includes('/auth/logout') && 
           !isLoggingOut) {
         
-        console.log('[AXIOS] Déconnexion requise')
+        logger.info('[AXIOS] Déconnexion requise')
         isLoggingOut = true
         await authStore.logout()
         isLoggingOut = false

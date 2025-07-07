@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
+import logger from '@/services/logger'
 
 export const useLanguageStore = defineStore('language', {
   state: () => ({
@@ -8,7 +8,7 @@ export const useLanguageStore = defineStore('language', {
   
   actions: {
     setLanguage(lang: string) {
-      console.log(`[LANGUAGE STORE] Changement de langue vers: ${lang}`)
+      logger.info(`[LANGUAGE STORE] Changement de langue vers: ${lang}`)
       this.currentLanguage = lang
       localStorage.setItem('language', lang)
       return true

@@ -1,17 +1,34 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import axios from '@/utils/axios'
+
+import { ApiService } from '@/services/api'
 import router from '@/router'
-import { persist } from 'pinia-plugin-persistedstate'
 
-console.log('[AUTH STORE] Initialisation du store d\'authentification')
+import logger from '@/services/logger'
 
-export const useAuthStore = defineStore('auth', {
-  persist: {
-    key: 'auth-state',
-    paths: ['initialized'],
-    storage: sessionStorage
-  },
+logger.info('[AUTH STORE] Initialisation du store d\'authentification')
+
+// Type d'actions du store d'authentification pour une meilleure inférence de type
+interface AuthStoreActions {
+  init: () => Promise<void>;
+  login: (email: string, password: string, remember?: boolean) => Promise<boolean>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<boolean>;
+  forgotPassword: (email: string) => Promise<boolean>;
+  resetPassword: (token: string, password: string) => Promise<boolean>;
+  updateLanguage: (lang: string) => Promise<void>;
+}
+
+export const useAuthStore = defineStore<string, {
+  user: any | null;
+  loading: boolean;
+  error: string | null;
+  initialized: boolean;
+}, {
+  isAuthenticated: (state: any) => boolean;
+  userFullName: (state: any) => string;
+}, AuthStoreActions>('auth', {
+  // Contourner le problème de typage en utilisant la structure minimale
+  persist: true,
 
   state: () => ({
     user: null as any | null,
@@ -28,37 +45,37 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async init() {
       if (this.initialized) {
-        console.log('[AUTH STORE] Déjà initialisé')
+        logger.info('[AUTH STORE] Déjà initialisé')
         return
       }
 
-      console.log('[AUTH STORE] Initialisation...')
+      logger.info('[AUTH STORE] Initialisation...')
       
       try {
-        const response = await axios.get('/api/v1/auth/check')
+        // Utilisation de la route centralisée pour vérifier l'authentification
+        const response = await ApiService.routes.auth.me()
         if (response.data?.user) {
-          console.log('[AUTH STORE] Utilisateur authentifié:', response.data.user)
+          logger.info('[AUTH STORE] Utilisateur authentifié', { user: response.data.user })
           this.user = response.data.user
         }
-      } catch (err) {
-        console.log('[AUTH STORE] Non authentifié')
+      } catch {
+        logger.info('[AUTH STORE] Non authentifié')
         this.user = null
       } finally {
         this.initialized = true
       }
     },
 
-    async login(email: string, password: string, remember: boolean = false) {
-      console.log('[AUTH STORE] Tentative de connexion pour:', email)
+    async login(email: string, password: string, _remember: boolean = false) {
+      logger.info('[AUTH STORE] Tentative de connexion', { email })
       try {
         this.loading = true
         this.error = null
 
-        const response = await axios.post('/api/v1/auth/login', {
-          email,
-          password,
-          remember
-        })
+        // Utilisation de la route centralisée pour la connexion
+        // Note: remember n'est pas supporté directement par l'API centralisée
+        const response = await ApiService.routes.auth.login(email, password)
+
 
         if (!response.data?.user) {
           throw new Error('Réponse invalide du serveur')
@@ -72,7 +89,7 @@ export const useAuthStore = defineStore('auth', {
 
         return true
       } catch (err: any) {
-        console.error('[AUTH STORE] Erreur de connexion:', err)
+        logger.error('[AUTH STORE] Erreur de connexion', { error: err })
         this.error = err.message
         return false
       } finally {
@@ -83,15 +100,16 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       // Si l'utilisateur est déjà déconnecté, ne rien faire
       if (!this.user) {
-        console.log('[AUTH STORE] Utilisateur déjà déconnecté')
+        logger.info('[AUTH STORE] Utilisateur déjà déconnecté')
         return
       }
 
+      logger.info('[AUTH STORE] Déconnexion...')
       try {
-        console.log('[AUTH STORE] Tentative de déconnexion')
-        await axios.post('/api/v1/auth/logout')
+        // Utilisation de la route centralisée pour la déconnexion
+        await ApiService.routes.auth.logout()
       } catch (err) {
-        console.error('[AUTH STORE] Erreur lors de la déconnexion:', err)
+        logger.error('[AUTH STORE] Erreur de déconnexion', { error: err })
       } finally {
         // Nettoyer l'état local
         this.user = null
@@ -103,33 +121,35 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async checkAuth() {
+      logger.info('[AUTH STORE] Vérification de l\'authentification...')
       try {
-        console.log('[AUTH STORE] Vérification de l\'authentification')
-        const response = await axios.get('/api/v1/auth/check')
+        // Utilisation de la route centralisée pour vérifier l'authentification
+        const response = await ApiService.routes.auth.me()
         
         if (response.data?.user) {
-          console.log('[AUTH STORE] Utilisateur authentifié:', response.data.user)
+          logger.info('[AUTH STORE] Utilisateur authentifié')
           this.user = response.data.user
           return true
         }
 
-        console.log('[AUTH STORE] Utilisateur non authentifié')
+        logger.info('[AUTH STORE] Utilisateur non authentifié')
         return false
       } catch (err) {
-        console.error('[AUTH STORE] Erreur lors de la vérification de l\'authentification:', err)
+        logger.error('[AUTH STORE] Erreur lors de la vérification de l\'authentification', { error: err })
         this.user = null
         return false
       }
     },
 
     async forgotPassword(email: string) {
-      console.log('[AUTH STORE] Demande de réinitialisation pour:', email)
+      logger.info('[AUTH STORE] Demande de réinitialisation', { email })
       try {
-        const response = await axios.post('/api/v1/auth/forgot-password', { email })
-        console.log('[AUTH STORE] Email de réinitialisation envoyé')
+        // Utilisation de la route centralisée pour la demande de réinitialisation
+        const response = await ApiService.routes.auth.forgotPassword(email)
+        logger.info('[AUTH STORE] Email de réinitialisation envoyé')
         return response.data
       } catch (err) {
-        console.error('[AUTH STORE] Erreur lors de la demande:', err)
+        logger.error('[AUTH STORE] Erreur lors de la demande', { error: err })
         throw err
       }
     },
@@ -139,7 +159,8 @@ export const useAuthStore = defineStore('auth', {
         this.loading = true
         this.error = null
         
-        await axios.post('/api/v1/auth/reset-password', { token, password })
+        // Utilisation de la route centralisée pour la réinitialisation du mot de passe
+        await ApiService.routes.auth.resetPassword(token, password, password)
         return true
       } catch (err: any) {
         this.error = err.message
@@ -149,17 +170,17 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async updateLanguage(lang: string) {
+    async updateLanguage(lang: string): Promise<void> {
       // Cette méthode est utilisée pour mettre à jour la langue de l'utilisateur
       // Pour le moment, elle ne fait que stocker la préférence localement
       // Dans une implémentation complète, elle pourrait envoyer cette préférence au serveur
-      console.log(`[AUTH STORE] Changement de langue vers: ${lang}`)
+      logger.info(`[AUTH STORE] Changement de langue vers: ${lang}`)
       
       try {
         // Si nous avons un utilisateur connecté, on pourrait sauvegarder sa préférence
         if (this.user) {
           // Optionnel: Envoyer la préférence au serveur
-          // await axios.post('/api/v1/user/preferences', { language: lang })
+          // await ApiService.client.post('/api/v1/user/preferences', { language: lang })
           
           // Mettre à jour l'état local
           this.user = {
@@ -168,10 +189,11 @@ export const useAuthStore = defineStore('auth', {
           }
         }
         
-        return true
+        // Ne pas retourner de valeur pour Promise<void>
       } catch (err: any) {
-        console.error('[AUTH STORE] Erreur lors du changement de langue:', err)
-        return false
+        logger.error('[AUTH STORE] Erreur lors du changement de langue', { error: err })
+        this.error = err?.message || 'Erreur lors du changement de langue'
+        // Ne pas retourner de valeur pour Promise<void>
       }
     }
   }

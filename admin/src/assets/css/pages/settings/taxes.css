@@ -62,12 +62,12 @@
 }
 
 .tax-status.active {
-    background: rgba(16, 185, 129, 0.1);
+    background: rgb(16 185 129 / 10%);
     color: #10B981;
 }
 
 .tax-status.inactive {
-    background: rgba(148, 163, 184, 0.1);
+    background: rgb(148 163 184 / 10%);
     color: #94A3B8;
 }
 
@@ -103,7 +103,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .taxes-header {
         flex-direction: column;
         gap: var(--spacing-md);

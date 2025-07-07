@@ -1,9 +1,9 @@
 <template>
   <div class="view-container not-found-container">
     <div class="header-box">
-      <h1 class="page-title">404 - Page Non Trouvée</h1>
+      <h1 class="page-title">{{ $t('notFound.title') }}</h1>
       <p class="page-description">
-        La page que vous recherchez n'existe pas ou a été déplacée.
+        {{ $t('notFound.description') }}
       </p>
     </div>
 
@@ -17,26 +17,26 @@
         <div class="alert-box alert-info">
           <i class="fas fa-info-circle"></i>
           <div>
-            <h3>Que s'est-il passé ?</h3>
-            <p>L'URL que vous avez saisie n'a pas été trouvée sur ce serveur.</p>
+            <h3>{{ $t('notFound.whatHappened') }}</h3>
+            <p>{{ $t('notFound.urlNotFound') }}</p>
           </div>
         </div>
 
         <div class="suggestions">
-          <h3>Suggestions :</h3>
+          <h3>{{ $t('notFound.suggestions') }}</h3>
           <ul>
-            <li>Vérifiez que l'URL est correctement saisie</li>
-            <li>Retournez à la page précédente</li>
-            <li>Accédez au tableau de bord</li>
+            <li>{{ $t('notFound.checkUrl') }}</li>
+            <li>{{ $t('notFound.goBack') }}</li>
+            <li>{{ $t('notFound.goToDashboard') }}</li>
           </ul>
         </div>
 
         <div class="action-buttons">
-          <button @click="goBack" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Retour
+          <button class="btn btn-secondary" @click="goBack">
+            <i class="fas fa-arrow-left"></i> {{ $t('notFound.backButton') }}
           </button>
           <router-link to="/dashboard" class="btn btn-primary">
-            <i class="fas fa-home"></i> Tableau de bord
+            <i class="fas fa-home"></i> {{ $t('notFound.dashboardButton') }}
           </router-link>
         </div>
       </div>
@@ -47,7 +47,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
+
 const router = useRouter()
+
 
 const goBack = () => {
   router.go(-1)
@@ -100,9 +102,8 @@ const goBack = () => {
   font-size: 8rem;
   font-weight: 700;
   color: #f8f9fa;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 2px 2px 4px rgb(0 0 0 / 10%);
   background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-  -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1;
@@ -142,7 +143,7 @@ const goBack = () => {
   background-color: #fff;
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 5%);
 }
 
 .suggestions h3 {
@@ -197,7 +198,7 @@ const goBack = () => {
   background-color: #5c636a;
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .not-found-content {
     flex-direction: row;
   }

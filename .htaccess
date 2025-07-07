@@ -112,6 +112,12 @@ RewriteCond %{REQUEST_URI} !^/admin/api/.*$
 RewriteCond %{REQUEST_URI} !^/admin/dist/.*$
 RewriteRule ^admin/.*$ /admin/dist/index.html [L]
 
+# Rediriger toutes les autres requêtes /client/* vers l'application Vue.js
+RewriteCond %{REQUEST_URI} ^/client/.*$
+RewriteCond %{REQUEST_URI} !^/client/api/.*$
+RewriteCond %{REQUEST_URI} !^/client/dist/.*$
+RewriteRule ^client/.*$ /client/dist/index.html [L]
+
 # Empêcher l'accès direct aux fichiers PHP
 <FilesMatch "\.php$">
     Order Allow,Deny

@@ -1,21 +1,22 @@
 /* Client list styles */
+
 /* Variables */
 :root {
-  --primary-blue: #0066FF;
+  --primary-blue: #06F;
   --secondary-blue: #00C6FF;
   --accent-blue: #5F9FFF;
   --neon-blue: #00F0FF;
   
   /* Light theme */
-  --glass-bg-light: rgba(255, 255, 255, 0.1);
-  --card-border-light: rgba(255, 255, 255, 0.2);
+  --glass-bg-light: rgb(255 255 255 / 10%);
+  --card-border-light: rgb(255 255 255 / 20%);
   --text-color-light: #2A2A2A;
-  --text-muted-light: #666666;
+  --text-muted-light: #666;
   
   /* Dark theme */
-  --glass-bg-dark: rgba(16, 20, 35, 0.7);
-  --card-border-dark: rgba(255, 255, 255, 0.08);
-  --text-color-dark: #FFFFFF;
+  --glass-bg-dark: rgb(16 20 35 / 70%);
+  --card-border-dark: rgb(255 255 255 / 8%);
+  --text-color-dark: #FFF;
   --text-muted-dark: #A0A0A0;
 }
 
@@ -42,7 +43,7 @@
   font-size: 1.75rem;
   font-weight: 700;
   background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0;
 }
@@ -56,8 +57,12 @@
 
 /* Filters section */
 .filters-section {
-  composes: filter-box;
+  /* Remplacé 'composes: filter-box' par les propriétés directes */
   margin-bottom: var(--spacing-xl);
+  background-color: var(--glass-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: var(--spacing-lg);
 }
 
 .filter-grid {
@@ -89,7 +94,7 @@
 .filter-input {
   width: 100%;
   padding: 0.75rem 1rem 0.75rem 2.5rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(255 255 255 / 5%);
   border: 1px solid var(--card-border);
   border-radius: 10px;
   color: var(--text-color);
@@ -99,7 +104,7 @@
 
 .filter-input:focus {
   border-color: var(--primary-blue);
-  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
+  box-shadow: 0 0 0 2px rgb(0 102 255 / 20%);
   outline: none;
 }
 
@@ -117,9 +122,8 @@
   background: var(--glass-bg);
   border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgb(0 102 255 / 15%);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--card-border);
   overflow-x: auto;
 }
@@ -143,7 +147,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: rgba(0, 102, 255, 0.05);
+  background: rgb(0 102 255 / 5%);
 }
 
 tbody td {
@@ -193,17 +197,17 @@ tbody td {
 }
 
 .status-active {
-  background: rgba(0, 200, 83, 0.1);
+  background: rgb(0 200 83 / 10%);
   color: #00C853;
 }
 
 .status-inactive {
-  background: rgba(244, 67, 54, 0.1);
+  background: rgb(244 67 54 / 10%);
   color: #F44336;
 }
 
 .status-pending {
-  background: rgba(255, 152, 0, 0.1);
+  background: rgb(255 152 0 / 10%);
   color: #FF9800;
 }
 
@@ -216,9 +220,8 @@ tbody td {
   padding: 3rem;
   background: var(--glass-bg);
   border-radius: 20px;
-  box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgb(0 102 255 / 15%);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--card-border);
 }
 
@@ -250,16 +253,15 @@ tbody td {
   padding: 3rem;
   background: var(--glass-bg);
   border-radius: 20px;
-  box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgb(0 102 255 / 15%);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--card-border);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(0, 102, 255, 0.3);
+  border: 3px solid rgb(0 102 255 / 30%);
   border-radius: 50%;
   border-top-color: var(--primary-blue);
   animation: spin 1s linear infinite;
@@ -285,7 +287,7 @@ tbody td {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(255 255 255 / 5%);
   color: var(--text-muted);
   border: 1px solid var(--card-border);
   transition: all 0.3s ease;
@@ -331,11 +333,11 @@ tbody td {
 .btn-gradient {
   background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
   color: white;
-  box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+  box-shadow: 0 4px 15px rgb(0 102 255 / 30%);
 }
 
 .btn-gradient:hover {
-  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+  box-shadow: 0 6px 20px rgb(0 102 255 / 40%);
   transform: translateY(-2px);
 }
 
@@ -353,10 +355,7 @@ tbody td {
 /* Modal styles */
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -365,11 +364,8 @@ tbody td {
 
 .modal-backdrop {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background: rgb(0 0 0 / 50%);
   backdrop-filter: blur(5px);
 }
 
@@ -381,9 +377,8 @@ tbody td {
   overflow-y: auto;
   background: var(--glass-bg);
   border-radius: 20px;
-  box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.15);
+  box-shadow: 0 8px 32px 0 rgb(0 102 255 / 15%);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--card-border);
   z-index: 101;
 }
@@ -401,7 +396,7 @@ tbody td {
   font-weight: 600;
   margin: 0;
   background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -456,7 +451,7 @@ tbody td {
 .form-input {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(255 255 255 / 5%);
   border: 1px solid var(--card-border);
   border-radius: 10px;
   color: var(--text-color);
@@ -466,7 +461,7 @@ tbody td {
 
 .form-input:focus {
   border-color: var(--primary-blue);
-  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
+  box-shadow: 0 0 0 2px rgb(0 102 255 / 20%);
   outline: none;
 }
 

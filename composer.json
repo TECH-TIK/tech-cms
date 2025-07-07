@@ -1,12 +1,35 @@
 {
     "require": {
         "ably/ably-php": "^1.1",
-        "phpseclib/phpseclib": "^3.0"
+        "phpseclib/phpseclib": "^3.0",
+        "monolog/monolog": "^3.9",
+        "phpmailer/phpmailer": "^6.10"
     },
     "autoload": {
+        "psr-4": {
+            "TechCMS\\Provisioning\\": "includes/provisioning/"
+        },
         "classmap": [
             "includes/",
             "api/"
         ]
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.13",
+        "phpstan/phpstan": "^2.1",
+        "friendsofphp/php-cs-fixer": "^3.75"
+    },
+    "scripts": {
+        "lint:php": [
+            "@php vendor/bin/phpstan analyse --memory-limit=64G --ansi",
+            "@php vendor/bin/phpcs --colors"
+        ],
+        "fix:php": [
+            "@php vendor/bin/php-cs-fixer fix --ansi --diff"
+        ],
+        "phpstan": "phpstan analyse --ansi --memory-limit=64G",
+        "phpcs": "phpcs --colors",
+        "phpcbf": "phpcbf --colors",
+        "php-cs-fixer": "php-cs-fixer fix --ansi --diff"
     }
 }

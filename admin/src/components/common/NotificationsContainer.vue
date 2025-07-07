@@ -25,8 +25,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useNotificationStore } from '@/stores/notifications'
+import logger from '@/services/logger'
 
 const notificationStore = useNotificationStore()
 
@@ -36,7 +37,7 @@ const closeToast = (id) => {
 }
 
 onMounted(() => {
-  console.log('[NotificationsContainer] Composant monté')
+  logger.debug('[NotificationsContainer] Composant monté')
 })
 
 // Fonctions utilitaires pour les classes CSS
@@ -79,7 +80,7 @@ const getIconClass = (type) => {
 
 .notification-toast {
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
   width: 100%;
   margin-bottom: 10px;
   animation: slide-in 0.5s ease-out forwards;
@@ -177,6 +178,7 @@ const getIconClass = (type) => {
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -188,6 +190,7 @@ const getIconClass = (type) => {
     transform: translateX(0);
     opacity: 1;
   }
+
   to {
     transform: translateX(100%);
     opacity: 0;

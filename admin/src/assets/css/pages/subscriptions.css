@@ -7,22 +7,18 @@
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
-    
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
-    
     --primary-blue: #00C3FF;
-    --secondary-blue: #0066FF;
+    --secondary-blue: #06F;
     --primary-color: var(--primary-blue);
-    --secondary-color: rgba(255, 255, 255, 0.7);
+    --secondary-color: rgb(255 255 255 / 70%);
     --error: #EF4444;
-    
-    --glass-bg: rgba(255, 255, 255, 0.02);
-    --glass-border: rgba(0, 102, 255, 0.1);
+    --glass-bg: rgb(255 255 255 / 2%);
+    --glass-border: rgb(0 102 255 / 10%);
     --text-color: #E4E6EB;
     --text-muted: #B0B3B8;
-    
     --transition-fast: 0.2s ease;
 }
 
@@ -49,22 +45,22 @@
 }
 
 .status-active {
-    background-color: rgba(46, 213, 115, 0.15);
+    background-color: rgb(46 213 115 / 15%);
     color: #2ed573;
 }
 
 .status-cancelled {
-    background-color: rgba(235, 77, 75, 0.15);
+    background-color: rgb(235 77 75 / 15%);
     color: #eb4d4b;
 }
 
 .status-expired {
-    background-color: rgba(128, 128, 128, 0.15);
+    background-color: rgb(128 128 128 / 15%);
     color: #808080;
 }
 
 .status-suspended {
-    background-color: rgba(253, 203, 110, 0.15);
+    background-color: rgb(253 203 110 / 15%);
     color: #fdcb6e;
 }
 
@@ -120,7 +116,7 @@
 .spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid rgba(0, 102, 255, 0.1);
+    border: 3px solid rgb(0 102 255 / 10%);
     border-radius: 50%;
     border-top-color: var(--primary-blue);
     animation: spin 1s ease-in-out infinite;

@@ -1,8 +1,32 @@
 import * as Ably from 'ably'
 import { ref } from 'vue'
-import axios from '@/utils/axios'
+import logger from '@/services/logger'
+import { ApiService } from '@/services/api'
 
-console.log('[ABLY] Initialisation du service Ably')
+// Types manuels pour remplacer Ably.Types qui n'est pas exporté correctement
+interface ClientOptions {
+  authCallback?: (tokenParams: any, callback: (error: any, tokenOrTokenRequest: any) => void) => void;
+  token?: string;
+  echoMessages?: boolean;
+  closeOnUnload?: boolean;
+  recover?: string;
+}
+
+interface ErrorInfo {
+  code: number;
+  statusCode: number;
+  message: string;
+  name: string;
+}
+
+interface ConnectionStateChange {
+  current: string;
+  previous: string;
+  reason?: ErrorInfo;
+  retryIn?: number;
+}
+
+logger.debug('[ABLY] Initialisation du service Ably')
 
 let client: Ably.Realtime | null = null
 const connected = ref(false)
@@ -11,7 +35,7 @@ const connected = ref(false)
 const subscriptions = ref<{
   channel: string;
   event: string;
-  callback: Function;
+  callback: (message: any) => void;
 }[]>([])
 
 // Obtenir le nom de domaine actuel pour le préfixe des canaux
@@ -22,66 +46,40 @@ const getDomainPrefix = (): string => {
   return 'default';
 }
 
-// Générer un ID client stable pour l'utilisateur actuel
-const generateClientId = (): string => {
-  // Récupérer les informations utilisateur du localStorage
-  try {
-    const authData = localStorage.getItem('auth');
-    if (authData) {
-      const auth = JSON.parse(authData);
-      
-      // Si un ID utilisateur est disponible, l'utiliser
-      if (auth.user && auth.user.id) {
-        return `user-${auth.user.id}`;
-      }
-    }
-  } catch (err) {
-    console.error('[ABLY] Erreur lors de la récupération de l\'ID utilisateur:', err);
-  }
-  
-  // Fallback: générer un ID stable basé sur le domaine et la session
-  const sessionId = localStorage.getItem('ably_session_id');
-  if (!sessionId) {
-    const newSessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    localStorage.setItem('ably_session_id', newSessionId);
-    return `anonymous-${newSessionId}`;
-  }
-  
-  return `anonymous-${sessionId}`;
-};
 
-// Fonction pour obtenir un nouveau token Ably depuis l'API
+
+// Fonction pour obtenir un nouveau token Ably depuis l'API via le service API centralisé
 const fetchToken = async (): Promise<string> => {
-  console.log('[ABLY] Récupération d\'un nouveau token')
+  logger.debug('[ABLY] Récupération d\'un nouveau token')
   try {
-    const response = await axios.get('/api/v1/realtime/token')
+    const response = await ApiService.routes.realtime.getToken()
     if (!response.data?.token) {
       throw new Error('Token Ably non trouvé dans la réponse')
     }
-    console.log('[ABLY] Nouveau token obtenu avec succès')
+    logger.debug('[ABLY] Nouveau token obtenu avec succès')
     return response.data.token
   } catch (err) {
-    console.error('[ABLY] Erreur lors de la récupération du token:', err)
+    logger.error('[ABLY] Erreur lors de la récupération du token', { error: err })
     throw err
   }
 }
 
 export const initAbly = async (initialToken: string) => {
-  console.log('[ABLY] Connexion au service de temps réel')
+  logger.info('[ABLY] Connexion au service de temps réel')
   try {
     // Nous ne spécifions plus de clientId car cela entre en conflit avec le token
-    console.log('[ABLY] Initialisation sans clientId spécifique');
+    logger.debug('[ABLY] Initialisation sans clientId spécifique');
     
-    const options: Ably.Types.ClientOptions = {
-      authCallback: async (tokenParams, callback) => {
-        console.log('[ABLY] authCallback appelé pour renouveler le token')
+    const options: ClientOptions = {
+      authCallback: async (_tokenParams: any, callback: (error: any, tokenOrTokenRequest: any) => void) => {
+        logger.debug('[ABLY] authCallback appelé pour renouveler le token')
         try {
           const token = await fetchToken()
           callback(null, token)
         } catch (err) {
-          console.error('[ABLY] Erreur dans authCallback:', err)
+          logger.error('[ABLY] Erreur dans authCallback', { error: err })
           // Créer une ErrorInfo compatible avec l'API Ably
-          const errorInfo: Ably.Types.ErrorInfo = {
+          const errorInfo: ErrorInfo = {
             code: 40170,
             statusCode: 401,
             message: err instanceof Error ? err.message : 'Erreur de récupération du token',
@@ -102,18 +100,18 @@ export const initAbly = async (initialToken: string) => {
     client = new Ably.Realtime(options);
 
     client.connection.on('connected', () => {
-      console.log('[ABLY] Connecté au service de temps réel')
+      logger.info('[ABLY] Connecté au service de temps réel')
       connected.value = true
     })
 
     client.connection.on('disconnected', () => {
-      console.log('[ABLY] Déconnecté du service de temps réel')
+      logger.info('[ABLY] Déconnecté du service de temps réel')
       connected.value = false
     })
 
     // Ajout d'écouteurs pour les événements liés au token
-    client.connection.on('failed', (stateChange: Ably.Types.ConnectionStateChange) => {
-      console.error('[ABLY] Échec de connexion:', stateChange.reason)
+    client.connection.on('failed', (stateChange: ConnectionStateChange) => {
+      logger.error('[ABLY] Échec de connexion', { reason: stateChange.reason })
     })
 
     client.connection.on('suspended', () => {
@@ -123,20 +121,20 @@ export const initAbly = async (initialToken: string) => {
     // Forcer la reconnexion après 1s en cas d'erreur
     setTimeout(() => {
       if (!connected.value) {
-        console.log('[ABLY] Tentative de connexion forcée après délai d\'initialisation');
+        logger.debug('[ABLY] Tentative de connexion forcée après délai d\'initialisation');
         client?.connect();
       }
     }, 1000);
   } catch (err) {
-    console.error('[ABLY] Erreur de connexion:', err)
+    logger.error('[ABLY] Erreur de connexion', { error: err })
     throw err
   }
 }
 
 export const subscribe = (channel: string, event: string, callback: (message: any) => void) => {
-  console.log(`[ABLY] Abonnement au canal ${channel}, événement ${event}`)
+  logger.debug(`[ABLY] Abonnement au canal ${channel}, événement ${event}`)
   if (!client) {
-    console.error('[ABLY] Client non initialisé')
+    logger.error('[ABLY] Client non initialisé')
     return () => {}; // Fonction de désabonnement vide
   }
   
@@ -144,7 +142,7 @@ export const subscribe = (channel: string, event: string, callback: (message: an
     // Créer le canal Ably et s'abonner à l'événement
     const ablyChannel = client.channels.get(channel)
     ablyChannel.subscribe(event, (message) => {
-      console.log(`[ABLY] Message reçu sur ${channel}:${event}`, message)
+      logger.debug(`[ABLY] Message reçu sur ${channel}:${event}`, { message })
       callback(message.data)
     })
     
@@ -156,9 +154,9 @@ export const subscribe = (channel: string, event: string, callback: (message: an
     if (existingSubscriptionIndex === -1) {
       // Ajouter le nouvel abonnement à notre liste
       subscriptions.value.push({ channel, event, callback });
-      console.log(`[ABLY] Abonnement ajouté: ${channel}:${event}`);
+      logger.debug(`[ABLY] Abonnement ajouté: ${channel}:${event}`);
     } else {
-      console.log(`[ABLY] Abonnement déjà existant: ${channel}:${event}`);
+      logger.debug(`[ABLY] Abonnement déjà existant: ${channel}:${event}`);
     }
     
     // Afficher les souscriptions mises à jour (uniquement en développement)
@@ -169,15 +167,15 @@ export const subscribe = (channel: string, event: string, callback: (message: an
     // Renvoyer une fonction pour se désabonner
     return () => unsubscribe(channel, event);
   } catch (err) {
-    console.error(`[ABLY] Erreur lors de l'abonnement au canal ${channel}:`, err);
+    logger.error(`[ABLY] Erreur lors de l'abonnement au canal`, { channel, error: err });
     return () => {}; // Fonction de désabonnement vide en cas d'erreur
   }
 }
 
 export const unsubscribe = (channel: string, event?: string) => {
-  console.log(`[ABLY] Désabonnement du canal ${channel}${event ? `, événement ${event}` : ''}`)
+  logger.debug(`[ABLY] Désabonnement du canal ${channel}${event ? `, événement ${event}` : ''}`)
   if (!client) {
-    console.error('[ABLY] Client non initialisé')
+    logger.error('[ABLY] Client non initialisé')
     return
   }
   
@@ -199,29 +197,29 @@ export const unsubscribe = (channel: string, event?: string) => {
     // Afficher les souscriptions mises à jour
     logSubscriptions()
   } catch (err) {
-    console.error(`[ABLY] Erreur lors du désabonnement du canal ${channel}:`, err)
+    logger.error(`[ABLY] Erreur lors du désabonnement du canal`, { channel, error: err })
   }
 }
 
 export const publish = async (channel: string, event: string, data: any) => {
-  console.log(`[ABLY] Publication sur le canal ${channel}, événement ${event}`)
+  logger.debug(`[ABLY] Publication sur le canal ${channel}, événement ${event}`)
   if (!client) {
-    console.error('[ABLY] Client non initialisé')
+    logger.error('[ABLY] Client non initialisé')
     return
   }
   
   try {
     const ablyChannel = client.channels.get(channel)
     await ablyChannel.publish(event, data)
-    console.log(`[ABLY] Message publié avec succès sur ${channel}:${event}`)
+    logger.debug(`[ABLY] Message publié avec succès sur ${channel}:${event}`)
   } catch (err) {
-    console.error('[ABLY] Erreur de publication:', err)
+    logger.error('[ABLY] Erreur de publication', { error: err })
     throw err
   }
 }
 
 export const disconnect = () => {
-  console.log('[ABLY] Déconnexion du service de temps réel')
+  logger.info('[ABLY] Déconnexion du service de temps réel')
   if (client) {
     client.close()
     client = null
@@ -237,7 +235,7 @@ export const getClient = (): Ably.Realtime | null => client
 // Récupérer la liste des canaux actifs
 export const getActiveChannels = () => {
   if (!client) {
-    console.error('[ABLY] Client non initialisé')
+    logger.error('[ABLY] Client non initialisé')
     return []
   }
   
@@ -284,14 +282,14 @@ export const logSubscriptions = () => {
   const channels = getActiveChannels()
   
   // Pour le débogage, affichez toujours le nombre total d'abonnements
-  console.log(`[ABLY] Nombre total d'abonnements enregistrés: ${subscriptions.value.length}`)
+  logger.debug(`[ABLY] Nombre total d'abonnements enregistrés: ${subscriptions.value.length}`)
   
   // Affichage différent selon qu'il y a des canaux ou non
   if (channels.length === 0) {
-    console.log('[ABLY] Aucun canal actif')
+    logger.debug('[ABLY] Aucun canal actif')
     // Pour le débogage, afficher les abonnements bruts s'il y en a
     if (subscriptions.value.length > 0) {
-      console.log('[ABLY] Abonnements enregistrés mais aucun canal trouvé:', 
+      logger.debug('[ABLY] Abonnements enregistrés mais aucun canal trouvé:', 
         subscriptions.value.map(s => `${s.channel}:${s.event}`))
     }
   } else {
@@ -305,9 +303,9 @@ export const logSubscriptions = () => {
       
       console.group(`%c${channel.name} (${channel.state})`, style)
       if (channel.events.length > 0) {
-        console.log('Événements:', channel.events.join(', '))
+        logger.debug('Événements:', { events: channel.events.join(', ') })
       } else {
-        console.log('Aucun événement spécifique')
+        logger.debug('Aucun événement spécifique')
       }
       console.groupEnd()
     })
@@ -319,10 +317,10 @@ export const logSubscriptions = () => {
     const isAutoActive = (window as any).AblyDebug.isAutoDisplayActive()
     
     if (isAutoActive) {
-      console.log('[ABLY] Mode d\'affichage: %cAutomatique', 'color: green; font-weight: bold;')
+      logger.debug('[ABLY] Mode d\'affichage: Automatique')
     } else {
-      console.log('[ABLY] Mode d\'affichage: %cManuel', 'color: orange;')
-      console.log('[ABLY] Astuce: utilisez AblyDebug.startAutoDisplay() pour activer l\'affichage automatique')
+      logger.debug('[ABLY] Mode d\'affichage: Manuel')
+      logger.debug('[ABLY] Astuce: utilisez AblyDebug.startAutoDisplay() pour activer l\'affichage automatique')
     }
   }
   
@@ -338,7 +336,7 @@ export const logSubscriptions = () => {
 export const subscribeToAdminChannel = (event: string, callback: (message: any) => void) => {
   const domain = getDomainPrefix();
   const channelName = `${domain}:private-admin`;
-  console.log(`[ABLY] Abonnement au canal global d'administration: ${channelName}, événement: ${event}`);
+  logger.debug(`[ABLY] Abonnement au canal global d'administration: ${channelName}, événement: ${event}`);
   return subscribe(channelName, event, callback);
 }
 
@@ -349,7 +347,18 @@ export const subscribeToAdminChannel = (event: string, callback: (message: any) 
 export const subscribeToAdminPrivateChannel = (adminId: number | string, event: string, callback: (message: any) => void) => {
   const domain = getDomainPrefix();
   const channelName = `${domain}:private-admin-${adminId}`;
-  console.log(`[ABLY] Abonnement au canal privé d'administrateur: ${channelName}, événement: ${event}`);
+  logger.debug(`[ABLY] Abonnement au canal privé d'administrateur: ${channelName}, événement: ${event}`);
+  return subscribe(channelName, event, callback);
+}
+
+/**
+ * S'abonner au canal d'un ticket spécifique (partagé admin/client)
+ * Format: domaine:ticket-{ticketId}
+ */
+export const subscribeToTicketChannel = (ticketId: number | string, event: string, callback: (message: any) => void) => {
+  const domain = getDomainPrefix();
+  const channelName = `${domain}:ticket-${ticketId}`;
+  logger.debug(`[ABLY] Abonnement au canal ticket: ${channelName}, événement: ${event}`);
   return subscribe(channelName, event, callback);
 }
 
@@ -359,6 +368,15 @@ export const subscribeToAdminPrivateChannel = (adminId: number | string, event: 
 export const publishToAdminChannel = async (event: string, data: any) => {
   const domain = getDomainPrefix();
   const channelName = `${domain}:private-admin`;
+  return publish(channelName, event, data);
+}
+
+/**
+ * Publier un message sur le canal d'un ticket spécifique
+ */
+export const publishToTicketChannel = async (ticketId: number | string, event: string, data: any) => {
+  const domain = getDomainPrefix();
+  const channelName = `${domain}:ticket-${ticketId}`;
   return publish(channelName, event, data);
 }
 
@@ -376,7 +394,7 @@ export const useAbly = () => {
   // Obtenir un canal avec contexte de domaine
   const getChannel = (channelName: string = 'services', withDomainPrefix: boolean = true) => {
     if (!client) {
-      console.error('[ABLY] Client non initialisé, impossible d\'obtenir le canal')
+      logger.error('[ABLY] Client non initialisé, impossible d\'obtenir le canal')
       throw new Error('Ably client not initialized')
     }
     

@@ -5,9 +5,10 @@
         <h1 class="page-title">{{ $t('invoices.title') }}</h1>
         <span class="page-description">{{ $t('invoices.description') }}</span>
       </div>
-      <button class="btn btn-primary" @click="openCreateModal">
-        <i class="fas fa-plus"></i> {{ $t('invoices.actions.add') }}
-      </button>
+      <router-link to="/invoices/create" class="btn btn-gradient">
+        <i class="fas fa-plus"></i>
+        {{ $t('invoices.actions.add') }}
+      </router-link>
     </div>
 
     <div class="filter-box">
@@ -17,8 +18,8 @@
           <div class="filter-input-wrapper">
             <i class="fas fa-search"></i>
             <input 
-              type="text" 
               v-model="searchQuery" 
+              type="text" 
               class="filter-input" 
               :placeholder="$t('invoices.search.placeholder')"
             />
@@ -29,199 +30,231 @@
           <label class="filter-label">{{ $t('invoices.filters.status') }}</label>
           <div class="filter-input-wrapper">
             <i class="fas fa-file-invoice-dollar"></i>
-            <select v-model="currentStatusFilter" class="filter-input">
-              <option v-for="status in statusFilters" :key="status.value" :value="status.value">
-                {{ status.label }} ({{ getFilteredInvoicesCount(status.value) }})
-              </option>
+            <select v-model="statusFilter" class="filter-input">
+              <option value="">{{ $t('invoices.status.all') }}</option>
+              <option value="paid">{{ $t('invoices.status.paid') }}</option>
+              <option value="unpaid">{{ $t('invoices.status.unpaid') }}</option>
+              <option value="overdue">{{ $t('invoices.status.overdue') }}</option>
+              <option value="cancelled">{{ $t('invoices.status.cancelled') }}</option>
             </select>
           </div>
         </div>
-        
+
         <div class="filter-group">
           <label class="filter-label">{{ $t('invoices.filters.date_range') }}</label>
           <div class="filter-input-wrapper">
             <i class="fas fa-calendar"></i>
-            <select v-model="dateRangeFilter" class="filter-input">
-              <option value="all">{{ $t('invoices.filters.all_time') }}</option>
+            <select v-model="dateFilter" class="filter-input">
+              <option value="">{{ $t('invoices.filters.all_time') }}</option>
               <option value="this_month">{{ $t('invoices.filters.this_month') }}</option>
               <option value="last_month">{{ $t('invoices.filters.last_month') }}</option>
               <option value="this_year">{{ $t('invoices.filters.this_year') }}</option>
             </select>
           </div>
         </div>
-        
-        <div class="filter-group">
-          <label class="filter-label">&nbsp;</label>
-          <div class="filter-input-wrapper">
-            <button @click="applyFilters" class="btn btn-gradient filter-button">
-              <i class="fas fa-filter"></i>
-              {{ $t('invoices.filters.apply') }}
-            </button>
-          </div>
-        </div>
       </div>
     </div>
 
-    <div class="table-box">
-      <table v-if="!loading && filteredInvoices.length > 0" class="invoices-table">
+    <!-- Liste des factures -->
+    <div v-if="invoiceStore.loading" class="loading-state box">
+      <div class="spinner"></div>
+      <p>{{ t('common.loading') }}</p>
+    </div>
+
+    <div v-else-if="filteredInvoices.length === 0" class="empty-state box">
+      <div class="empty-icon">
+        <i class="fas fa-file-invoice-dollar"></i>
+      </div>
+      <h3 class="empty-title">{{ t('invoices.empty.title') }}</h3>
+      <p class="empty-description">{{ t('invoices.empty.description') }}</p>
+    </div>
+
+    <div v-else class="table-box">
+      <table class="data-table">
         <thead>
           <tr>
-            <th>{{ $t('invoices.table.id') }}</th>
-            <th>{{ $t('invoices.table.client') }}</th>
-            <th>{{ $t('invoices.table.service') }}</th>
-            <th>{{ $t('invoices.table.date') }}</th>
-            <th>{{ $t('invoices.table.dueDate') }}</th>
-            <th>{{ $t('invoices.table.amount') }}</th>
-            <th>{{ $t('invoices.table.status') }}</th>
-            <th>{{ $t('invoices.table.actions') }}</th>
+            <th>ID</th>
+            <th>{{ t('invoices.table.client') }}</th>
+            <th>{{ t('invoices.table.service') }}</th>
+            <th>{{ t('invoices.table.date') }}</th>
+            <th>{{ t('invoices.table.due_date') }}</th>
+            <th>{{ t('invoices.table.amount') }}</th>
+            <th>{{ t('invoices.table.status') }}</th>
+            <th>{{ t('invoices.table.actions') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="invoice in filteredInvoices" :key="invoice.id">
-            <td>{{ invoice.id }}</td>
+          <tr v-for="invoice in paginatedInvoices" :key="invoice.id" @click="viewInvoiceDetails(invoice.id)">
+            <td>#{{ invoice.id }}</td>
             <td>{{ invoice.client_name }}</td>
-            <td>{{ invoice.service_name }}</td>
+            <td>{{ invoice.service_name || '-' }}</td>
             <td>{{ formatDate(invoice.date) }}</td>
             <td>{{ invoice.due_date ? formatDate(invoice.due_date) : '-' }}</td>
             <td>{{ formatPrice(invoice.amount) }}</td>
             <td>
-              <span :class="['status-badge', invoice.status]">
+              <span :class="`status-badge status-${invoice.status}`">
                 {{ getStatusName(invoice.status) }}
               </span>
             </td>
-            <td class="actions-cell">
-              <button class="action-btn view-btn" @click="openViewModal(invoice.id)" title="Voir">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="action-btn edit-btn" @click="openEditModal(invoice.id)" title="Modifier">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button 
-                v-if="invoice.status !== 'paid'" 
-                class="action-btn pay-btn" 
-                @click="handlePay(invoice.id)" 
-                title="Payer"
-              >
-                <i class="fas fa-credit-card"></i>
-              </button>
+            <td class="actions">
+              <div class="action-buttons">
+                <button class="btn-icon" :title="t('invoices.actions.view')" @click.stop="viewInvoiceDetails(invoice.id)">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn-icon" :title="t('invoices.actions.edit')" @click.stop="editInvoice(invoice.id)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  v-if="invoice.status !== 'paid'"
+                  class="btn-icon"
+                  :title="t('invoices.actions.mark_paid')"
+                  @click.stop="markAsPaid(invoice.id)"
+                >
+                  <i class="fas fa-credit-card"></i>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
+</div>
 
-      <div v-else-if="loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>{{ $t('common.loading') }}</p>
-      </div>
-
-      <div v-else class="empty-state">
-        <i class="fas fa-file-invoice-dollar empty-icon"></i>
-        <h3>{{ $t('invoices.empty.title') }}</h3>
-        <p>{{ $t('invoices.empty.message') }}</p>
-        <button class="btn btn-primary" @click="openCreateModal">
-          {{ $t('invoices.actions.add') }}
-        </button>
-      </div>
+    <!-- Pagination -->
+    <div v-if="totalPages > 1" class="pagination">
+      <a
+        v-for="page in totalPages"
+        :key="page"
+        :class="['page-link', { active: page === currentPage }]"
+        @click="changePage(page)"
+      >
+        {{ page }}
+      </a>
     </div>
-
-    <!-- Teleport pour le modal -->
-    <Teleport to="body">
-      <div v-if="showModal" class="modal-backdrop" @click.self="closeModal">
-        <div class="modal-box">
-          <InvoiceModal 
-            :invoice-id="selectedInvoiceId" 
-            :mode="modalMode"
-            @close="closeModal"
-            @created="handleCreated"
-            @updated="handleUpdated"
-            @paid="handlePaid"
-            @edit="openEditModal"
-          />
-        </div>
-      </div>
-    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useInvoiceStore } from '@/stores/invoices'
-import InvoiceModal from '@/components/invoices/InvoiceModal.vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useInvoiceStore } from '@/stores/invoices'
+import logger from '@/services/logger'
 
 const { t } = useI18n()
-
-// Store
+const router = useRouter()
 const invoiceStore = useInvoiceStore()
 
-// State
-const showModal = ref(false)
-const modalMode = ref('create') // 'create', 'edit', 'view'
-const selectedInvoiceId = ref<number | null>(null)
-const currentStatusFilter = ref('all')
+// État
 const searchQuery = ref('')
-const dateRangeFilter = ref('all')
+const statusFilter = ref('')
+const dateFilter = ref('')
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+
+
+// Watched for automatic filtering
+watch([searchQuery, statusFilter, dateFilter], () => {
+  currentPage.value = 1
+})
 
 // Computed
-const loading = computed(() => invoiceStore.loading)
-
-const statusFilters = computed(() => [
-  { value: 'all', label: t('invoices.filters.all') },
-  { value: 'paid', label: t('invoices.filters.paid') },
-  { value: 'unpaid', label: t('invoices.filters.unpaid') },
-  { value: 'overdue', label: t('invoices.filters.overdue') },
-  { value: 'cancelled', label: t('invoices.filters.cancelled') }
-])
-
 const filteredInvoices = computed(() => {
-  let result = invoiceStore.invoices
-
-  // Filtrer par statut
-  if (currentStatusFilter.value !== 'all') {
-    result = result.filter(inv => inv.status === currentStatusFilter.value)
+  let result = [...invoiceStore.invoices].map(inv => ({
+    ...inv,
+    date: inv.created_at,
+    invoice_date: inv.created_at
+  }))
+  
+  // Filtrage par statut
+  if (statusFilter.value) {
+    result = result.filter(inv => inv.status === statusFilter.value)
   }
-
-  // Filtrer par recherche
-  if (searchQuery.value.trim()) {
+  
+  // Filtrage par recherche
+  if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(inv => 
-      String(inv.id).includes(query) ||
-      (inv.client_name && inv.client_name.toLowerCase().includes(query)) ||
-      (inv.service_name && inv.service_name.toLowerCase().includes(query))
+      inv.client_name?.toLowerCase().includes(query) || 
+      inv.product_name?.toLowerCase().includes(query) ||
+      inv.id.toString().includes(query)
     )
   }
-
-  // Filtrer par date
-  if (dateRangeFilter.value !== 'all') {
-    const today = new Date()
-    const thisMonth = today.getMonth()
-    const thisYear = today.getFullYear()
-    const lastMonth = thisMonth - 1
-    const lastYear = thisYear - 1
-
-    switch (dateRangeFilter.value) {
-      case 'this_month':
-        result = result.filter(inv => new Date(inv.date).getMonth() === thisMonth && new Date(inv.date).getFullYear() === thisYear)
-        break
-      case 'last_month':
-        result = result.filter(inv => new Date(inv.date).getMonth() === lastMonth && new Date(inv.date).getFullYear() === thisYear)
-        break
-      case 'this_year':
-        result = result.filter(inv => new Date(inv.date).getFullYear() === thisYear)
-        break
+  
+  // Filtrage par période
+  if (dateFilter.value === 'current_month') {
+    const now = new Date()
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
+    result = result.filter(inv => {
+      const invDate = new Date(inv.created_at)
+      return invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear
+    })
+  } else if (dateFilter.value === 'previous_month') {
+    const now = new Date()
+    let prevMonth = now.getMonth() - 1
+    let prevYear = now.getFullYear()
+    if (prevMonth < 0) {
+      prevMonth = 11
+      prevYear--
     }
+    result = result.filter(inv => {
+      const invDate = new Date(inv.created_at)
+      return invDate.getMonth() === prevMonth && invDate.getFullYear() === prevYear
+    })
+  } else if (dateFilter.value === 'current_year') {
+    const thisYear = new Date().getFullYear()
+    result = result.filter(inv => new Date(inv.created_at).getFullYear() === thisYear)
   }
-
+  
+  // Tri par date (plus récent en premier)
+  result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
   return result
 })
 
-// Methods
-const getFilteredInvoicesCount = (status: string) => {
-  if (status === 'all') return invoiceStore.invoices.length
-  return invoiceStore.invoices.filter(inv => inv.status === status).length
+const totalPages = computed(() => {
+  return Math.ceil(filteredInvoices.value.length / itemsPerPage.value)
+})
+
+const paginatedInvoices = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filteredInvoices.value.slice(start, end)
+})
+
+// Méthodes
+const fetchInvoices = async () => {
+  try {
+    await invoiceStore.fetchInvoices()
+  } catch (error) {
+    logger.error('[InvoicesView] Erreur lors du chargement des factures', { error })
+  }
 }
 
-const formatDate = (dateString: string) => {
+const changePage = (page: number) => {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const viewInvoiceDetails = (invoiceId: number) => {
+  router.push({ name: 'invoice-details', params: { id: invoiceId.toString() } })
+}
+
+const editInvoice = (invoiceId: number) => {
+  router.push({ name: 'edit-invoice', params: { id: invoiceId.toString() } })
+}
+
+const markAsPaid = async (invoiceId: number) => {
+  if (confirm(t('invoices.confirm_mark_paid'))) {
+    try {
+      await invoiceStore.markAsPaid(invoiceId)
+      await fetchInvoices()
+    } catch (error) {
+      logger.error('[InvoicesView] Erreur lors du marquage comme payé', { error })
+    }
+  }
+}
+
+const formatDate = (dateString?: string | null) => {
   if (!dateString) return ''
   const date = new Date(dateString)
   return date.toLocaleDateString('fr-FR')
@@ -233,66 +266,73 @@ const formatPrice = (price: number) => {
 
 const getStatusName = (status: string) => {
   const statuses: Record<string, string> = {
-    'paid': t('invoices.statuses.paid'),
-    'unpaid': t('invoices.statuses.unpaid'),
-    'overdue': t('invoices.statuses.overdue'),
-    'cancelled': t('invoices.statuses.cancelled')
+    'paid': t('invoices.status.paid'),
+    'unpaid': t('invoices.status.unpaid'),
+    'overdue': t('invoices.status.overdue'),
+    'cancelled': t('invoices.status.cancelled')
   }
   return statuses[status] || status
 }
 
-const openCreateModal = () => {
-  selectedInvoiceId.value = null
-  modalMode.value = 'create'
-  showModal.value = true
+// Initialisation du temps réel
+const initRealtime = () => {
+  logger.info('[INVOICES-VIEW] Initialisation des écouteurs temps réel')
+  invoiceStore.initRealtimeListeners()
 }
 
-const openEditModal = (id: number) => {
-  selectedInvoiceId.value = id
-  modalMode.value = 'edit'
-  showModal.value = true
-}
+// Observer les événements temps réel
+watch(() => invoiceStore.lastRealtimeEvent, (newEvent) => {
+  if (!newEvent) return
+  
+  logger.info('[INVOICES-VIEW] Événement temps réel reçu pour les factures', {
+    action: newEvent.action,
+    invoice_id: newEvent.invoice?.id
+  })
+  
+  // Les modifications sont déjà prises en compte dans le store
+  // La vue réactive mettra automatiquement à jour l'affichage
+}, { deep: true })
 
-const openViewModal = (id: number) => {
-  selectedInvoiceId.value = id
-  modalMode.value = 'view'
-  showModal.value = true
-}
-
-const closeModal = () => {
-  showModal.value = false
-}
-
-const handleCreated = () => {
-  invoiceStore.fetchInvoices()
-}
-
-const handleUpdated = () => {
-  invoiceStore.fetchInvoices()
-}
-
-const handlePaid = () => {
-  invoiceStore.fetchInvoices()
-}
-
-const handlePay = async (id: number) => {
-  selectedInvoiceId.value = id
-  modalMode.value = 'pay'
-  showModal.value = true
-}
-
-const applyFilters = () => {
-  // TODO: implémenter la logique de filtrage
-}
-
-// Lifecycle
+// Cycle de vie
 onMounted(async () => {
-  console.log('InvoicesView - Chargement des données')
-  await invoiceStore.fetchInvoices()
+  await fetchInvoices()
+  initRealtime()
 })
 </script>
 
-<style>
+<style scoped>
+/* Utiliser les styles existants du fichier CSS */
 @import '@/assets/css/pages/invoices.css';
 @import '@/assets/css/components/common-layout.css';
+
+/* Styles additionnels */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* Alignement du texte dans les cellules du tableau */
+.data-table th, .data-table td {
+  text-align: center;
+}
+
+/* Garder l'alignement à gauche pour les colonnes de texte */
+.data-table th:nth-child(1),
+.data-table th:nth-child(2),
+.data-table th:nth-child(3),
+.data-table td:nth-child(1),
+.data-table td:nth-child(2),
+.data-table td:nth-child(3) {
+  text-align: left;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
 </style>

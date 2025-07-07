@@ -190,9 +190,9 @@
     </div>
 
     <!-- Modal de confirmation de suppression -->
-    <div class="modal show" v-if="showDeleteModal" style="display: flex; align-items: center; justify-content: center;">
+    <div v-if="showDeleteModal" class="modal show" style="display: flex; align-items: center; justify-content: center;">
       <div class="modal-backdrop" @click="showDeleteModal = false"></div>
-      <div class="modal-content" style="position: fixed; z-index: 1052; max-height: 80vh; backdrop-filter: none; -webkit-backdrop-filter: none;">
+      <div class="modal-content" style="position: fixed; z-index: 1052; max-height: 80vh; backdrop-filter: none;">
         <div class="modal-header">
           <h3>{{ t('clients.delete_modal.title') }}</h3>
           <button class="close-btn" @click="showDeleteModal = false">
@@ -204,10 +204,10 @@
           <p class="warning">{{ t('clients.delete_modal.warning') }}</p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showDeleteModal = false" :disabled="isDeleting">
+          <button class="btn btn-secondary" :disabled="isDeleting" @click="showDeleteModal = false">
             {{ t('common.cancel') }}
           </button>
-          <button class="btn btn-danger" @click="confirmDelete" :disabled="isDeleting">
+          <button class="btn btn-danger" :disabled="isDeleting" @click="confirmDelete">
             <span v-if="isDeleting">
               <span class="spinner-border spinner-border-sm mr-2"></span>
               {{ t('common.deleting') }}...
@@ -221,14 +221,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useClientsStore } from '@/stores/clients'
 import { useServicesStore } from '@/stores/services'
+import { useNotificationStore } from '@/stores/notifications'
 import md5 from 'md5'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import logger from '@/services/logger'
 
 // Route et routeur
 const route = useRoute()
@@ -238,22 +240,10 @@ const { t } = useI18n()
 // Stores
 const clientsStore = useClientsStore()
 const servicesStore = useServicesStore()
+const notificationStore = useNotificationStore()
 
-// Interface pour le type client et service
-interface Client {
-  id: number;
-  firstname: string;
-  lastname: string;
-  email: string;
-  status: string;
-  company?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  postal_code?: string;
-  country?: string;
-  [key: string]: any;
-}
+// Interface pour le type service
+// L'interface Client n'est plus nécessaire car importée depuis types/
 
 interface Service {
   id: number;
@@ -266,7 +256,10 @@ interface Service {
 }
 
 // État
-const client = ref<Client | null>(null)
+const clientId = computed(() => parseInt(route.params.id as string))
+
+// Client comme propriété calculée pour rester synchronisé avec le store
+const client = computed(() => clientsStore.currentClient)
 const clientServices = ref<Service[]>([])
 const loading = ref(true)
 const error = ref('')
@@ -289,47 +282,55 @@ const fetchClient = async () => {
   try {
     // S'assurer que la liste des clients est chargée
     if (clientsStore.clients.length === 0) {
-      console.log('Chargement de la liste des clients...')
+      logger.debug('Chargement de la liste des clients...')
       await clientsStore.fetchClients()
     }
     
-    const clientId = parseInt(route.params.id as string)
-    client.value = await clientsStore.getClient(clientId)
-    console.log('Client récupéré dans ClientDetailView:', client.value)
+    const id = clientId.value
+    const fetchedClient = await clientsStore.getClient(id)
+    
+    // Mettre à jour currentClient dans le store
+    clientsStore.$patch({
+      currentClient: fetchedClient
+    })
+    
+    logger.debug('[ClientDetailView] Client récupéré', { client: clientsStore.currentClient })
     
     // Si le client n'est pas trouvé via l'API, essayons de le trouver dans le store
-    if (!client.value) {
-      console.log('Recherche du client dans le store...')
-      const storedClient = clientsStore.clients.find(c => c.id === clientId)
+    if (!clientsStore.currentClient) {
+      logger.debug('[ClientDetailView] Recherche du client dans le store...')
+      const storedClient = clientsStore.clients.find(c => c.id === id)
       if (storedClient) {
-        console.log('Client trouvé dans le store:', storedClient)
-        client.value = storedClient
+        logger.debug('[ClientDetailView] Client trouvé dans le store', { client: storedClient })
+        clientsStore.$patch({
+          currentClient: storedClient
+        })
       } else {
-        console.error('Client non trouvé dans le store')
+        logger.error('[ClientDetailView] Client non trouvé dans le store')
         error.value = t('clients.details.not_found')
       }
     }
     
     // Récupérer les services du client
     try {
-      console.log('Récupération des services du client...')
-      const response = await servicesStore.fetchClientServices(clientId)
-      console.log('Services du client récupérés:', response)
+      logger.debug('[ClientDetailView] Récupération des services du client...')
+      const response = await servicesStore.fetchClientServices(id)
+      logger.debug('[ClientDetailView] Services du client récupérés', { response })
       
       if (response && Array.isArray(response.data)) {
         clientServices.value = response.data
       } else if (response && response.data) {
         clientServices.value = Array.isArray(response.data) ? response.data : [response.data]
       } else {
-        console.log('Aucun service trouvé pour ce client')
+        logger.debug('Aucun service trouvé pour ce client')
         clientServices.value = []
       }
     } catch (servicesErr) {
-      console.error('Erreur lors de la récupération des services du client:', servicesErr)
+      logger.error('Erreur lors de la récupération des services du client', { error: servicesErr })
       clientServices.value = []
     }
   } catch (err) {
-    console.error('Erreur lors de la récupération du client:', err)
+    logger.error('Erreur lors de la récupération du client', { error: err })
     error.value = t('clients.details.error_loading')
   } finally {
     loading.value = false
@@ -339,7 +340,7 @@ const fetchClient = async () => {
 const formatDate = (date: string) => {
   try {
     return format(new Date(date), 'dd/MM/yyyy', { locale: fr })
-  } catch (e) {
+  } catch {
     return date
   }
 }
@@ -369,7 +370,7 @@ const confirmDelete = async () => {
     await clientsStore.deleteClient(client.value.id)
     router.push({ name: 'clients' })
   } catch (err) {
-    console.error('Erreur lors de la suppression du client:', err)
+    logger.error('Erreur lors de la suppression du client', { error: err })
     error.value = t('clients.details.error_deleting')
   } finally {
     isDeleting.value = false
@@ -388,8 +389,59 @@ const createServiceForClient = () => {
   })
 }
 
+// Initialisation des écouteurs temps réel
+const initRealtime = () => {
+  logger.debug('[ClientDetailView] Initialisation des écouteurs temps réel')
+  
+  // Initialiser les écouteurs dans le store
+  if (!clientsStore.realtimeInitialized) {
+    clientsStore.initRealtimeListeners()
+  }
+  
+  // Ajouter un watcher sur lastRealtimeEvent pour être notifié des changements
+  watch(() => clientsStore.lastRealtimeEvent, (newEvent) => {
+    logger.info('[ClientDetailView] DIAGNOSTIC - Watcher déclenché sur lastRealtimeEvent', { 
+      hasNewEvent: !!newEvent,
+      currentClientId: clientId.value,
+      newEventClientId: newEvent?.client?.id,
+      actionType: newEvent?.action,
+      time: new Date().toISOString()
+    })
+    
+    if (newEvent && clientId.value && newEvent.client && newEvent.client.id === clientId.value) {
+      logger.info('[ClientDetailView] Événement temps réel détecté pour le client courant', { 
+        action: newEvent.action,
+        clientId: clientId.value,
+        currentStoreClientId: clientsStore.currentClient?.id || 'aucun'
+      })
+      
+      const action = newEvent.action
+      
+      if (action === 'delete') {
+        // Si le client est supprimé, retourner à la liste des clients
+        notificationStore.showNotification({
+          title: t('clients.deleted'),
+          message: t('clients.client_deleted_message'),
+          type: 'warning'
+        })
+        router.push({ name: 'clients' })
+      } else {
+        // Pour create ou update, recharger explicitement les données du client depuis l'API
+        logger.info('[ClientDetailView] Rechargement explicite des données client après événement temps réel', {
+          action,
+          clientId: clientId.value
+        })
+        fetchClient()
+      }
+    }
+  }, { deep: true })
+}
+
 // Cycle de vie
-onMounted(fetchClient)
+onMounted(() => {
+  fetchClient()
+  initRealtime()
+})
 </script>
 
 <style scoped>
@@ -431,7 +483,7 @@ onMounted(fetchClient)
 }
 
 .client-title h2 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.5rem;
   font-size: 1.5rem;
 }
 

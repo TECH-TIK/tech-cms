@@ -21,7 +21,7 @@
       <div class="server-list-container">
         <div class="header-box">
           <div class="header-actions">
-            <button @click="openServerModal()" class="btn btn-primary">
+            <button class="btn btn-primary" @click="openServerModal()">
               <i class="fas fa-plus"></i> {{ t('settings.servers.add') }}
             </button>
           </div>
@@ -43,7 +43,7 @@
               <tr v-if="servers.length === 0">
                 <td colspan="6" class="text-center">{{ t('settings.servers.noServers') }}</td>
               </tr>
-              <tr v-for="server in servers" :key="server.id" @click="toggleServerDetails(server)" class="server-row" :class="{'selected': selectedServer && selectedServer.id === server.id}">
+              <tr v-for="server in servers" :key="server.id" class="server-row" :class="{'selected': selectedServer && selectedServer.id === server.id}" @click="toggleServerDetails(server)">
                 <td>{{ server.name }}</td>
                 <td>{{ server.hostname }}</td>
                 <td>
@@ -64,13 +64,13 @@
                 </td>
                 <td>
                   <div class="action-buttons">
-                    <button @click.stop="testServerConnection(server)" class="btn btn-sm btn-info mr-1" title="Test Connection">
+                    <button class="btn btn-sm btn-info mr-1" title="Test Connection" @click.stop="testServerConnection(server)">
                       <i class="fas fa-plug"></i>
                     </button>
-                    <button @click.stop="openServerModal(server)" class="btn btn-sm btn-primary mr-1" title="Edit">
+                    <button class="btn btn-sm btn-primary mr-1" title="Edit" @click.stop="openServerModal(server)">
                       <i class="fas fa-edit"></i>
                     </button>
-                    <button @click.stop="confirmDeleteServer(server)" class="btn btn-sm btn-danger" title="Delete">
+                    <button class="btn btn-sm btn-danger" title="Delete" @click.stop="confirmDeleteServer(server)">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -92,7 +92,7 @@
       <div v-if="selectedServer && selectedServer.id" class="server-details-container mt-4">
         <div class="header-box">
           <h3>{{ t('settings.servers.details') }}: {{ selectedServer.name }}</h3>
-          <button @click="refreshServerStats(selectedServer)" class="btn btn-sm btn-outline-primary">
+          <button class="btn btn-sm btn-outline-primary" @click="refreshServerStats(selectedServer)">
             <i class="fas fa-sync-alt"></i> {{ t('settings.servers.refresh') }}
           </button>
           <div v-if="selectedServer.loadingStats" class="loading-state-text ml-2">
@@ -115,10 +115,10 @@
                     {{ selectedServer.status === 'online' ? t('settings.servers.online') : t('settings.servers.offline') }}
                   </span>
                 </div>
-                <div class="stat-details" v-if="selectedServer.lastRefresh">
-                  {{ t('settings.servers.lastRefresh') }}: {{ selectedServer.lastRefresh }}
+                                <div v-if="selectedServer.stats && selectedServer.stats.last_updated" class="stat-details">
+                  {{ t('settings.servers.lastRefresh') }}: {{ formatDate(selectedServer.stats.last_updated) }}
                 </div>
-                <div class="stat-details" v-if="selectedServer.last_check">
+                <div v-if="selectedServer.last_check" class="stat-details">
                   {{ t('settings.servers.lastCheck') }}: {{ formatDate(selectedServer.last_check) }}
                 </div>
               </div>
@@ -134,12 +134,12 @@
             <div class="stat-content">
               <div v-if="selectedServer.loadingStats" class="loading-spinner"></div>
               <div v-else>
-                <div class="stat-value">{{ selectedServer.server_load || 0 }}%</div>
+                <div class="stat-value">{{ selectedServer.stats && selectedServer.stats.server_load ? selectedServer.stats.server_load : 0 }}%</div>
                 <div class="progress">
                   <div 
                     class="progress-bar" 
-                    :class="getLoadClass(selectedServer.server_load)" 
-                    :style="{ width: `${selectedServer.server_load || 0}%` }"
+                    :class="getLoadClass(selectedServer.stats && selectedServer.stats.server_load ? selectedServer.stats.server_load : 0)" 
+                    :style="{ width: `${selectedServer.stats && selectedServer.stats.server_load ? selectedServer.stats.server_load : 0}%` }"
                   ></div>
                 </div>
               </div>
@@ -156,17 +156,17 @@
               <div v-if="selectedServer.loadingStats" class="loading-spinner"></div>
               <div v-else>
                 <div class="stat-value">
-                  {{ selectedServer.memory && selectedServer.memory.percent ? selectedServer.memory.percent + '%' : '0%' }}
+                  {{ selectedServer.stats && selectedServer.stats.memory && selectedServer.stats.memory.percent ? selectedServer.stats.memory.percent + '%' : '0%' }}
                 </div>
                 <div class="progress">
                   <div 
                     class="progress-bar" 
-                    :class="getLoadClass(selectedServer.memory ? selectedServer.memory.percent : 0)" 
-                    :style="{ width: `${selectedServer.memory ? selectedServer.memory.percent : 0}%` }"
+                    :class="getLoadClass(selectedServer.stats && selectedServer.stats.memory ? selectedServer.stats.memory.percent : 0)" 
+                    :style="{ width: `${selectedServer.stats && selectedServer.stats.memory ? selectedServer.stats.memory.percent : 0}%` }"
                   ></div>
                 </div>
-                <div class="stat-details" v-if="selectedServer.memory">
-                  {{ formatBytes(selectedServer.memory.used || 0) }} / {{ formatBytes(selectedServer.memory.total || 0) }}
+                <div v-if="selectedServer.stats && selectedServer.stats.memory" class="stat-details">
+                  {{ formatBytes(selectedServer.stats.memory.used || 0) }} / {{ formatBytes(selectedServer.stats.memory.total || 0) }}
                 </div>
               </div>
             </div>
@@ -182,17 +182,17 @@
               <div v-if="selectedServer.loadingStats" class="loading-spinner"></div>
               <div v-else>
                 <div class="stat-value">
-                  {{ selectedServer.disk && selectedServer.disk.percent ? selectedServer.disk.percent + '%' : '0%' }}
+                  {{ selectedServer.stats && selectedServer.stats.disk && selectedServer.stats.disk.percent ? selectedServer.stats.disk.percent + '%' : '0%' }}
                 </div>
                 <div class="progress">
                   <div 
                     class="progress-bar" 
-                    :class="getLoadClass(selectedServer.disk ? selectedServer.disk.percent : 0)" 
-                    :style="{ width: `${selectedServer.disk ? selectedServer.disk.percent : 0}%` }"
+                    :class="getLoadClass(selectedServer.stats && selectedServer.stats.disk ? selectedServer.stats.disk.percent : 0)" 
+                    :style="{ width: `${selectedServer.stats && selectedServer.stats.disk ? selectedServer.stats.disk.percent : 0}%` }"
                   ></div>
                 </div>
-                <div class="stat-details" v-if="selectedServer.disk">
-                  {{ formatBytes(selectedServer.disk.used || 0) }} / {{ formatBytes(selectedServer.disk.total || 0) }}
+                <div v-if="selectedServer.stats && selectedServer.stats.disk" class="stat-details">
+                  {{ formatBytes(selectedServer.stats.disk.used || 0) }} / {{ formatBytes(selectedServer.stats.disk.total || 0) }}
                 </div>
               </div>
             </div>
@@ -206,8 +206,8 @@
             </div>
             <div class="stat-content">
               <div v-if="selectedServer.loadingStats" class="loading-spinner"></div>
-              <div v-else class="stat-value">
-                {{ formatUptime(selectedServer.uptime || 0) }}
+              <div v-else-if="selectedServer.stats" class="stat-value">
+                {{ formatUptime(selectedServer.stats.uptime || 0) }}
               </div>
             </div>
           </div>
@@ -252,10 +252,10 @@
               <div class="form-group">
                 <label for="serverName">{{ t('settings.servers.name') }}</label>
                 <input
-                  type="text"
-                  class="form-control"
                   id="serverName"
                   v-model="editingServer.name"
+                  type="text"
+                  class="form-control"
                   required
                 />
               </div>
@@ -268,70 +268,69 @@
                   required
                   @change="updateDefaultPort"
                 >
-                  <option value="cPanel">cPanel</option>
-                  <option value="Proxmox">Proxmox</option>
-                  <option value="Virtualizor">Virtualizor</option>
+                  <option value="" disabled>{{ t('settings.servers.selectModule') }}</option>
+                  <option v-for="(module, moduleName) in availableServerModules" :key="moduleName" :value="module.name">{{ module.display_name || module.name }}</option>
                 </select>
               </div>
               <div class="form-group">
                 <label for="serverHostname">{{ t('settings.servers.hostname') }}</label>
                 <input
-                  type="text"
-                  class="form-control"
                   id="serverHostname"
                   v-model="editingServer.hostname"
+                  type="text"
+                  class="form-control"
                   required
                 />
               </div>
               <div class="form-group">
                 <label for="serverIp">{{ t('settings.servers.ip') }}</label>
                 <input
-                  type="text"
-                  class="form-control"
                   id="serverIp"
                   v-model="editingServer.ip"
+                  type="text"
+                  class="form-control"
                   required
                 />
               </div>
               <div class="form-group">
                 <label for="serverPort">{{ t('settings.servers.port') }}</label>
                 <input
-                  type="number"
-                  class="form-control"
                   id="serverPort"
                   v-model="editingServer.port"
+                  type="number"
+                  class="form-control"
                 />
               </div>
               <div class="form-group">
                 <label for="serverUsername">{{ t('settings.servers.username') }}</label>
                 <input
-                  type="text"
-                  class="form-control"
                   id="serverUsername"
                   v-model="editingServer.username"
+                  type="text"
+                  class="form-control"
                   required
                 />
               </div>
               <div class="form-group">
                 <label for="serverPassword">{{ t('settings.servers.password') }}</label>
                 <input
-                  type="password"
-                  class="form-control"
                   id="serverPassword"
                   v-model="editingServer.password"
+                  type="password"
+                  class="form-control"
                   :required="!editingServer.id"
                 />
                 <small v-if="editingServer.id" class="form-text text-muted">
                   {{ t('settings.servers.passwordHint') }}
                 </small>
               </div>
-              <div v-if="editingServer.type === 'cPanel'" class="form-group">
+              <div v-if="editingServer.type === 'cpanel'" class="form-group">
                 <label for="serverApiToken">{{ t('settings.servers.apiToken') }}</label>
                 <input
-                  type="password"
-                  class="form-control"
                   id="serverApiToken"
                   v-model="editingServer.api_token"
+                  type="password"
+                  class="form-control"
                 />
                 <small v-if="editingServer.id" class="form-text text-muted">
                   {{ t('settings.servers.apiTokenInputHint') }}
@@ -340,9 +339,9 @@
               <div class="form-group">
                 <label for="serverNameservers">{{ t('settings.servers.nameservers') }}</label>
                 <textarea
-                  class="form-control"
                   id="serverNameservers"
                   v-model="editingServer.nameservers"
+                  class="form-control"
                   placeholder="ns1.example.com&#10;ns2.example.com"
                   rows="3"
                 ></textarea>
@@ -353,10 +352,10 @@
               <div class="form-group">
                 <label for="serverMaxAccounts">{{ t('settings.servers.maxAccounts') }}</label>
                 <input
-                  type="number"
-                  class="form-control"
                   id="serverMaxAccounts"
                   v-model="editingServer.maxAccounts"
+                  type="number"
+                  class="form-control"
                   min="0"
                 />
                 <small class="form-text text-muted">
@@ -365,10 +364,10 @@
               </div>
               <div class="form-check">
                 <input
-                  type="checkbox"
-                  class="form-check-input"
                   id="serverSecure"
                   v-model="editingServer.secure"
+                  type="checkbox"
+                  class="form-check-input"
                 />
                 <label class="form-check-label" for="serverSecure">
                   {{ t('settings.servers.secure') }}
@@ -376,10 +375,10 @@
               </div>
               <div class="form-check">
                 <input
-                  type="checkbox"
-                  class="form-check-input"
                   id="serverActive"
                   v-model="editingServer.active"
+                  type="checkbox"
+                  class="form-check-input"
                 />
                 <label class="form-check-label" for="serverActive">
                   {{ t('settings.servers.active') }}
@@ -400,8 +399,8 @@
                   <button 
                     type="button" 
                     class="btn btn-info me-2" 
-                    @click="editingServer.id ? testServerConnection(editingServer) : testNewServerConnection()"
                     :disabled="testingConnection || !isFormValid()"
+                    @click="editingServer.id ? testServerConnection(editingServer as Server) : testNewServerConnection()"
                   >
                     <span v-if="testingConnection" class="spinner-border spinner-border-sm" role="status"></span>
                     {{ t('settings.servers.testConnection') }}
@@ -445,9 +444,17 @@
   </div>
 </template>
 
+
+
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { ref, onMounted, type Ref } from 'vue'
+import { ApiService } from '@/services/api'
+import type { Server, ServerModule } from '@/types/server.d.ts'
+
+
+
+import { useI18n } from 'vue-i18n';
+import logger from '@/services/logger';
 import { useServersStore } from '@/stores/servers'
 import { useNotificationStore } from '@/stores/notifications'
 
@@ -462,6 +469,7 @@ const { t } = useI18n({
         'delete': 'Supprimer le Serveur',
         'name': 'Nom',
         'type': 'Type',
+        'selectModule': 'Sélectionner un module',
         'hostname': 'Nom d\'hôte',
         'ip': 'Adresse IP',
         'port': 'Port',
@@ -520,28 +528,26 @@ const notificationStore = useNotificationStore()
 const loading = ref(true)
 const saving = ref(false)
 const testingConnection = ref(false)
-const servers = ref([])
+const servers: Ref<Server[]> = ref([])
+const availableServerModules: Ref<{ [key: string]: ServerModule }> = ref({});
 const showServerModal = ref(false)
 const showDeleteModal = ref(false)
-const editingServer = ref({
-  id: null,
-  name: '',
-  hostname: '',
+const editingServer: Ref<Partial<Server>> = ref({
   type: 'cPanel',
-  username: '',
-  password: '',
   port: 2087,
   secure: true,
   active: true,
+  name: '',
+  hostname: '',
+  username: '',
+  password: '',
   api_token: '',
   ip: '',
   maxAccounts: 0,
   nameservers: ''
 })
-const serverToDelete = ref(null)
-const selectedServer = ref({
-  loadingStats: false
-})
+const serverToDelete: Ref<Server | null> = ref(null)
+const selectedServer: Ref<Server | null> = ref(null)
 
 // Méthodes
 const fetchServers = async () => {
@@ -549,41 +555,25 @@ const fetchServers = async () => {
   try {
     servers.value = await serversStore.fetchServers()
   } catch (error) {
-    console.error('Error fetching servers:', error)
-    notificationStore.error(t('common.errorFetching'))
+    if (logger) logger.error('Error fetching servers', { error });
+    if (notificationStore) notificationStore.error(t('common.errorFetching'));
   } finally {
     loading.value = false
   }
 }
 
-const openServerModal = (server = null) => {
+const openServerModal = (server: Server | null = null) => {
   if (server) {
     // Édition d'un serveur existant
     editingServer.value = {
-      id: server.id,
-      name: server.name,
-      hostname: server.hostname,
-      type: server.type || 'cPanel', // Ajouter une valeur par défaut si type est vide
-      username: server.username,
-      password: '', // Ne pas afficher le mot de passe existant
-      port: server.port || 2087,
-      secure: server.secure !== undefined ? server.secure : true,
-      active: server.active !== undefined ? server.active : true,
-      api_token: '',
-      ip: server.ip || '',
-      maxAccounts: server.maxAccounts || 0,
-      nameservers: server.nameservers || ''
-    }
-    
-    // Ajouter des logs pour déboguer
-    console.log('Serveur à éditer:', server);
-    console.log('Type de serveur:', server.type);
-    console.log('Statut actif:', server.active);
-    console.log('Statut secure:', server.secure);
+      ...server,
+      password: '', // Ne pas pré-remplir le mot de passe pour la sécurité
+      api_token: '', // Ne pas pré-remplir le token pour la sécurité
+      type: server.type // Conserver le type lors de l'édition pour le pré-remplir
+    };
   } else {
     // Création d'un nouveau serveur
     editingServer.value = {
-      id: null,
       name: '',
       hostname: '',
       type: 'cPanel',
@@ -596,9 +586,9 @@ const openServerModal = (server = null) => {
       ip: '',
       maxAccounts: 0,
       nameservers: ''
-    }
+    };
   }
-  showServerModal.value = true
+  showServerModal.value = true;
 }
 
 const closeServerModal = () => {
@@ -606,28 +596,37 @@ const closeServerModal = () => {
 }
 
 const saveServer = async () => {
-  saving.value = true
+  const serverData = editingServer.value;
+
+  // Validation des champs requis
+  if (!serverData.name || !serverData.hostname || !serverData.username || !serverData.ip) {
+    if (notificationStore) notificationStore.error('Veuillez remplir tous les champs obligatoires.');
+    return;
+  }
+  if (!serverData.id && !serverData.password) {
+    if (notificationStore) notificationStore.error('Le mot de passe est requis pour la création d\'un nouveau serveur.');
+    return;
+  }
+
+  saving.value = true;
   try {
-    if (editingServer.value.id) {
-      // Mise à jour d'un serveur existant
-      await serversStore.updateServer(editingServer.value)
-      notificationStore.success(t('settings.servers.saveSuccess'))
+    if (serverData.id) {
+      await serversStore.updateServer(serverData as Server);
     } else {
-      // Création d'un nouveau serveur
-      await serversStore.createServer(editingServer.value)
-      notificationStore.success(t('settings.servers.saveSuccess'))
+      await serversStore.createServer(serverData as Server);
     }
-    closeServerModal()
-    fetchServers()
+    if (notificationStore) notificationStore.success(t('settings.servers.saveSuccess'));
+    closeServerModal();
+    fetchServers();
   } catch (error) {
-    console.error('Error saving server:', error)
-    notificationStore.error(t('settings.servers.saveError'))
+    if (logger) logger.error('Error saving server', { error });
+    if (notificationStore) notificationStore.error(t('settings.servers.saveError'));
   } finally {
-    saving.value = false
+    saving.value = false;
   }
 }
 
-const confirmDeleteServer = (server) => {
+const confirmDeleteServer = (server: Server) => {
   serverToDelete.value = server
   showDeleteModal.value = true
 }
@@ -638,48 +637,62 @@ const cancelDeleteServer = () => {
 }
 
 const deleteServer = async () => {
+  if (!serverToDelete.value || typeof serverToDelete.value.id === 'undefined') {
+    if (logger) logger.warn('Attempted to delete a server without an ID.');
+    if (serverToDelete.value) {
+      cancelDeleteServer();
+    }
+    return;
+  }
+
   try {
-    await serversStore.deleteServer(serverToDelete.value.id)
-    notificationStore.success(t('settings.servers.deleteSuccess'))
-    cancelDeleteServer()
-    fetchServers()
+    await serversStore.deleteServer(serverToDelete.value.id);
+    if (notificationStore) notificationStore.success(t('settings.servers.deleteSuccess'));
+    fetchServers();
   } catch (error) {
-    console.error('Error deleting server:', error)
-    notificationStore.error(t('settings.servers.deleteError'))
+    if (logger) logger.error('Error deleting server', { error });
+    if (notificationStore) notificationStore.error(t('settings.servers.deleteError'));
+  } finally {
+    cancelDeleteServer();
   }
 }
 
-const testServerConnection = async (server) => {
-  testingConnection.value = true
+const testServerConnection = async (server: Server) => {
+  if (typeof server.id === 'undefined') {
+    if (logger) logger.warn('testServerConnection called on a server without an ID.', { server });
+    return;
+  }
+  testingConnection.value = true;
   try {
-    const result = await serversStore.testServerConnection(server.id)
+    const result = await serversStore.testServerConnection(server.id);
     if (result.success) {
-      notificationStore.success(t('settings.servers.testSuccess'))
+      if (notificationStore) notificationStore.success(t('settings.servers.testSuccess'));
     } else {
-      notificationStore.error(t('settings.servers.testError'))
+      if (notificationStore) notificationStore.error(t('settings.servers.testError'));
     }
   } catch (error) {
-    console.error('Error testing server connection:', error)
-    notificationStore.error(t('settings.servers.testError'))
+    if (logger) logger.error('Error testing server connection', { error, serverId: server.id });
+    if (notificationStore) notificationStore.error(t('settings.servers.testError'));
   } finally {
-    testingConnection.value = false
+    testingConnection.value = false;
   }
 }
 
 const testNewServerConnection = async () => {
-  testingConnection.value = true
+  testingConnection.value = true;
   try {
-    const result = await serversStore.testServerConnection(null, editingServer.value)
+    // Assurons-nous que les données sont conformes avant de les envoyer
+    const result = await serversStore.testServerConnection(null, editingServer.value as Server);
     if (result.success) {
-      notificationStore.success(t('settings.servers.testSuccess'))
+      if (notificationStore) notificationStore.success(t('settings.servers.testConnectionSuccess'));
     } else {
-      notificationStore.error(t('settings.servers.testError'))
+      if (notificationStore) notificationStore.error(t('settings.servers.testConnectionError'));
     }
   } catch (error) {
-    console.error('Error testing new server connection:', error)
-    notificationStore.error(t('settings.servers.testError'))
+    if (logger) logger.error('Error testing new server connection', { error });
+    if (notificationStore) notificationStore.error(t('settings.servers.testConnectionError'));
   } finally {
-    testingConnection.value = false
+    testingConnection.value = false;
   }
 }
 
@@ -693,14 +706,14 @@ const isFormValid = () => {
   )
 }
 
-const getStatusClass = (status) => {
+const getStatusClass = (status: boolean) => {
   return {
     'status-active': status,
     'status-inactive': !status
   }
 }
 
-const getTypeClass = (type) => {
+const getTypeClass = (type: string) => {
   return {
     'server-type-badge-cpanel': type === 'cPanel',
     'server-type-badge-proxmox': type === 'Proxmox',
@@ -708,14 +721,14 @@ const getTypeClass = (type) => {
   }
 }
 
-const getServerStatusClass = (status) => {
+const getServerStatusClass = (status: Server['status']) => {
   return {
     'status-online': status === 'online',
     'status-offline': status === 'offline'
   }
 }
 
-const getLoadClass = (load) => {
+const getLoadClass = (load: number) => {
   if (load < 33) {
     return 'bg-success'
   } else if (load < 66) {
@@ -725,7 +738,7 @@ const getLoadClass = (load) => {
   }
 }
 
-const toggleServerDetails = (server) => {
+const toggleServerDetails = (server: Server) => {
   if (selectedServer.value && selectedServer.value.id === server.id) {
     selectedServer.value = null
   } else {
@@ -733,7 +746,7 @@ const toggleServerDetails = (server) => {
   }
 }
 
-const refreshServerStats = async (server) => {
+const refreshServerStats = async (server: Server) => {
   if (!server || !server.id) {
     return;
   }
@@ -751,21 +764,21 @@ const refreshServerStats = async (server) => {
       server.lastUpdated = new Date().toLocaleString();
     }
   } catch (error) {
-    console.error('Erreur lors de la récupération des statistiques du serveur:', error);
+    if (logger) logger.error('Erreur lors de la récupération des statistiques du serveur', { error });
     
     // Notifier l'utilisateur de l'erreur
-    notificationStore.error(t('settings.servers.stats_error'));
+    if (notificationStore) notificationStore.error(t('settings.servers.stats_error'));
   } finally {
     // Réinitialiser l'état de chargement
     server.loadingStats = false;
   }
 }
 
-const formatDate = (date) => {
+const formatDate = (date: string) => {
   return new Date(date).toLocaleString()
 }
 
-const formatBytes = (bytes) => {
+const formatBytes = (bytes: number) => {
   if (bytes === 0) return '0 B';
   
   const k = 1024;
@@ -775,7 +788,7 @@ const formatBytes = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-const formatUptime = (seconds) => {
+const formatUptime = (seconds: number | undefined) => {
   if (!seconds) return '0 secondes';
   
   const days = Math.floor(seconds / 86400);
@@ -797,29 +810,18 @@ const formatUptime = (seconds) => {
   return result;
 }
 
-const formatUptimeSince = (seconds) => {
-  if (!seconds) return '';
-  
-  const startDate = new Date(Date.now() - (seconds * 1000));
-  
-  return startDate.toLocaleString('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
 
 const updateDefaultPort = () => {
-  switch (editingServer.value.type) {
-    case 'cPanel':
+  // Type est maintenant le nom du module (en minuscules)
+  const serverType = editingServer.value.type ? editingServer.value.type.toLowerCase() : '';
+  switch (serverType) {
+    case 'cpanel':
       editingServer.value.port = 2087
       break
-    case 'Proxmox':
+    case 'proxmox':
       editingServer.value.port = 8006
       break
-    case 'Virtualizor':
+    case 'virtualizor':
       editingServer.value.port = 4085
       break
     default:
@@ -827,8 +829,45 @@ const updateDefaultPort = () => {
   }
 }
 
+// Fonctions pour la gestion des modules
+async function fetchAvailableServerModules() {
+  try {
+    const response = await ApiService.routes.admin.system.module.list('servers')
+    const data = response.data
+    
+    if (data.success && data.data && data.data.servers) {
+      availableServerModules.value = data.data.servers
+    } else {
+      notificationStore.notificationError('Erreur lors du chargement des modules de serveurs')
+    }
+  } catch (error) {
+    logger.error('Erreur lors du chargement des modules de serveurs', { error });
+    notificationStore.notificationError('Erreur lors du chargement des modules de serveurs')
+  }
+}
+
 // Cycle de vie
-onMounted(() => {
-  fetchServers()
+onMounted(async () => {
+  // Charger d'abord les modules de type servers disponibles
+  await fetchAvailableServerModules()
+  
+  // Ensuite charger les serveurs
+  await fetchServers()
+  
+  // Vérifier si un type de module est spécifié dans l'URL
+  const urlParams = new URLSearchParams(window.location.search)
+  const moduleType = urlParams.get('moduleType')
+  
+  if (moduleType) {
+    // Chercher le module avec le bon name
+    for (const key in availableServerModules.value) {
+      if (availableServerModules.value[key].name === moduleType) {
+        editingServer.value.type = moduleType;
+        break;
+      }
+    }
+    updateDefaultPort()
+    openServerModal()
+  }
 })
 </script>

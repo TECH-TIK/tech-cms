@@ -25,7 +25,7 @@
               <td :colspan="columns.length">
                 <div class="loading-spinner">
                   <i class="fas fa-spinner fa-spin"></i>
-                  Chargement...
+                  {{ $t('common.loading') }}
                 </div>
               </td>
             </tr>
@@ -33,7 +33,7 @@
           <template v-else-if="sortedData.length === 0">
             <tr class="empty-row">
               <td :colspan="columns.length">
-                Aucune donnée disponible
+                {{ $t('common.noData') }}
               </td>
             </tr>
           </template>
@@ -44,6 +44,7 @@
               @click="emit('row-click', row)"
             >
               <td v-for="column in columns" :key="column.key">
+                <!-- eslint-disable-next-line vue/no-v-html -->
                 <span v-if="column.formatter" v-html="column.formatter(row[column.key], row)"></span>
                 <template v-else>{{ row[column.key] }}</template>
               </td>
@@ -57,6 +58,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+
+
+
 
 interface Column {
   key: string;

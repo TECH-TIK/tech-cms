@@ -1,22 +1,24 @@
 <template>
   <div class="top-bar" data-component="topbar">
-    <div class="search-bar">
-      <i class="fas fa-search"></i>
-      <input 
-        type="text" 
-        :placeholder="$t('common.search')" 
-        v-model="searchQuery"
-        @input="handleSearch"
-      >
+    <div class="top-bar-title">
+      <!-- Espace pour un titre ou autre élément -->
     </div>
     
     <div class="top-bar-actions">
+      <!-- Barre de recherche déplacée à droite -->
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input 
+          v-model="searchQuery" 
+          type="text" 
+          :placeholder="$t('common.search')"
+          @input="handleSearch"
+        >
+      </div>
       <!-- Sélecteur de langue -->
-      <div class="dropdown" ref="languageDropdown">
-        <button class="btn-icon dropdown-toggle" @click="toggleLanguage">
-          <i class="fas fa-globe"></i>
+      <div ref="languageDropdown" class="dropdown">
+        <button class="btn-icon dropdown-toggle lang-btn" @click="toggleLanguage">
           <span class="current-lang">{{ currentLanguage.toUpperCase() }}</span>
-          <i class="fas fa-chevron-down"></i>
         </button>
         <div class="dropdown-menu" :class="{ show: showLanguageMenu }">
           <div class="menu-header">
@@ -53,7 +55,7 @@
       </button>
 
       <!-- Notifications -->
-      <div class="notifications-container" ref="notificationsDropdown">
+      <div ref="notificationsDropdown" class="notifications-container">
         <button 
           type="button" 
           class="btn-icon notification-btn" 
@@ -75,8 +77,8 @@
             <button 
               type="button" 
               class="mark-all-read" 
-              @click="markAllAsRead"
               :aria-label="$t('topbar.notifications.mark_all_read')"
+              @click="markAllAsRead"
             >
               <i class="fas fa-check-double"></i>
               <span>{{ $t('topbar.notifications.mark_all_read') }}</span>
@@ -90,8 +92,8 @@
             </div>
 
             <div 
-              v-else
-              v-for="notification in notifications" 
+              v-for="notification in notifications"
+              v-else 
               :key="notification.id"
               class="notification-item"
               :class="{ unread: !notification.read }"
@@ -105,9 +107,9 @@
                 <div class="notification-time">{{ formatTime(notification.time) }}</div>
               </div>
               <button 
+                v-if="!notification.read"
                 class="notification-action"
                 @click="markAsRead(notification.id)"
-                v-if="!notification.read"
               >
                 <i class="fas fa-check"></i>
               </button>
@@ -123,7 +125,7 @@
       </div>
 
       <!-- Profil -->
-      <div class="profile-container" ref="profileDropdown">
+      <div ref="profileDropdown" class="profile-container">
         <button class="profile-btn" @click="toggleProfile">
           <img :src="avatarUrl" alt="Avatar" class="avatar">
           <span class="username">{{ username }}</span>
@@ -174,7 +176,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import { hash } from '@/utils/hash'
 
-const { t, locale } = useI18n()
+const { locale } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
@@ -194,7 +196,7 @@ const profileDropdown = ref<HTMLElement | null>(null)
 
 // Computed properties
 const currentLanguage = computed(() => languageStore.currentLanguage)
-const isDarkMode = computed(() => themeStore.isDarkMode)
+const isDarkMode = computed(() => themeStore.darkMode)
 const unreadCount = computed(() => notificationStore.unreadCount)
 const notifications = computed(() => notificationStore.notifications)
 const username = computed(() => authStore.user?.username || '')
@@ -243,7 +245,7 @@ const toggleNotifications = () => {
   showProfileMenu.value = false
 }
 
-const markAsRead = (id: string) => {
+const markAsRead = (id: string | number) => {
   notificationStore.markAsRead(id)
 }
 
@@ -262,12 +264,14 @@ const logout = async () => {
   router.push('/login')
 }
 
-const formatTime = (time: string | Date) => {
-  const date = typeof time === 'string' ? new Date(time) : time
+const formatTime = (time: string | Date | undefined) => {
+  if (!time) return ''; // Retourne chaîne vide si time est undefined
+  
+  const date = typeof time === 'string' ? new Date(time) : time;
   return formatDistanceToNow(date, {
     addSuffix: true,
     locale: locale.value === 'fr' ? fr : enUS
-  })
+  });
 }
 
 const closeNotifications = () => {
@@ -316,8 +320,7 @@ onUnmounted(() => {
   gap: 1rem;
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(0, 102, 255, 0.1);
+  border-bottom: 1px solid rgb(0 102 255 / 10%);
   position: relative;
   z-index: 100;
 }
@@ -347,8 +350,8 @@ onUnmounted(() => {
   width: 100%;
   padding: 0.75rem 1.25rem;
   padding-left: 3rem;
-  background: rgba(0, 102, 255, 0.05);
-  border: 1px solid rgba(0, 102, 255, 0.1);
+  background: rgb(0 102 255 / 5%);
+  border: 1px solid rgb(0 102 255 / 10%);
   border-radius: 12px;
   color: var(--text-color);
   font-size: 0.95rem;
@@ -357,9 +360,9 @@ onUnmounted(() => {
 
 .search-bar input:focus {
   outline: none;
-  background: rgba(0, 102, 255, 0.08);
+  background: rgb(0 102 255 / 8%);
   border-color: var(--primary-blue);
-  box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
+  box-shadow: 0 0 0 4px rgb(0 102 255 / 10%);
 }
 
 .search-bar i {
@@ -371,6 +374,15 @@ onUnmounted(() => {
   font-size: 1.1rem;
   opacity: 0.7;
   transition: opacity 0.3s ease;
+}
+
+.lang-btn {
+  min-width: 40px;
+  padding: 0 10px;
+}
+
+.lang-btn .current-lang {
+  font-weight: 600;
 }
 
 .search-bar input:focus + i {
@@ -388,7 +400,7 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  border: 1px solid rgba(0, 102, 255, 0.1);
+  border: 1px solid rgb(0 102 255 / 10%);
   background: var(--glass-bg);
   color: var(--text-color);
   cursor: pointer;
@@ -447,7 +459,6 @@ onUnmounted(() => {
   z-index: 9999;
   box-shadow: var(--shadow-lg);
   backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
 
 .dropdown-menu.show {
@@ -641,15 +652,15 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 1rem;
-  background: rgba(0, 102, 255, 0.05);
-  border: 1px solid rgba(0, 102, 255, 0.1);
+  background: rgb(0 102 255 / 5%);
+  border: 1px solid rgb(0 102 255 / 10%);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .profile-btn:hover {
-  background: rgba(0, 102, 255, 0.08);
+  background: rgb(0 102 255 / 8%);
   transform: translateY(-2px);
   border-color: var(--primary-blue);
 }
@@ -660,7 +671,7 @@ onUnmounted(() => {
   border-radius: 12px;
   object-fit: cover;
   border: 2px solid var(--primary-blue);
-  box-shadow: 0 0 15px rgba(0, 102, 255, 0.2);
+  box-shadow: 0 0 15px rgb(0 102 255 / 20%);
 }
 
 .username {
@@ -668,7 +679,7 @@ onUnmounted(() => {
   font-size: 0.95rem;
   color: var(--text-color);
   background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -742,7 +753,7 @@ onUnmounted(() => {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .search-bar {
     display: none;
   }

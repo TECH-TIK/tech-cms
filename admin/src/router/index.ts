@@ -1,17 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import logger from '@/services/logger'
 import DashboardView from '@/views/DashboardView.vue'
 import LoginView from '@/views/LoginView.vue'
 import ClientsView from '@/views/client/ClientsView.vue'
 import ProductsView from '@/views/products/ProductsView.vue'
 import CreateProductView from '@/views/products/CreateProductView.vue'
+import ProductTypeView from '@/views/products/wizard/ProductTypeView.vue'
 import ProductDetailsView from '@/views/products/wizard/ProductDetailsView.vue'
 import ProductPricingView from '@/views/products/wizard/ProductPricingView.vue'
 import ProductModuleView from '@/views/products/wizard/ProductModuleView.vue'
 import ProductCustomFieldsView from '@/views/products/wizard/ProductCustomFieldsView.vue'
 import ProductConfigurableOptionsView from '@/views/products/wizard/ProductConfigurableOptionsView.vue'
 import ProductUpgradesView from '@/views/products/wizard/ProductUpgradesView.vue'
-import ProductFreedomainView from '@/views/products/wizard/ProductFreedomainView.vue'
+import ProductFreeDomainView from '@/views/products/wizard/ProductFreeDomainView.vue'
 import ProductCrossSellsView from '@/views/products/wizard/ProductCrossSellsView.vue'
 import ProductOtherView from '@/views/products/wizard/ProductOtherView.vue'
 import ProductLinksView from '@/views/products/wizard/ProductLinksView.vue'
@@ -27,6 +29,9 @@ import NotificationsSettingsView from '@/views/settings/NotificationsView.vue'
 import BillingView from '@/views/settings/BillingView.vue'
 import IntegrationsView from '@/views/settings/IntegrationsView.vue'
 import LicenseView from '@/views/settings/LicenseView.vue'
+import ModulesView from '@/views/settings/ModulesView.vue'
+import AutomationView from '@/views/settings/AutomationView.vue'
+import UpdatesView from '@/views/system/UpdatesView.vue'
 import InvalidLicenseView from '@/views/license/InvalidLicenseView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import NotificationsView from '@/views/notifications/NotificationsView.vue'
@@ -36,43 +41,64 @@ import ServiceDetailView from '@/views/services/ServiceDetailView.vue'
 import ClientFormView from '@/views/client/ClientFormView.vue'
 import ClientDetailView from '@/views/client/ClientDetailView.vue'
 
+// Nouvelles pages de formulaires et détails
+import PaymentFormView from '@/views/payments/PaymentFormView.vue'
+import PaymentDetailsView from '@/views/payments/PaymentDetailsView.vue'
+import InvoiceFormView from '@/views/billing/InvoiceFormView.vue'
+import InvoiceDetailsView from '@/views/billing/InvoiceDetailsView.vue'
+import SubscriptionFormView from '@/views/billing/SubscriptionFormView.vue'
+import SubscriptionDetailsView from '@/views/billing/SubscriptionDetailsView.vue'
+import TicketFormView from '@/views/support/TicketFormView.vue'
+import TicketDetailsView from '@/views/support/TicketDetailsView.vue'
+import TicketDepartmentsView from '@/views/support/TicketDepartmentsView.vue'
+
 // Logs pour vérifier les importations
-console.log('[ROUTER] Importation des composants:')
-console.log('- DashboardView:', !!DashboardView)
-console.log('- LoginView:', !!LoginView)
-console.log('- ClientsView:', !!ClientsView)
-console.log('- ProductsView:', !!ProductsView)
-console.log('- CreateProductView:', !!CreateProductView)
-console.log('- InvoicesView:', !!InvoicesView)
-console.log('- PaymentsView:', !!PaymentsView)
-console.log('- SubscriptionsView:', !!SubscriptionsView)
-console.log('- TicketsView:', !!TicketsView)
-console.log('- SettingsView:', !!SettingsView)
-console.log('- ServersView:', !!ServersView)
-console.log('- GeneralView:', !!GeneralView)
-console.log('- SecurityView:', !!SecurityView)
-console.log('- LicenseView:', !!LicenseView)
-console.log('- InvalidLicenseView:', !!InvalidLicenseView)
-console.log('- NotFoundView:', !!NotFoundView)
-console.log('- NotificationsView:', !!NotificationsView)
-console.log('- NotificationsSettingsView:', !!NotificationsSettingsView)
-console.log('- BillingView:', !!BillingView)
-console.log('- IntegrationsView:', !!IntegrationsView)
-console.log('- ProductDetailsView:', !!ProductDetailsView)
-console.log('- ProductPricingView:', !!ProductPricingView)
-console.log('- ProductModuleView:', !!ProductModuleView)
-console.log('- ProductCustomFieldsView:', !!ProductCustomFieldsView)
-console.log('- ProductConfigurableOptionsView:', !!ProductConfigurableOptionsView)
-console.log('- ProductUpgradesView:', !!ProductUpgradesView)
-console.log('- ProductFreedomainView:', !!ProductFreedomainView)
-console.log('- ProductCrossSellsView:', !!ProductCrossSellsView)
-console.log('- ProductOtherView:', !!ProductOtherView)
-console.log('- ProductLinksView:', !!ProductLinksView)
-console.log('- ServicesView:', !!ServicesView)
-console.log('- ServiceFormView:', !!ServiceFormView)
-console.log('- ServiceDetailView:', !!ServiceDetailView)
-console.log('- ClientFormView:', !!ClientFormView)
-console.log('- ClientDetailView:', !!ClientDetailView)
+logger.debug('[ROUTER] Composants importés', {
+  DashboardView: !!DashboardView,
+  LoginView: !!LoginView,
+  ClientsView: !!ClientsView,
+  ProductsView: !!ProductsView,
+  CreateProductView: !!CreateProductView,
+  InvoicesView: !!InvoicesView,
+  PaymentsView: !!PaymentsView,
+  SubscriptionsView: !!SubscriptionsView,
+  TicketsView: !!TicketsView,
+  SettingsView: !!SettingsView,
+  ServersView: !!ServersView,
+  GeneralView: !!GeneralView,
+  SecurityView: !!SecurityView,
+  LicenseView: !!LicenseView,
+  InvalidLicenseView: !!InvalidLicenseView,
+  NotFoundView: !!NotFoundView,
+  NotificationsView: !!NotificationsView,
+  NotificationsSettingsView: !!NotificationsSettingsView,
+  BillingView: !!BillingView,
+  IntegrationsView: !!IntegrationsView,
+  ProductDetailsView: !!ProductDetailsView,
+  ProductPricingView: !!ProductPricingView,
+  ProductModuleView: !!ProductModuleView,
+  ProductCustomFieldsView: !!ProductCustomFieldsView,
+  ProductConfigurableOptionsView: !!ProductConfigurableOptionsView,
+  ProductUpgradesView: !!ProductUpgradesView,
+  ProductFreeDomainView: !!ProductFreeDomainView,
+  ProductCrossSellsView: !!ProductCrossSellsView,
+  ProductOtherView: !!ProductOtherView,
+  ProductLinksView: !!ProductLinksView,
+  ServicesView: !!ServicesView,
+  ServiceFormView: !!ServiceFormView,
+  ServiceDetailView: !!ServiceDetailView,
+  ClientFormView: !!ClientFormView,
+  ClientDetailView: !!ClientDetailView,
+  PaymentFormView: !!PaymentFormView,
+  PaymentDetailsView: !!PaymentDetailsView,
+  InvoiceFormView: !!InvoiceFormView,
+  InvoiceDetailsView: !!InvoiceDetailsView,
+  SubscriptionFormView: !!SubscriptionFormView,
+  SubscriptionDetailsView: !!SubscriptionDetailsView,
+  TicketFormView: !!TicketFormView,
+  TicketDetailsView: !!TicketDetailsView,
+  UpdatesView: !!UpdatesView,
+});
 
 // Récupérer le chemin de base depuis l'URL actuelle
 const baseUrl = '/admin'
@@ -143,18 +169,16 @@ const router = createRouter({
     },
     {
       path: '/products/create',
-      name: 'create-product',
-      component: CreateProductView,
-      meta: {
-        public: false,
-        requiresAuth: true,
-        onlyWhenLoggedOut: false
-      }
+      redirect: '/products/create/type'
     },
+    // Route principale pour les produits avec paramètre idOrAction
     {
       path: '/products/:idOrAction',
       component: CreateProductView,
-      props: true,
+      props: route => ({
+        productId: route.params.idOrAction !== 'create' ? parseInt(route.params.idOrAction as string) : null,
+        productType: route.query.type || 'shared_hosting'
+      }),
       meta: {
         public: false,
         requiresAuth: true,
@@ -163,6 +187,20 @@ const router = createRouter({
       children: [
         {
           path: '',
+          redirect: to => {
+            // Vérifier si nous avons un ID (édition) ou un type (création)
+            if (to.params.idOrAction && to.params.idOrAction !== 'create') {
+              // Mode édition avec ID numérique
+              if (!isNaN(Number(to.params.idOrAction))) {
+                return { name: 'product-details', params: { idOrAction: to.params.idOrAction } }
+              }
+            }
+            // Mode création
+            return { name: 'product-type', params: { idOrAction: to.params.idOrAction } }
+          }
+        },
+        {
+          path: 'details',
           name: 'product-details',
           component: ProductDetailsView,
           meta: {
@@ -174,7 +212,7 @@ const router = createRouter({
         {
           path: 'type',
           name: 'product-type',
-          component: CreateProductView,
+          component: ProductTypeView,
           meta: {
             public: false,
             requiresAuth: true,
@@ -234,7 +272,7 @@ const router = createRouter({
         {
           path: 'freedomain',
           name: 'product-freedomain',
-          component: ProductFreedomainView,
+          component: ProductFreeDomainView,
           meta: {
             public: false,
             requiresAuth: true,
@@ -284,6 +322,24 @@ const router = createRouter({
       }
     },
     {
+      path: '/invoices/create',
+      name: 'create-invoice',
+      component: InvoiceFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/invoices/:id/edit',
+      name: 'edit-invoice',
+      component: InvoiceFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/invoices/:id',
+      name: 'invoice-details',
+      component: InvoiceDetailsView,
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/payments',
       name: 'payments',
       component: PaymentsView,
@@ -292,6 +348,24 @@ const router = createRouter({
         requiresAuth: true,
         onlyWhenLoggedOut: false
       }
+    },
+    {
+      path: '/payments/create',
+      name: 'create-payment',
+      component: PaymentFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/payments/:id/edit',
+      name: 'edit-payment',
+      component: PaymentFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/payments/:id',
+      name: 'payment-details',
+      component: PaymentDetailsView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/subscriptions',
@@ -304,6 +378,24 @@ const router = createRouter({
       }
     },
     {
+      path: '/subscriptions/create',
+      name: 'create-subscription',
+      component: SubscriptionFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/subscriptions/:id/edit',
+      name: 'edit-subscription',
+      component: SubscriptionFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/subscriptions/:id',
+      name: 'subscription-details',
+      component: SubscriptionDetailsView,
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/tickets',
       name: 'tickets',
       component: TicketsView,
@@ -312,6 +404,30 @@ const router = createRouter({
         requiresAuth: true,
         onlyWhenLoggedOut: false
       }
+    },
+    {
+      path: '/tickets/create',
+      name: 'create-ticket',
+      component: TicketFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/tickets/:id/edit',
+      name: 'edit-ticket',
+      component: TicketFormView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/tickets/:id',
+      name: 'ticket-details',
+      component: TicketDetailsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/ticket-departments',
+      name: 'ticket-departments',
+      component: TicketDepartmentsView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/settings',
@@ -384,9 +500,39 @@ const router = createRouter({
       }
     },
     {
+      path: '/settings/modules',
+      name: 'settings-modules',
+      component: ModulesView,
+      meta: {
+        public: false,
+        requiresAuth: true,
+        onlyWhenLoggedOut: false
+      }
+    },
+    {
       path: '/settings/license',
       name: 'settings-license',
       component: LicenseView,
+      meta: {
+        public: false,
+        requiresAuth: true,
+        onlyWhenLoggedOut: false
+      }
+    },
+    {
+      path: '/settings/automation',
+      name: 'settings-automation',
+      component: AutomationView,
+      meta: {
+        public: false,
+        requiresAuth: true,
+        onlyWhenLoggedOut: false
+      }
+    },
+    {
+      path: '/system/updates',
+      name: 'system-updates',
+      component: UpdatesView,
       meta: {
         public: false,
         requiresAuth: true,
@@ -450,7 +596,7 @@ const router = createRouter({
     // Routes anciennes à conserver temporairement pour compatibilité
     {
       path: '/products/create',
-      redirect: to => '/products/create'
+      redirect: _to => '/products/create'
     },
     {
       path: '/products/:id/edit',
@@ -459,43 +605,43 @@ const router = createRouter({
     // Routes pour les détails par type - rediriger vers la nouvelle structure
     {
       path: '/products/details/:type',
-      redirect: to => '/products/create'
+      redirect: _to => '/products/create'
     },
     {
       path: '/products/pricing/:type',
-      redirect: to => '/products/create/pricing'
+      redirect: _to => '/products/create/pricing'
     },
     {
       path: '/products/module/:type',
-      redirect: to => '/products/create/module'
+      redirect: _to => '/products/create/module'
     },
     {
       path: '/products/custom-fields/:type',
-      redirect: to => '/products/create/custom-fields'
+      redirect: _to => '/products/create/custom-fields'
     },
     {
       path: '/products/configurable-options/:type',
-      redirect: to => '/products/create/configurable-options'
+      redirect: _to => '/products/create/configurable-options'
     },
     {
       path: '/products/upgrades/:type',
-      redirect: to => '/products/create/upgrades'
+      redirect: _to => '/products/create/upgrades'
     },
     {
       path: '/products/freedomain/:type',
-      redirect: to => '/products/create/freedomain'
+      redirect: _to => '/products/create/freedomain'
     },
     {
       path: '/products/cross-sells/:type',
-      redirect: to => '/products/create/cross-sells'
+      redirect: _to => '/products/create/cross-sells'
     },
     {
       path: '/products/other/:type',
-      redirect: to => '/products/create/other'
+      redirect: _to => '/products/create/other'
     },
     {
       path: '/products/links/:type',
-      redirect: to => '/products/create/links'
+      redirect: _to => '/products/create/links'
     }
   ]
 })
@@ -504,35 +650,35 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
-  console.log('[ROUTER] Navigation de', from.path, 'vers', to.path, 'Route:', to.name)
+    logger.debug('[ROUTER] Navigation', { from: from.path, to: to.path, name: to.name })
   
   // Initialiser le store d'authentification si nécessaire
   if (!authStore.initialized) {
-    console.log('[ROUTER] Initialisation du store d\'authentification')
+    logger.debug('[ROUTER] Initialisation du store d\'authentification')
     await authStore.init()
   }
 
   // Si la route nécessite une authentification
   if (to.meta.requiresAuth) {
-    console.log('[ROUTER] Route protégée, vérification auth:', authStore.isAuthenticated)
+    logger.debug('[ROUTER] Route protégée, vérification auth', { isAuthenticated: authStore.isAuthenticated })
     
     // Vérifier explicitement l'authentification avec le serveur
     if (!authStore.isAuthenticated) {
       try {
-        console.log('[ROUTER] Vérification de l\'authentification avec le serveur')
+        logger.debug('[ROUTER] Vérification de l\'authentification avec le serveur')
         const isAuthenticated = await authStore.checkAuth()
         
         if (!isAuthenticated) {
-          console.log('[ROUTER] Redirection vers login - Authentification requise')
+          logger.info('[ROUTER] Redirection vers login - Authentification requise')
           return next({ 
             name: 'login',
             query: { redirect: to.fullPath }
           })
         }
         
-        console.log('[ROUTER] Authentification confirmée par le serveur')
+        logger.debug('[ROUTER] Authentification confirmée par le serveur')
       } catch (error) {
-        console.error('[ROUTER] Erreur lors de la vérification de l\'authentification:', error)
+        logger.error('[ROUTER] Erreur lors de la vérification de l\'authentification', { error })
         return next({ 
           name: 'login',
           query: { redirect: to.fullPath }
@@ -543,17 +689,17 @@ router.beforeEach(async (to, from, next) => {
   
   // Si l'utilisateur est sur login mais déjà authentifié
   if (to.meta.onlyWhenLoggedOut && authStore.isAuthenticated) {
-    console.log('[ROUTER] Redirection vers dashboard - Déjà authentifié')
+    logger.info('[ROUTER] Redirection vers dashboard - Déjà authentifié')
     return next({ name: 'dashboard' })
   }
 
   // Vérifier si la route existe
   if (to.matched.length === 0) {
-    console.log('[ROUTER] Route non trouvée, redirection vers dashboard')
+    logger.warn('[ROUTER] Route non trouvée, redirection vers dashboard', { path: to.path })
     return next({ name: 'dashboard' })
   }
 
-  console.log('[ROUTER] Navigation autorisée vers', to.path)
+  logger.debug('[ROUTER] Navigation autorisée vers', { path: to.path })
   next()
 })
 

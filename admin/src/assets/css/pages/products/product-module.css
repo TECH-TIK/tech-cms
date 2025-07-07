@@ -1,0 +1,150 @@
+/* Styles pour la page de configuration du module */
+
+.product-module-page {
+  padding: var(--spacing-md);
+  width: 100%;
+}
+
+.module-section {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  backdrop-filter: blur(10px);
+}
+
+.module-section-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.module-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.module-card {
+  background: rgb(0 0 0 / 10%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.module-card:hover {
+  border-color: var(--primary-blue);
+  transform: translateY(-2px);
+}
+
+.module-card.selected {
+  border-color: var(--primary-blue);
+  background: rgb(0 102 255 / 10%);
+}
+
+.module-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--primary-blue);
+}
+
+.module-name {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: var(--spacing-xs);
+}
+
+.module-description {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.provision-options {
+  border-top: 1px solid var(--glass-border);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+}
+
+.provision-option {
+  background: rgb(0 0 0 / 10%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.provision-option:hover {
+  border-color: var(--primary-blue);
+}
+
+.provision-option.selected {
+  border-color: var(--primary-blue);
+  background: rgb(0 102 255 / 10%);
+}
+
+.provision-option-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.provision-option-title {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-left: var(--spacing-sm);
+}
+
+.provision-option-description {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-left: 1.8rem;
+}
+
+.server-group-selector {
+  margin-top: var(--spacing-md);
+}
+
+.additional-settings {
+  margin-top: var(--spacing-lg);
+}
+
+/* Style pour les onglets internes */
+.module-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: var(--spacing-md);
+}
+
+.module-tab {
+  padding: var(--spacing-sm) var(--spacing-md);
+  cursor: pointer;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.module-tab:hover {
+  color: var(--text-color);
+}
+
+.module-tab.active {
+  color: var(--primary-blue);
+  border-bottom-color: var(--primary-blue);
+}
+
+/* Responsive */
+@media (width <= 768px) {
+  .module-options {
+    grid-template-columns: 1fr;
+  }
+}

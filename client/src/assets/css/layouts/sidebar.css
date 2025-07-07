@@ -1,0 +1,216 @@
+/* Client Sidebar Styles */
+.client-sidebar {
+    position: fixed;
+    left: 0;
+    top: 70px; /* Hauteur du header */
+    width: 280px;
+    height: calc(100vh - 70px);
+    background: rgb(16 20 35 / 30%);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgb(255 255 255 / 8%);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.client-sidebar.sidebar-collapsed {
+    width: 80px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgb(255 255 255 / 8%);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: #fff;
+}
+
+.logo-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+}
+
+.logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #06F, #5F9FFF);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: rgb(255 255 255 / 70%);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.sidebar-toggle:hover {
+    background: rgb(255 255 255 / 10%);
+    color: #fff;
+}
+
+.client-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 1.5rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, rgb(0 102 255 / 20%), rgb(0 102 255 / 10%));
+    border-radius: 12px;
+    color: #06F;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: 1px solid rgb(0 102 255 / 30%);
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin: 0.25rem 1rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    color: rgb(255 255 255 / 70%);
+    text-decoration: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgb(0 102 255 / 10%), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.nav-link:hover::before,
+.nav-link.router-link-active::before {
+    opacity: 1;
+}
+
+.nav-link:hover {
+    color: #fff;
+    background: rgb(255 255 255 / 5%);
+    transform: translateX(4px);
+}
+
+.nav-link i {
+    font-size: 1.25rem;
+    width: 20px;
+    text-align: center;
+    color: #06F;
+}
+
+.sidebar-nav li.active .nav-link {
+    color: #fff;
+    background: linear-gradient(135deg, rgb(0 102 255 / 20%), rgb(0 102 255 / 10%));
+    border: 1px solid rgb(0 102 255 / 30%);
+    box-shadow: 0 4px 15px rgb(0 102 255 / 20%);
+}
+
+.sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid rgb(255 255 255 / 8%);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #06F, #00C6FF);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.5rem;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.875rem;
+}
+
+.user-email {
+    font-size: 0.75rem;
+    color: rgb(255 255 255 / 70%);
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgb(255 75 75 / 10%);
+    border: 1px solid rgb(255 75 75 / 30%);
+    border-radius: 8px;
+    color: #ff4b4b;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.logout-btn:hover {
+    background: rgb(255 75 75 / 20%);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .client-sidebar {
+        transform: translateX(-100%);
+    }
+
+    .client-sidebar.sidebar-collapsed {
+        transform: translateX(-100%);
+    }
+}
+
+

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
+import logger from '@/services/logger'
+import { ApiService } from '@/services/api'
 
 export interface ProductGroup {
   id: number
@@ -21,10 +22,10 @@ export const useProductGroupsStore = defineStore('productGroups', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await axios.get('/api/v1/product-groups')
+      const response = await ApiService.routes.admin.productGroup.list()
       productGroups.value = response.data.productGroups || []
     } catch (err: any) {
-      console.error('Erreur lors de la récupération des groupes de produits:', err)
+            logger.error('Erreur lors de la récupération des groupes de produits', { error: err })
       error.value = err.response?.data?.message || 'Erreur lors de la récupération des groupes de produits'
     } finally {
       loading.value = false
@@ -36,11 +37,11 @@ export const useProductGroupsStore = defineStore('productGroups', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await axios.post('/api/v1/product-groups', groupData)
+      const response = await ApiService.routes.admin.productGroup.create(groupData)
       productGroups.value.push(response.data)
       return response.data
     } catch (err: any) {
-      console.error('Erreur lors de la création du groupe de produits:', err)
+            logger.error('Erreur lors de la création du groupe de produits', { error: err })
       error.value = err.response?.data?.message || 'Erreur lors de la création du groupe de produits'
       throw error.value
     } finally {
@@ -53,14 +54,14 @@ export const useProductGroupsStore = defineStore('productGroups', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await axios.put(`/api/v1/product-groups/${id}`, groupData)
+      const response = await ApiService.routes.admin.productGroup.update(String(id), groupData)
       const index = productGroups.value.findIndex(group => group.id === id)
       if (index !== -1) {
         productGroups.value[index] = response.data
       }
       return response.data
     } catch (err: any) {
-      console.error('Erreur lors de la mise à jour du groupe de produits:', err)
+            logger.error('Erreur lors de la mise à jour du groupe de produits', { error: err })
       error.value = err.response?.data?.message || 'Erreur lors de la mise à jour du groupe de produits'
       throw error.value
     } finally {
@@ -73,11 +74,11 @@ export const useProductGroupsStore = defineStore('productGroups', () => {
     loading.value = true
     error.value = null
     try {
-      await axios.delete(`/api/v1/product-groups/${id}`)
+      await ApiService.routes.admin.productGroup.delete(String(id))
       productGroups.value = productGroups.value.filter(group => group.id !== id)
       return true
     } catch (err: any) {
-      console.error('Erreur lors de la suppression du groupe de produits:', err)
+            logger.error('Erreur lors de la suppression du groupe de produits', { error: err })
       error.value = err.response?.data?.message || 'Erreur lors de la suppression du groupe de produits'
       throw error.value
     } finally {

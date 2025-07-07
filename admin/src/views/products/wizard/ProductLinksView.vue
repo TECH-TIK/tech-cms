@@ -1,117 +1,48 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/stores/notifications'
-import { useProductStore } from '@/stores/products'
+import { useProductWizardStore } from '@/stores/product-wizard'
 
 const { t } = useI18n()
-const router = useRouter()
-const route = useRoute()
 const notificationStore = useNotificationStore()
-const productStore = useProductStore()
+const productWizardStore = useProductWizardStore()
 
-// Récupérer le type de produit et les données précédentes
-const productType = computed(() => route.params.type as string || 'shared_hosting')
-const previousData = computed(() => {
-  const savedProductData = localStorage.getItem('currentProductData')
-  if (savedProductData) {
-    try {
-      return JSON.parse(savedProductData)
-    } catch (e) {
-      console.error('Erreur lors du parsing des données:', e)
-      return {}
-    }
-  }
-  return {}
-})
 
-// Déterminer si nous sommes en mode édition
-const productId = computed(() => {
-  const idOrAction = route.params.idOrAction as string
-  if (idOrAction && idOrAction !== 'create') {
-    return parseInt(idOrAction, 10)
-  }
-  return null
-})
 
-const isEditMode = computed(() => !!productId.value)
 
-// Définition des onglets
-const tabs = [
-  { id: 'type', label: t('products_services.tabs.type'), icon: 'tag', route: 'create-product' },
-  { id: 'details', label: t('products_services.tabs.details'), icon: 'info-circle', route: 'product-details' },
-  { id: 'pricing', label: t('products_services.tabs.pricing'), icon: 'money-bill', route: 'product-pricing' },
-  { id: 'module', label: t('products_services.tabs.module'), icon: 'puzzle-piece', route: 'product-module' },
-  { id: 'custom_fields', label: t('products_services.tabs.custom_fields'), icon: 'list-alt', route: 'product-custom-fields' },
-  { id: 'configurable_options', label: t('products_services.tabs.configurable_options'), icon: 'cogs', route: 'product-configurable-options' },
-  { id: 'upgrades', label: t('products_services.tabs.upgrades'), icon: 'arrow-up', route: 'product-upgrades' },
-  { id: 'freedomain', label: t('products_services.tabs.freedomain'), icon: 'globe', route: 'product-freedomain' },
-  { id: 'cross_sells', label: t('products_services.tabs.cross_sells'), icon: 'shopping-cart', route: 'product-cross-sells' },
-  { id: 'other', label: t('products_services.tabs.other'), icon: 'ellipsis-h', route: 'product-other' },
-  { id: 'links', label: t('products_services.tabs.links'), icon: 'link', route: 'product-links' }
-]
 
-// Déterminer l'onglet actif en fonction de la route actuelle
-const activeTab = computed(() => {
-  const currentRouteName = route.name as string
-  const tab = tabs.find(tab => tab.route === currentRouteName)
-  return tab ? tab.id : 'links'
-})
 
-// Naviguer vers un onglet spécifique
-const navigateToTab = (tab) => {
-  // Sauvegarder les données dans localStorage
-  localStorage.setItem('linksData', JSON.stringify(linksData.value))
-  
-  if (tab.id === 'type') {
-    // Si nous sommes en mode édition, rediriger vers la page d'édition du produit
-    if (isEditMode.value) {
-      router.push({ path: `/products/${productId.value}` })
-    } else {
-      // Sinon, rediriger vers la création de produit
-      router.push({ name: 'create-product' })
-    }
-  } else {
-    const idOrAction = isEditMode.value ? productId.value : 'create'
-    router.push({
-      name: tab.route,
-      params: { idOrAction }
-    })
-  }
-}
 
-// États locaux pour les liens
+// États locaux pour les liens - initialisés depuis le store Pinia
 const linksData = ref({
   directLinks: {
-    cartLink: '',
-    cartLinkWithTemplate: '',
-    cartLinkWithDomain: '',
-    groupLink: ''
+    cartLink: productWizardStore.productData.links?.directLinks?.cartLink || '',
+    cartLinkWithTemplate: productWizardStore.productData.links?.directLinks?.cartLinkWithTemplate || '',
+    cartLinkWithDomain: productWizardStore.productData.links?.directLinks?.cartLinkWithDomain || '',
+    groupLink: productWizardStore.productData.links?.directLinks?.groupLink || ''
   },
-  productLinks: [] as Array<{ url: string, visits: number }>
+  productLinks: productWizardStore.productData.links?.productLinks || [] as Array<{ url: string, visits: number }>
 })
 
-const loading = ref(false)
-const submitting = ref(false)
 
 // Gestion des formulaires
-const updateDirectLink = (type, value) => {
+const updateDirectLink = (type: 'cartLink' | 'cartLinkWithTemplate' | 'cartLinkWithDomain' | 'groupLink', value: string): void => {
   linksData.value.directLinks[type] = value
 }
 
 // Ajouter un lien de produit
-const addProductLink = () => {
+const addProductLink = (): void => {
   linksData.value.productLinks.push({ url: '', visits: 0 })
 }
 
 // Mettre à jour un lien de produit
-const updateProductLink = (index, url) => {
+const updateProductLink = (index: number, url: string): void => {
   linksData.value.productLinks[index].url = url
 }
 
 // Supprimer un lien de produit
-const removeProductLink = (index) => {
+const removeProductLink = (index: number): void => {
   linksData.value.productLinks.splice(index, 1)
   notificationStore.addNotification({
     type: 'success',
@@ -120,60 +51,18 @@ const removeProductLink = (index) => {
   })
 }
 
-// Enregistrer le produit et terminer
-const saveProduct = async () => {
-  try {
-    submitting.value = true
-    
-    // Sauvegarder les données
-    localStorage.setItem('linksData', JSON.stringify(linksData.value))
-    
-    // Message de succès
-    notificationStore.showNotification({
-      title: t('products_services.success.save'),
-      message: isEditMode.value
-        ? t('products_services.success.update_message')
-        : t('products_services.success.create_message'),
-      type: 'success'
-    })
-    
-    // Rediriger vers la liste des produits
-    router.push({ name: 'products' })
-  } catch (error) {
-    console.error('Erreur lors de l\'enregistrement du produit:', error)
-    notificationStore.showNotification({
-      title: t('products_services.errors.save'),
-      message: t('products_services.errors.save_message'),
-      type: 'error'
-    })
-  } finally {
-    submitting.value = false
-  }
-}
 
-// Retour à l'étape précédente
-const goBack = () => {
-  // Sauvegarder les données
-  localStorage.setItem('linksData', JSON.stringify(linksData.value))
-  
-  // Naviguer vers l'étape précédente
-  const idOrAction = isEditMode.value ? productId.value : 'create'
-  router.push({
-    name: 'product-other',
-    params: { idOrAction }
-  })
-}
 
-// Initialiser avec les données précédentes, si disponibles
+
+// Initialisation
 onMounted(() => {
-  if (previousData.value && previousData.value.links) {
-    linksData.value = previousData.value.links
-  }
-  
   // Si aucun lien de produit n'est défini, en ajouter un vide par défaut
   if (linksData.value.productLinks.length === 0) {
     addProductLink()
   }
+  
+  // Définir l'étape courante
+  productWizardStore.currentStep = 'links';
 })
 </script>
 
@@ -190,12 +79,12 @@ onMounted(() => {
             <label for="cart-link">{{ t('products_services.links.direct_cart_link') }}</label>
             <div class="input-group">
               <input 
-                type="text" 
                 id="cart-link" 
+                type="text" 
                 class="form-control" 
                 :value="linksData.directLinks.cartLink"
-                @input="e => updateDirectLink('cartLink', e.target.value)"
                 :placeholder="t('products_services.links.direct_cart_link_placeholder')"
+                @input="e => updateDirectLink('cartLink', (e.target as HTMLInputElement).value)"
               />
               <div class="input-group-append">
                 <button type="button" class="btn btn-outline-secondary">
@@ -209,12 +98,12 @@ onMounted(() => {
             <label for="cart-link-template">{{ t('products_services.links.direct_cart_link_template') }}</label>
             <div class="input-group">
               <input 
-                type="text" 
                 id="cart-link-template" 
+                type="text" 
                 class="form-control" 
                 :value="linksData.directLinks.cartLinkWithTemplate"
-                @input="e => updateDirectLink('cartLinkWithTemplate', e.target.value)"
                 :placeholder="t('products_services.links.direct_cart_link_template_placeholder')"
+                @input="e => updateDirectLink('cartLinkWithTemplate', (e.target as HTMLInputElement).value)"
               />
               <div class="input-group-append">
                 <button type="button" class="btn btn-outline-secondary">
@@ -228,12 +117,12 @@ onMounted(() => {
             <label for="cart-link-domain">{{ t('products_services.links.direct_cart_link_domain') }}</label>
             <div class="input-group">
               <input 
-                type="text" 
                 id="cart-link-domain" 
+                type="text" 
                 class="form-control" 
                 :value="linksData.directLinks.cartLinkWithDomain"
-                @input="e => updateDirectLink('cartLinkWithDomain', e.target.value)"
                 :placeholder="t('products_services.links.direct_cart_link_domain_placeholder')"
+                @input="e => updateDirectLink('cartLinkWithDomain', (e.target as HTMLInputElement).value)"
               />
               <div class="input-group-append">
                 <button type="button" class="btn btn-outline-secondary">
@@ -247,12 +136,12 @@ onMounted(() => {
             <label for="group-link">{{ t('products_services.links.group_cart_link') }}</label>
             <div class="input-group">
               <input 
-                type="text" 
                 id="group-link" 
+                type="text" 
                 class="form-control" 
                 :value="linksData.directLinks.groupLink"
-                @input="e => updateDirectLink('groupLink', e.target.value)"
                 :placeholder="t('products_services.links.group_cart_link_placeholder')"
+                @input="e => updateDirectLink('groupLink', (e.target as HTMLInputElement).value)"
               />
               <div class="input-group-append">
                 <button type="button" class="btn btn-outline-secondary">
@@ -293,8 +182,8 @@ onMounted(() => {
                     type="text" 
                     class="form-control" 
                     :value="link.url"
-                    @input="e => updateProductLink(index, e.target.value)"
                     :placeholder="t('products_services.links.url_placeholder')"
+                    @input="e => updateProductLink(index, (e.target as HTMLInputElement).value)"
                   />
                 </td>
                 <td class="text-center visits-column">{{ link.visits }}</td>
@@ -302,8 +191,8 @@ onMounted(() => {
                   <button 
                     type="button" 
                     class="btn btn-sm btn-outline-danger"
-                    @click="removeProductLink(index)"
                     :disabled="linksData.productLinks.length === 1"
+                    @click="removeProductLink(index)"
                   >
                     <i class="fas fa-trash-alt"></i>
                   </button>
@@ -314,30 +203,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    
-    <div class="wizard-actions">
-      <button 
-        type="button" 
-        class="btn btn-outline-secondary"
-        @click="goBack"
-        :disabled="submitting"
-      >
-        {{ t('common.back') }}
-      </button>
-      
-      <div class="action-buttons">
-        <button 
-          type="button" 
-          class="btn btn-success"
-          @click="saveProduct"
-          :disabled="submitting"
-        >
-          <span v-if="submitting">{{ t('common.saving') }}...</span>
-          <span v-else>{{ t('common.save') }}</span>
-        </button>
-      </div>
-    </div>
-  </div>
+</div>
 </template>
 
 <style scoped>
@@ -464,7 +330,7 @@ onMounted(() => {
 .form-control:focus {
   border-color: var(--primary-blue);
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(var(--primary-blue-rgb), 0.25);
+  box-shadow: 0 0 0 0.2rem rgb(var(--primary-blue-rgb), 0.25);
 }
 
 select.form-control {
@@ -609,7 +475,7 @@ select.form-control {
 }
 
 /* Style responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .form-row {
     flex-direction: column;
     gap: var(--spacing-md);

@@ -60,8 +60,8 @@
             <div class="form-actions">
               <button 
                 class="btn btn-primary" 
-                @click="submitReply"
                 :disabled="!replyMessage.trim() || submitting"
+                @click="submitReply"
               >
                 <i class="fas fa-paper-plane"></i> {{ $t('tickets.sendReply') }}
               </button>
@@ -70,7 +70,7 @@
         </div>
         
         <!-- Formulaire de création/édition -->
-        <form v-else @submit.prevent="submitForm" class="ticket-form">
+        <form v-else class="ticket-form" @submit.prevent="submitForm">
           <div class="form-group">
             <label>{{ $t('tickets.fields.client') }} <span class="required">*</span></label>
             <select 
@@ -93,8 +93,8 @@
           <div class="form-group">
             <label>{{ $t('tickets.fields.subject') }} <span class="required">*</span></label>
             <input 
-              type="text" 
               v-model="formData.subject" 
+              type="text" 
               class="form-control"
               required
             />
@@ -111,7 +111,7 @@
               </select>
             </div>
             
-            <div class="form-group" v-if="mode === 'edit'">
+            <div v-if="mode === 'edit'" class="form-group">
               <label>{{ $t('tickets.fields.status') }}</label>
               <select v-model="formData.status" class="form-control">
                 <option value="open">{{ $t('tickets.status.open') }}</option>
@@ -122,7 +122,7 @@
             </div>
           </div>
           
-          <div class="form-group" v-if="mode === 'create'">
+          <div v-if="mode === 'create'" class="form-group">
             <label>{{ $t('tickets.fields.message') }} <span class="required">*</span></label>
             <textarea 
               v-model="formData.message" 
@@ -145,7 +145,7 @@
               class="btn btn-primary"
               :disabled="submitting"
             >
-              <i class="fas fa-spinner fa-spin" v-if="submitting"></i>
+              <i v-if="submitting" class="fas fa-spinner fa-spin"></i>
               {{ submitButtonText }}
             </button>
           </div>
@@ -162,6 +162,7 @@ import { useTicketStore } from '@/stores/tickets'
 import { useClientsStore } from '@/stores/clients'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationStore } from '@/stores/notifications'
+import logger from '@/services/logger'
 
 const props = defineProps({
   ticket: {
@@ -256,7 +257,7 @@ async function submitForm() {
       emit('updated')
     }
   } catch (error) {
-    console.error('Error submitting ticket:', error)
+    logger.error('Error submitting ticket', { error })
     notificationStore.showNotification('error', props.mode === 'create' 
       ? t('tickets.errors.create') 
       : t('tickets.errors.update')
@@ -286,7 +287,7 @@ async function submitReply() {
     
     notificationStore.showNotification('success', t('tickets.success.reply'))
   } catch (error) {
-    console.error('Error submitting reply:', error)
+    logger.error('Error submitting reply', { error })
     notificationStore.showNotification('error', t('tickets.errors.reply'))
   } finally {
     submitting.value = false
@@ -304,11 +305,8 @@ onMounted(() => {
 <style scoped>
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background-color: rgb(0 0 0 / 50%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -318,7 +316,7 @@ onMounted(() => {
 .modal-container {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 15%);
   width: 90%;
   max-width: 800px;
   max-height: 90vh;
@@ -534,7 +532,7 @@ onMounted(() => {
   font-size: 1.1rem;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .form-row {
     flex-direction: column;
     gap: 1.25rem;

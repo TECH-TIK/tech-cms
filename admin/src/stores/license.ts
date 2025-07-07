@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from '@/utils/axios'
+import { ApiService } from '@/services/api'
 import { useNotificationStore } from './notifications'
+import logger from '@/services/logger'
 
 export interface LicenseInfo {
   key: string | null
@@ -12,7 +13,8 @@ export interface LicenseInfo {
 export const useLicenseStore = defineStore('license', () => {
   const licenseInfo = ref<LicenseInfo | null>(null)
   const loading = ref(false)
-  const error = ref<string | null>(null)
+  // Permettre des types plus larges pour les messages d'erreur (string, null ou directement une erreur extraite)
+  const error = ref<string | unknown | null>(null)
   const notificationStore = useNotificationStore()
 
   /**
@@ -23,11 +25,11 @@ export const useLicenseStore = defineStore('license', () => {
     error.value = null
 
     try {
-      const response = await axios.get('/api/v1/license')
+      const response = await ApiService.routes.admin.system.license.getLicenseInfo()
       licenseInfo.value = response.data.data
       return response.data.data
     } catch (err: any) {
-      console.error('Erreur lors de la récupération des infos de licence:', err)
+      logger.error('Erreur lors de la récupération des infos de licence', { err })
       error.value = err.response?.data?.message || 'Erreur lors de la récupération des informations de licence'
       return null
     } finally {
@@ -43,7 +45,7 @@ export const useLicenseStore = defineStore('license', () => {
     error.value = null
 
     try {
-      const response = await axios.put('/api/v1/license', { license_key: licenseKey })
+      const response = await ApiService.routes.admin.system.license.activateLicense(licenseKey)
       licenseInfo.value = response.data.data
       
       notificationStore.showNotification({
@@ -54,12 +56,12 @@ export const useLicenseStore = defineStore('license', () => {
       
       return response.data
     } catch (err: any) {
-      console.error('Erreur lors de la mise à jour de la licence:', err)
+      logger.error('Erreur lors de la mise à jour de la licence', { err })
       error.value = err.response?.data?.message || 'Erreur lors de la mise à jour de la licence'
       
       notificationStore.showNotification({
         title: 'Erreur',
-        message: error.value,
+        message: typeof error.value === 'string' ? error.value : 'Erreur lors de la mise à jour de la licence',
         type: 'error'
       })
       

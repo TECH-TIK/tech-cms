@@ -44,7 +44,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { useNotificationStore } from '@/stores/notifications'
+import { useNotificationStore } from '@/stores/notifications';
+import logger from '@/services/logger';
 import '@/assets/css/components/common-layout.css'
 import '@/assets/css/pages/settings.css'
 
@@ -101,6 +102,20 @@ const settingsBoxes = computed(() => [
     route: '/settings/integrations'
   },
   { 
+    id: 'automation', 
+    title: t('settings.automation.title') || 'Automatisation', 
+    description: t('settings.automation.description') || 'Configurer les tâches automatisées pour la gestion des tickets, facturations, services et domaines', 
+    icon: 'fas fa-robot',
+    route: '/settings/automation'
+  },
+  { 
+    id: 'modules', 
+    title: t('settings.modules.title'), 
+    description: t('settings.modules.description'), 
+    icon: 'fas fa-cubes',
+    route: '/settings/modules'
+  },
+  { 
     id: 'license', 
     title: t('settings.license.title'), 
     description: t('settings.license.description'), 
@@ -110,7 +125,7 @@ const settingsBoxes = computed(() => [
 ])
 
 // Méthodes
-const navigateTo = (route) => {
+const navigateTo = (route: string) => {
   router.push(route)
 }
 
@@ -122,7 +137,7 @@ onMounted(async () => {
       loading.value = false
     }, 500)
   } catch (error) {
-    console.error('Error loading settings:', error)
+    logger.error('Error loading settings', { error });
     notificationStore.notificationError(t('common.errorLoading'))
   }
 })

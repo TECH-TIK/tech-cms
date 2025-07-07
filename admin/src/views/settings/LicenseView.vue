@@ -22,7 +22,7 @@
         <div class="settings-group">
           <h3>{{ t('settings.license.information') }}</h3>
           
-          <div v-if="licenseInfo.valid" class="license-info">
+          <div v-if="licenseInfo.status === 'valid'" class="license-info">
             <div class="license-status valid">
               <i class="fas fa-check-circle"></i>
               {{ t('settings.license.valid') }}
@@ -35,33 +35,19 @@
               </div>
               
               <div class="license-detail">
-                <div class="detail-label">{{ t('settings.license.registeredTo') }}</div>
-                <div class="detail-value">{{ licenseInfo.registeredTo }}</div>
+                <div class="detail-label">{{ t('settings.license.product') }}</div>
+                <div class="detail-value">{{ licenseInfo.product }}</div>
               </div>
               
-              <div class="license-detail">
-                <div class="detail-label">{{ t('settings.license.email') }}</div>
-                <div class="detail-value">{{ licenseInfo.email }}</div>
-              </div>
-              
-              <div class="license-detail">
-                <div class="detail-label">{{ t('settings.license.plan') }}</div>
-                <div class="detail-value">
-                  <span class="plan-badge">{{ licenseInfo.plan }}</span>
-                </div>
+              <div v-if="licenseInfo.type" class="license-detail">
+                <div class="detail-label">{{ t('settings.license.type') }}</div>
+                <div class="detail-value">{{ licenseInfo.type }}</div>
               </div>
               
               <div class="license-detail">
                 <div class="detail-label">{{ t('settings.license.expiresAt') }}</div>
                 <div class="detail-value">
-                  {{ licenseInfo.expiresAt ? formatDate(licenseInfo.expiresAt) : t('common.never') }}
-                </div>
-              </div>
-              
-              <div class="license-detail">
-                <div class="detail-label">{{ t('settings.license.supportUntil') }}</div>
-                <div class="detail-value">
-                  {{ licenseInfo.supportUntil ? formatDate(licenseInfo.supportUntil) : t('common.never') }}
+                  {{ licenseInfo.expires_at ? formatDate(licenseInfo.expires_at) : t('common.never') }}
                 </div>
               </div>
             </div>
@@ -83,14 +69,14 @@
               class="btn btn-primary" 
               @click="showLicenseModal = true"
             >
-              {{ licenseInfo.valid ? t('settings.license.update') : t('settings.license.activate') }}
+              {{ licenseInfo.status === 'valid' ? t('settings.license.update') : t('settings.license.activate') }}
             </button>
             
             <button 
-              v-if="licenseInfo.valid"
+              v-if="licenseInfo.status === 'valid'"
               class="btn btn-secondary" 
-              @click="checkLicenseStatus"
               :disabled="checkingStatus"
+              @click="checkLicenseStatus"
             >
               <i v-if="checkingStatus" class="fas fa-spinner fa-spin" />
               <i v-else class="fas fa-sync-alt"></i>
@@ -100,7 +86,7 @@
         </div>
         
         <!-- Fonctionnalités de la licence -->
-        <div v-if="licenseInfo.valid" class="settings-group">
+        <div v-if="licenseInfo.status === 'valid'" class="settings-group">
           <h3>{{ t('settings.license.features') }}</h3>
           
           <div class="license-features">
@@ -128,7 +114,7 @@
     <div v-if="showLicenseModal" class="modal-overlay">
       <div class="modal-container">
         <div class="modal-header">
-          <h3>{{ licenseInfo.valid ? t('settings.license.updateLicense') : t('settings.license.activateLicense') }}</h3>
+          <h3>{{ licenseInfo.status === 'valid' ? t('settings.license.updateLicense') : t('settings.license.activateLicense') }}</h3>
           <button class="btn-close" @click="closeLicenseModal">
             <i class="fas fa-times"></i>
           </button>
@@ -138,9 +124,9 @@
             <div class="form-group">
               <label class="form-label">{{ t('settings.license.licenseKey') }}</label>
               <input 
-                type="text" 
+                v-model="licenseKey" 
+                type="text"
                 class="form-control"
-                v-model="licenseKey"
                 required
                 placeholder="XXXX-XXXX-XXXX-XXXX"
               />
@@ -174,12 +160,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '@/stores/settings'
 import { useNotificationStore } from '@/stores/notifications'
-import { format } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import logger from '@/services/logger'
+import { LicenseInfo } from '@/types/settings'
 import '@/assets/css/components/common-layout.css'
 import '@/assets/css/pages/settings.css'
 
@@ -189,14 +175,12 @@ const notificationStore = useNotificationStore()
 
 // État
 const loading = ref(true)
-const licenseInfo = ref({
-  valid: false,
+const licenseInfo = ref<LicenseInfo>({
+  status: 'invalid',
   key: '',
-  registeredTo: '',
-  email: '',
-  plan: '',
-  expiresAt: null,
-  supportUntil: null,
+  registered_to: '',
+  product: '',
+  expires_at: undefined,
   message: ''
 })
 const licenseKey = ref('')
@@ -205,38 +189,44 @@ const savingLicense = ref(false)
 const checkingStatus = ref(false)
 
 // Fonctionnalités de la licence
-const licenseFeatures = computed(() => [
-  {
-    name: t('settings.license.features.multipleUsers'),
-    description: t('settings.license.features.multipleUsersDesc'),
-    enabled: true
-  },
-  {
-    name: t('settings.license.features.api'),
-    description: t('settings.license.features.apiDesc'),
-    enabled: true
-  },
-  {
-    name: t('settings.license.features.whiteLabel'),
-    description: t('settings.license.features.whiteLabelDesc'),
-    enabled: licenseInfo.value.plan === 'Professional' || licenseInfo.value.plan === 'Enterprise'
-  },
-  {
-    name: t('settings.license.features.multipleServers'),
-    description: t('settings.license.features.multipleServersDesc'),
-    enabled: licenseInfo.value.plan === 'Professional' || licenseInfo.value.plan === 'Enterprise'
-  },
-  {
-    name: t('settings.license.features.advancedReporting'),
-    description: t('settings.license.features.advancedReportingDesc'),
-    enabled: licenseInfo.value.plan === 'Enterprise'
-  },
-  {
-    name: t('settings.license.features.prioritySupport'),
-    description: t('settings.license.features.prioritySupportDesc'),
-    enabled: licenseInfo.value.plan === 'Enterprise'
+const licenseFeatures = computed(() => {
+  const hasFeature = (feature: string): boolean => {
+    return licenseInfo.value.product?.includes(feature) || licenseInfo.value.features?.includes(feature) || false
   }
-])
+
+  return [
+    {
+      name: t('settings.license.features.multipleUsers'),
+      description: t('settings.license.features.multipleUsersDesc'),
+      enabled: true
+    },
+    {
+      name: t('settings.license.features.api'),
+      description: t('settings.license.features.apiDesc'),
+      enabled: true
+    },
+    {
+      name: t('settings.license.features.whiteLabel'),
+      description: t('settings.license.features.whiteLabelDesc'),
+      enabled: hasFeature('white-label')
+    },
+    {
+      name: t('settings.license.features.multipleServers'),
+      description: t('settings.license.features.multipleServersDesc'),
+      enabled: hasFeature('multiple-servers')
+    },
+    {
+      name: t('settings.license.features.advancedReporting'),
+      description: t('settings.license.features.advancedReportingDesc'),
+      enabled: hasFeature('advanced-reporting')
+    },
+    {
+      name: t('settings.license.features.prioritySupport'),
+      description: t('settings.license.features.prioritySupportDesc'),
+      enabled: hasFeature('priority-support')
+    }
+  ]
+})
 
 // Méthodes
 const fetchLicenseInfo = async () => {
@@ -248,7 +238,7 @@ const fetchLicenseInfo = async () => {
       licenseInfo.value = response
     }
   } catch (error) {
-    console.error('Erreur lors du chargement des informations de licence:', error)
+    logger.error('Erreur lors du chargement des informations de licence', { error })
     notificationStore.notificationError(t('settings.loadError'))
   } finally {
     loading.value = false
@@ -261,13 +251,20 @@ const saveLicense = async () => {
     
     const response = await settingsStore.activateLicense(licenseKey.value)
     
-    if (response) {
-      licenseInfo.value = response
+    if (response && response.success && response.license) {
+      licenseInfo.value = response.license
       notificationStore.success(t('settings.license.activationSuccess'))
       closeLicenseModal()
+    } else if (response) {
+      // Si la réponse existe mais pas de licence ou pas de succès
+      notificationStore.showNotification({
+        title: 'Erreur',
+        message: response.message || 'Erreur lors de l\'activation de la licence',
+        type: 'error'
+      })
     }
   } catch (error) {
-    console.error('Erreur lors de l\'activation de la licence:', error)
+    logger.error('Erreur lors de l\'activation de la licence', { licenseKey: licenseKey.value, error })
     notificationStore.notificationError(t('settings.license.activationError'))
   } finally {
     savingLicense.value = false
@@ -285,7 +282,7 @@ const checkLicenseStatus = async () => {
       notificationStore.success(t('settings.license.checkSuccess'))
     }
   } catch (error) {
-    console.error('Erreur lors de la vérification de la licence:', error)
+    logger.error('Erreur lors de la vérification de la licence', { error })
     notificationStore.notificationError(t('settings.license.checkError'))
   } finally {
     checkingStatus.value = false
@@ -301,22 +298,18 @@ const closeLicenseModal = () => {
   }, 300)
 }
 
-const maskLicenseKey = (key) => {
+const maskLicenseKey = (key: string | undefined): string => {
   if (!key) return ''
+  if (key.length < 8) return key
   
-  const parts = key.split('-')
-  if (parts.length < 2) return key
-  
-  return parts[0] + '-XXXX-XXXX-' + parts[parts.length - 1]
+  return key.substring(0, 4) + '****' + key.substring(key.length - 4)
 }
 
-const formatDate = (dateString) => {
-  try {
-    const date = new Date(dateString)
-    return format(date, 'dd MMM yyyy', { locale: fr })
-  } catch (error) {
-    return dateString
-  }
+const formatDate = (dateString: string | null): string => {
+  if (!dateString) return '-'
+  
+  const date = new Date(dateString)
+  return date.toLocaleDateString()
 }
 
 // Cycle de vie

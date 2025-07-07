@@ -1,4 +1,5 @@
 -- Structure de la base de données TechCMS
+-- Version: 1.1.0 (Ajout du système d'automatisation)
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -11,6 +12,8 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `admins` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `firstname` varchar(100) DEFAULT NULL,
+  `lastname` varchar(100) DEFAULT NULL,
   `username` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
@@ -59,19 +62,30 @@ CREATE TABLE `products` (
   `name` varchar(255) NOT NULL,
   `slug` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL,
+  `short_description` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `color` varchar(50) DEFAULT '#0066ff',
   `group_id` int(11) DEFAULT NULL,
   `price` decimal(10,2) DEFAULT NULL,
-  `setup_fee` decimal(10,2) DEFAULT 0,
+  `setup_fee` decimal(10,2) DEFAULT 0.00,
   `recurring` tinyint(1) DEFAULT 0,
   `billing_cycle` enum('monthly','quarterly','semi_annually','annually','biennially','triennially') DEFAULT 'monthly',
   `product_type` varchar(50) DEFAULT 'other',
   `status` enum('active','inactive','maintenance') NOT NULL DEFAULT 'active',
+  `welcome_email_id` int(11) DEFAULT NULL,
+  `hidden` tinyint(1) DEFAULT 0,
+  `featured` tinyint(1) DEFAULT 0,
   `features` text DEFAULT NULL,
   `options` text DEFAULT NULL,
+  `stock_control` tinyint(1) DEFAULT 0,
+  `stock_quantity` int(11) DEFAULT 0,
   `created_at` datetime NOT NULL,
   `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `group_id` (`group_id`)
+  `auto_provision` tinyint(1) DEFAULT 0,
+  `provisioning_type` varchar(50) DEFAULT NULL,
+  `server_type` varchar(50) DEFAULT NULL,
+  `package_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -105,9 +119,12 @@ CREATE TABLE `invoices` (
   `status` enum('draft','unpaid','paid','cancelled') NOT NULL DEFAULT 'draft',
   `date` date NOT NULL,
   `due_date` date NOT NULL,
-  `total` decimal(10,2) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
   `notes` text DEFAULT NULL,
   `paid_at` datetime DEFAULT NULL,
+  `last_reminder_sent` datetime DEFAULT NULL COMMENT 'Date du dernier rappel envoyé',
+  `reminder_count` smallint(6) NOT NULL DEFAULT 0 COMMENT 'Nombre de rappels envoyés',
+  `reminder_type` varchar(20) DEFAULT NULL COMMENT 'Type du dernier rappel envoyé (first, second, final, post_due)',
   `created_at` datetime NOT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -121,16 +138,63 @@ CREATE TABLE `invoices` (
 -- Structure de la table `tickets`
 --
 
+--
+-- Structure de la table `tickets_departments`
+--
+
+CREATE TABLE `tickets_departments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `tickets`
+--
+
 CREATE TABLE `tickets` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `client_id` int(11) NOT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `service_id` int(11) DEFAULT NULL,
   `subject` varchar(255) NOT NULL,
   `status` enum('open','answered','customer-reply','closed') NOT NULL DEFAULT 'open',
   `priority` enum('low','medium','high') NOT NULL DEFAULT 'medium',
   `created_at` datetime NOT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `client_id` (`client_id`)
+  KEY `client_id` (`client_id`),
+  KEY `department_id` (`department_id`),
+  KEY `service_id` (`service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `ticket_replies`
+--
+
+--
+-- Structure de la table `tickets_assignments`
+--
+
+CREATE TABLE `tickets_assignments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(11) NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  `assigned_at` datetime NOT NULL,
+  `assigned_by` int(11) DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `ticket_id` (`ticket_id`),
+  KEY `admin_id` (`admin_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -472,3 +536,145 @@ CREATE TABLE `service_configurations` (
   KEY `service_id` (`service_id`),
   CONSTRAINT `service_configurations_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `product_drafts`
+--
+
+CREATE TABLE `product_drafts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `product_type` varchar(50) DEFAULT NULL,
+  `current_step` varchar(50) DEFAULT NULL,
+  `data` longtext DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `product_drafts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `admins` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `modules`
+--
+
+CREATE TABLE `modules` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category` varchar(50) NOT NULL COMMENT 'Catégorie du module (servers, gateways, etc.)',
+  `name` varchar(100) NOT NULL COMMENT 'Nom technique du module',
+  `display_name` varchar(100) NOT NULL COMMENT 'Nom d''affichage',
+  `version` varchar(20) DEFAULT '1.0.0',
+  `author` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `features` text DEFAULT NULL COMMENT 'Fonctionnalités en JSON',
+  `active` tinyint(1) NOT NULL DEFAULT 0,
+  `last_scan` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `category_name` (`category`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `automation_settings`
+--
+
+CREATE TABLE `automation_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group` varchar(100) NOT NULL COMMENT 'Groupe de paramètres (tickets, factures, etc.)',
+  `key` varchar(100) NOT NULL,
+  `value` text DEFAULT NULL,
+  `type` varchar(50) NOT NULL DEFAULT 'text' COMMENT 'Type de valeur (text, number, boolean, json)',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `group_key` (`group`,`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `system_migrations`
+--
+
+CREATE TABLE `system_migrations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `version_from` varchar(20) NOT NULL COMMENT 'Version source',
+  `version_to` varchar(20) NOT NULL COMMENT 'Version cible',
+  `migration_file` varchar(255) NOT NULL COMMENT 'Fichier de migration',
+  `executed_at` datetime NOT NULL COMMENT 'Date d\'exécution',
+  `rollback_file` varchar(255) DEFAULT NULL COMMENT 'Fichier de rollback',
+  `status` enum('pending','executing','completed','failed','rolled_back') NOT NULL DEFAULT 'pending' COMMENT 'Statut de la migration',
+  `backup_id` varchar(100) DEFAULT NULL COMMENT 'ID de la sauvegarde associée',
+  `error_message` text DEFAULT NULL COMMENT 'Message d\'erreur en cas d\'échec',
+  `execution_time` decimal(10,3) DEFAULT NULL COMMENT 'Temps d\'exécution en secondes',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_version_from` (`version_from`),
+  KEY `idx_version_to` (`version_to`),
+  KEY `idx_status` (`status`),
+  KEY `idx_executed_at` (`executed_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Suivi des migrations de base de données';
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `system_updates`
+--
+
+CREATE TABLE `system_updates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `version_from` varchar(20) NOT NULL COMMENT 'Version source',
+  `version_to` varchar(20) NOT NULL COMMENT 'Version cible',
+  `status` enum('pending','downloading','downloaded','installing','completed','failed','rolled_back') NOT NULL DEFAULT 'pending' COMMENT 'Statut de la mise à jour',
+  `download_token` varchar(255) DEFAULT NULL COMMENT 'Token de téléchargement sécurisé',
+  `download_url` varchar(500) DEFAULT NULL COMMENT 'URL de téléchargement',
+  `changelog` text DEFAULT NULL COMMENT 'Notes de version',
+  `file_path` varchar(500) DEFAULT NULL COMMENT 'Chemin du fichier téléchargé',
+  `file_size` bigint(20) DEFAULT NULL COMMENT 'Taille du fichier en bytes',
+  `checksum` varchar(64) DEFAULT NULL COMMENT 'Checksum MD5 du fichier',
+  `started_at` datetime DEFAULT NULL COMMENT 'Date de début de la mise à jour',
+  `completed_at` datetime DEFAULT NULL COMMENT 'Date de fin de la mise à jour',
+  `error_message` text DEFAULT NULL COMMENT 'Message d\'erreur en cas d\'échec',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `status` (`status`),
+  KEY `version_to` (`version_to`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `update_settings`
+--
+
+CREATE TABLE `update_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `auto_check` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Vérification automatique des mises à jour',
+  `auto_download` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Téléchargement automatique des mises à jour',
+  `auto_install` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Installation automatique des mises à jour',
+  `check_interval` int(11) NOT NULL DEFAULT 86400 COMMENT 'Intervalle de vérification en secondes (défaut: 24h)',
+  `backup_before_update` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Créer une sauvegarde avant mise à jour',
+  `notification_email` varchar(255) DEFAULT NULL COMMENT 'Email de notification pour les mises à jour',
+  `last_check` datetime DEFAULT NULL COMMENT 'Dernière vérification des mises à jour',
+  `last_available_version` varchar(20) DEFAULT NULL COMMENT 'Dernière version disponible détectée',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Données par défaut pour la table `update_settings`
+--
+
+INSERT INTO `update_settings` (`auto_check`, `auto_download`, `auto_install`, `check_interval`, `backup_before_update`, `created_at`) VALUES
+(1, 0, 0, 86400, 1, NOW());

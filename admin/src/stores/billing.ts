@@ -2,13 +2,14 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
 import { useAbly } from '@/services/ably'
+import type { Invoice, Payment } from '@/types/payment'
 
 export const useBillingStore = defineStore('billing', () => {
   // État
-  const invoices = ref([])
-  const payments = ref([])
+  const invoices = ref<Invoice[]>([])
+  const payments = ref<Payment[]>([])
   const loading = ref(false)
-  const error = ref(null)
+  const error = ref<string | null>(null)
 
   // Getters
   const allInvoices = computed(() => invoices.value)
@@ -23,49 +24,61 @@ export const useBillingStore = defineStore('billing', () => {
   )
 
   // Actions
-  const fetchInvoices = async (dateRange = {}) => {
+  const fetchInvoices = async (dateRange: Record<string, any> = {}) => {
     try {
       loading.value = true
       const response = await axios.get('/api/invoices', { params: dateRange })
       invoices.value = response.data
       return response.data
     } catch (err) {
-      error.value = err
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Erreur lors de la récupération des factures'
+      }
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  const fetchPayments = async (dateRange = {}) => {
+  const fetchPayments = async (dateRange: Record<string, any> = {}) => {
     try {
       loading.value = true
       const response = await axios.get('/api/payments', { params: dateRange })
       payments.value = response.data
       return response.data
     } catch (err) {
-      error.value = err
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Erreur lors de la récupération des paiements'
+      }
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  const createInvoice = async (invoice) => {
+  const createInvoice = async (invoice: Partial<Invoice>) => {
     try {
       loading.value = true
       const response = await axios.post('/api/invoices', invoice)
       invoices.value.push(response.data)
       return response.data
     } catch (err) {
-      error.value = err
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Erreur lors de la création de la facture'
+      }
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  const updateInvoice = async (invoice) => {
+  const updateInvoice = async (invoice: Invoice) => {
     try {
       loading.value = true
       const response = await axios.put(`/api/invoices/${invoice.id}`, invoice)
@@ -75,41 +88,53 @@ export const useBillingStore = defineStore('billing', () => {
       }
       return response.data
     } catch (err) {
-      error.value = err
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Erreur lors de la mise à jour de la facture'
+      }
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  const deleteInvoice = async (id) => {
+  const deleteInvoice = async (id: number) => {
     try {
       loading.value = true
       await axios.delete(`/api/invoices/${id}`)
       invoices.value = invoices.value.filter(inv => inv.id !== id)
     } catch (err) {
-      error.value = err
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Erreur lors de la suppression de la facture'
+      }
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  const processPayment = async (payment) => {
+  const processPayment = async (payment: Partial<Payment>) => {
     try {
       loading.value = true
       const response = await axios.post('/api/payments', payment)
       payments.value.push(response.data)
       return response.data
     } catch (err) {
-      error.value = err
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Erreur lors du traitement du paiement'
+      }
       throw err
     } finally {
       loading.value = false
     }
   }
 
-  const refundPayment = async (paymentId, amount) => {
+  const refundPayment = async (paymentId: number, amount: number) => {
     try {
       loading.value = true
       const response = await axios.post(`/api/payments/${paymentId}/refund`, { amount })
@@ -119,7 +144,11 @@ export const useBillingStore = defineStore('billing', () => {
       }
       return response.data
     } catch (err) {
-      error.value = err
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'Erreur lors du remboursement'
+      }
       throw err
     } finally {
       loading.value = false

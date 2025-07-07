@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
+import { ApiService } from '@/services/api'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/products'
 import ProductGroupModal from '@/components/products/ProductGroupModal.vue'
+
 import { useNotificationStore } from '@/stores/notifications'
 import { useProductGroupsStore, type ProductGroup } from '@/stores/product-groups'
+import logger from '@/services/logger'
+import type { Product } from '@/types/product'
+
+// Interface étendue de Product pour gérer la propriété clients utilisée dans le template
+interface ProductWithClients extends Product {
+  clients?: Array<any>;
+}
 
 // Traduction
 const { t } = useI18n()
@@ -17,19 +26,28 @@ const notificationStore = useNotificationStore()
 const productGroupsStore = useProductGroupsStore()
 
 // État
-const products = ref([])
+
 const isLoading = ref(true)
 const showGroupModal = ref(false)
-const selectedGroup = ref(null)
+const selectedGroup = ref<ProductGroup | undefined>(undefined)
 const filterStatus = ref('all')
 const filterType = ref('all')
-const filterTypeOptions = [
+// Options de base pour les types de produits
+interface FilterOption {
+  value: string;
+  label: string;
+  isModuleType?: boolean;
+}
+
+const filterTypeOptions = ref<FilterOption[]>([
   { value: 'all', label: t('products_services.filters.all_types') },
   { value: 'reseller_hosting', label: t('products_services.types.reseller') },
   { value: 'dedicated_server', label: t('products_services.types.dedicated') },
   { value: 'vps', label: t('products_services.types.vps') },
   { value: 'shared_hosting', label: t('products_services.types.shared') }
-]
+])
+
+// Modules disponibles pour les produits
 const filterGroup = ref('all')
 const searchQuery = ref('')
 const priceRangeFilter = ref('')
@@ -38,188 +56,124 @@ const sortDesc = ref(false)
 const sortDirection = ref('DESC')
 const editingGroup = ref(false)
 
-// Produit vide pour la création
-const emptyProduct = {
-  id: null,
-  name: '',
-  description: '',
-  price: 0,
-  setup_fee: 0,
-  recurring: 0,
-  billing_cycle: 'monthly',
-  status: 'active',
-  product_type: 'reseller_hosting',
-  group_id: null,
-  features: [],
-  clients: []
-}
 
-// Colonnes pour le tableau
-const columns = [
-  { 
-    key: 'name', 
-    label: t('products_services.columns.name'),
-    sortable: true,
-    formatter: (value, row) => {
-      return `<span class="product-name">${value}</span>`
-    }
-  },
-  { 
-    key: 'description', 
-    label: t('products_services.columns.description'),
-    sortable: false,
-    formatter: (value) => value && value.length > 50 ? value.substring(0, 50) + '...' : (value || '')
-  },
-  { 
-    key: 'product_type', 
-    label: t('products_services.columns.type'),
-    sortable: true,
-    formatter: (value) => {
-      const typeMap = {
-        'reseller_hosting': t('products_services.types.reseller'),
-        'dedicated_server': t('products_services.types.dedicated'),
-        'vps': t('products_services.types.vps'),
-        'shared_hosting': t('products_services.types.shared')
-      }
-      return typeMap[value] || value
-    }
-  },
-  { 
-    key: 'price', 
-    label: t('products_services.columns.price'),
-    sortable: true,
-    formatter: (value) => `${value} €`
-  },
-  { 
-    key: 'status', 
-    label: t('products_services.columns.status'),
-    sortable: true,
-    formatter: (value) => {
-      const statusClasses = {
-        active: 'status-active',
-        inactive: 'status-inactive',
-        maintenance: 'status-maintenance'
-      }
-      return `<span class="status-badge ${statusClasses[value] || ''}">${t(`products_services.status.${value}`)}</span>`
-    }
-  },
-  { 
-    key: 'group', 
-    label: t('products_services.columns.group'),
-    sortable: true,
-    formatter: (value, row) => {
-      // Vérifier que row existe et a une propriété group_id avant d'y accéder
-      if (!row) return t('products_services.groups.none');
-      return row.group_id ? productGroupsStore.getGroupName(row.group_id) : t('products_services.groups.none')
-    }
-  },
-  { 
-    key: 'clients', 
-    label: t('products_services.columns.clients'),
-    sortable: true,
-    formatter: (value, row) => {
-      if (!row || !row.clients) return '0';
-      return Array.isArray(row.clients) ? row.clients.length.toString() : '0'
-    }
-  },
-  {
-    key: 'actions',
-    label: t('common.actions'),
-    sortable: false,
-    formatter: (value, row) => {
-      return `
-        <div class="actions-menu">
-          <button class="btn-icon" @click.stop="openEditModal(row)" :title="t('products_services.actions.edit')">
-            <i class="fas fa-edit"></i>
-          </button>
-          <button class="btn-icon" @click.stop="confirmDelete(row)" :title="t('products_services.actions.delete')">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      `
-    }
-  }
-]
 
 // Computed
-const filteredProducts = computed(() => {
-  console.log('Calcul des produits filtrés');
-  console.log('Produits initiaux:', productStore.allProducts);
+const filteredProducts = computed<ProductWithClients[]>(() => {
+  logger.debug('Calcul des produits filtrés', { allProducts: productStore.allProducts });
   
   let result = [...productStore.allProducts];
-  console.log('Copie des produits:', result);
   
   // Filtre par type (utilise product_type au lieu de type)
   if (filterType.value !== 'all') {
-    console.log('Filtrage par type:', filterType.value);
+    logger.debug('Filtrage par type', { filter: filterType.value });
     result = result.filter(item => item.product_type === filterType.value);
   } else {
-    // N'applique pas de filtre par défaut, affiche tous les produits
-    console.log('Aucun filtrage par type');
+    logger.debug('Aucun filtrage par type');
   }
-  console.log('Après filtrage par type:', result);
   
   // Filtre par statut
   if (filterStatus.value !== 'all') {
-    console.log('Filtrage par statut:', filterStatus.value);
+    logger.debug('Filtrage par statut', { filter: filterStatus.value });
     result = result.filter(item => item.status === filterStatus.value);
   }
-  console.log('Après filtrage par statut:', result);
   
   // Filtre par groupe
   if (filterGroup.value !== 'all') {
-    console.log('Filtrage par groupe:', filterGroup.value);
+    logger.debug('Filtrage par groupe', { filter: filterGroup.value });
     if (filterGroup.value === 'none') {
       // Vérifier que l'item existe avant d'accéder à group_id
       result = result.filter(item => item && !item.group_id);
     } else {
-      // Vérifier que l'item existe avant d'accéder à group_id
-      result = result.filter(item => item && item.group_id === filterGroup.value);
+      // Vérifier que l'item existe avant d'accéder à group_id et convertir l'ID en string pour la comparaison
+      result = result.filter(item => item && item.group_id?.toString() === filterGroup.value);
     }
   }
-  console.log('Après filtrage par groupe:', result);
   
   // Filtre par recherche
   if (searchQuery.value) {
-    console.log('Filtrage par recherche:', searchQuery.value);
+    logger.debug('Filtrage par recherche', { query: searchQuery.value });
     const query = searchQuery.value.toLowerCase();
     result = result.filter(item => 
       item.name.toLowerCase().includes(query) || 
-      item.description.toLowerCase().includes(query)
+      (item.description?.toLowerCase().includes(query) ?? false)
     );
   }
-  console.log('Après filtrage par recherche:', result);
   
   // Filtre par prix
   if (priceRangeFilter.value) {
-    console.log('Filtrage par prix:', priceRangeFilter.value);
+    logger.debug('Filtrage par prix', { range: priceRangeFilter.value });
     const [min, max] = priceRangeFilter.value.split('-').map(Number);
     if (!isNaN(min) && !isNaN(max)) {
-      result = result.filter(item => item.price >= min && item.price <= max);
+      result = result.filter(item => 
+        (typeof item.price === 'number') && 
+        item.price >= min && 
+        item.price <= max
+      );
     }
   }
-  console.log('Après filtrage par prix:', result);
   
-  console.log('Résultat final du filtrage:', result);
+  logger.debug('Résultat final du filtrage', { result });
   return result;
 })
 
-// Watching filters for auto-apply
-watch([filterStatus, filterType, filterGroup, searchQuery, priceRangeFilter], () => {
-  console.log('Auto-applying filters')
-  // Les filtres sont appliqués automatiquement via les propriétés calculées
-})
+
+
+// Fonction pour récupérer les modules disponibles
+const fetchAvailableModules = async () => {
+  try {
+    const response = await ApiService.routes.admin.system.module.list('servers')
+    const data = response.data
+    
+    if (data.success && data.data && data.data.servers) {
+      // Ajouter les modules aux options de type de produit
+      Object.entries(data.data.servers).forEach(([moduleName, moduleData]) => {
+        // Cast moduleData à un type avec les propriétés attendues
+        const module = moduleData as { active: boolean; name: string };
+        // Vérifier si le module est actif avant de l'ajouter
+        if (module.active) {
+          filterTypeOptions.value.push({
+            value: `module_${moduleName}`, // Préfixe 'module_' pour distinguer des types standards
+            label: module.name,
+            isModuleType: true // Marquer comme un module pour traitement spécial
+          })
+        }
+      })
+    }
+  } catch (error) {
+    logger.error('Erreur lors du chargement des modules', { error })
+    notificationStore.showNotification({
+      title: t('common.error'),
+      type: 'error',
+      message: t('products_services.errors.modules_load')
+    })
+  }
+}
 
 // Méthodes
 const fetchData = async () => {
   try {
     isLoading.value = true
+    
+    // Récupérer les modules disponibles en premier
+    await fetchAvailableModules()
+    
+    // Puis récupérer les produits et groupes
     await productStore.fetchProducts()
     await productGroupsStore.fetchProductGroups()
-    products.value = productStore.allProducts
+    
+    // Vérifier si un type de module est spécifié dans l'URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const moduleType = urlParams.get('moduleType')
+    
+    if (moduleType) {
+      // Présélectionner ce type de module
+      filterType.value = `module_${moduleType}`
+    }
   } catch (error) {
-    console.error('Erreur lors de la récupération des données:', error)
+    logger.error('Erreur lors de la récupération des données', { error })
     notificationStore.showNotification({
+      title: t('common.error'),
       type: 'error',
       message: t('products_services.errors.fetch')
     })
@@ -228,25 +182,21 @@ const fetchData = async () => {
   }
 }
 
-const openCreateModal = () => {
-  router.push('/products/create')
-}
 
-const openEditModal = (product) => {
+const openEditModal = (product: ProductWithClients) => {
   router.push(`/products/${product.id}`)
 }
 
-const confirmDelete = async (product) => {
+const confirmDelete = async (product: ProductWithClients) => {
   if (confirm(t('products_services.confirm_delete'))) {
     try {
+      // Supprime le produit sans générer de notification côté client
+      // La notification sera générée par le serveur avec le nom du produit
       await productStore.deleteProduct(product.id)
-      notificationStore.showNotification({
-        type: 'success',
-        message: t('products_services.success.delete')
-      })
     } catch (error) {
-      console.error('Erreur lors de la suppression du produit:', error)
+      logger.error('Erreur lors de la suppression du produit', { error })
       notificationStore.showNotification({
+        title: t('common.error'),
         type: 'error',
         message: t('products_services.errors.delete')
       })
@@ -254,15 +204,8 @@ const confirmDelete = async (product) => {
   }
 }
 
-const resetFilters = () => {
-  filterStatus.value = 'all'
-  filterType.value = 'all'
-  filterGroup.value = 'all'
-  searchQuery.value = ''
-  priceRangeFilter.value = ''
-}
 
-const handleSort = (column) => {
+const handleSort = (column: string) => {
   if (sortBy.value === column) {
     // Si on clique sur la même colonne, on inverse la direction
     sortDirection.value = sortDirection.value === 'ASC' ? 'DESC' : 'ASC'
@@ -277,75 +220,60 @@ const handleSort = (column) => {
 
 // Méthodes pour la gestion des groupes
 const openCreateGroupModal = () => {
-  selectedGroup.value = { name: '', slug: '', description: '' }
+  selectedGroup.value = { name: '', slug: '', description: '' } as ProductGroup
   editingGroup.value = false
   showGroupModal.value = true
 }
 
-const openEditGroupModal = (group) => {
-  selectedGroup.value = { ...group }
-  editingGroup.value = true
-  showGroupModal.value = true
-}
 
-const handleSaveGroup = async () => {
-  try {
-    if (editingGroup.value) {
-      await productGroupsStore.updateProductGroup(selectedGroup.value.id, selectedGroup.value)
-      notificationStore.showNotification({
-        type: 'success',
-        message: t('product_groups.success.update')
-      })
-    } else {
-      await productGroupsStore.createProductGroup(selectedGroup.value)
-      notificationStore.showNotification({
-        type: 'success',
-        message: t('product_groups.success.create')
-      })
-    }
-    showGroupModal.value = false
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde du groupe:', error)
+// Écouteur pour les mises à jour en temps réel
+watch(() => productStore.lastRealtimeEvent, (newEvent) => {
+  if (!newEvent) return
+  
+  logger.info('[PRODUCTS VIEW] Événement temps réel détecté', { 
+    action: newEvent.action, 
+    product_id: newEvent.product?.id || 'non spécifié' 
+  })
+
+  // Afficher une notification selon le type d'événement
+  if (newEvent.action === 'create') {
     notificationStore.showNotification({
-      type: 'error',
-      message: editingGroup.value 
-        ? t('product_groups.errors.update') 
-        : t('product_groups.errors.create')
+      type: 'success',
+      title: t('products_services.realtime.new_title'),
+      message: t('products_services.realtime.new_message', { name: newEvent.product?.name || 'Nouveau produit' })
+    })
+  } else if (newEvent.action === 'update') {
+    notificationStore.showNotification({
+      type: 'info',
+      title: t('products_services.realtime.updated_title'),
+      message: t('products_services.realtime.updated_message', { name: newEvent.product?.name || 'Produit' })
+    })
+  } else if (newEvent.action === 'delete') {
+    notificationStore.showNotification({
+      type: 'warning',
+      title: t('products_services.realtime.deleted_title'),
+      message: t('products_services.realtime.deleted_message', { name: newEvent.product?.name || 'Produit' })
     })
   }
-}
-
-const confirmDeleteGroup = async (group) => {
-  if (confirm(t('product_groups.confirm_delete'))) {
-    try {
-      await productGroupsStore.deleteProductGroup(group.id)
-      notificationStore.showNotification({
-        type: 'success',
-        message: t('product_groups.success.delete')
-      })
-    } catch (error) {
-      console.error('Erreur lors de la suppression du groupe:', error)
-      notificationStore.showNotification({
-        type: 'error',
-        message: t('product_groups.errors.delete')
-      })
-    }
-  }
-}
+})
 
 // Cycle de vie
 onMounted(async () => {
   isLoading.value = true
   try {
-    console.log('Début du chargement des produits dans ProductsView')
+    logger.debug('Début du chargement des produits dans ProductsView')
     await productStore.fetchProducts()
-    console.log('Produits récupérés dans ProductsView:', productStore.allProducts)
+    logger.debug('Produits récupérés dans ProductsView', { products: productStore.allProducts })
     await productGroupsStore.fetchProductGroups()
-    console.log('Groupes de produits récupérés:', productGroupsStore.productGroups)
-    console.log('Produits filtrés:', filteredProducts.value)
+    logger.debug('Groupes de produits récupérés', { groups: productGroupsStore.productGroups })
+    logger.debug('Produits filtrés initialement', { filtered: filteredProducts.value })
+    
+    // Initialiser les écouteurs d'événements en temps réel
+    productStore.initRealtimeListeners()
+    logger.info('[PRODUCTS VIEW] Écouteurs temps réel initialisés')
   } catch (error) {
-    console.error('Erreur lors du chargement des produits:', error)
-    notificationStore.showError(t('products.errors.load_failed'))
+    logger.error('Erreur lors du chargement des produits', { error })
+    notificationStore.showError(t('products_services.errors.load_failed'))
   } finally {
     isLoading.value = false
   }
@@ -378,8 +306,8 @@ onMounted(async () => {
           <div class="filter-input-wrapper">
             <i class="fas fa-search"></i>
             <input 
-              type="text" 
               v-model="searchQuery" 
+              type="text" 
               class="filter-input" 
               :placeholder="t('products_services.search')"
             />
@@ -451,20 +379,20 @@ onMounted(async () => {
       <table class="data-table">
         <thead>
           <tr>
-            <th @click="handleSort('name')" :class="{ active: sortBy === 'name' }">
+            <th :class="{ active: sortBy === 'name' }" @click="handleSort('name')">
               {{ t('products_services.columns.name') }}
               <i v-if="sortBy === 'name'" :class="sortDirection === 'ASC' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
             </th>
             <th>{{ t('products_services.columns.description') }}</th>
-            <th @click="handleSort('product_type')" :class="{ active: sortBy === 'product_type' }">
+            <th :class="{ active: sortBy === 'product_type' }" @click="handleSort('product_type')">
               {{ t('products_services.columns.type') }}
               <i v-if="sortBy === 'product_type'" :class="sortDirection === 'ASC' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
             </th>
-            <th @click="handleSort('price')" :class="{ active: sortBy === 'price' }">
+            <th :class="{ active: sortBy === 'price' }" @click="handleSort('price')">
               {{ t('products_services.columns.price') }}
               <i v-if="sortBy === 'price'" :class="sortDirection === 'ASC' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
             </th>
-            <th @click="handleSort('status')" :class="{ active: sortBy === 'status' }">
+            <th :class="{ active: sortBy === 'status' }" @click="handleSort('status')">
               {{ t('products_services.columns.status') }}
               <i v-if="sortBy === 'status'" :class="sortDirection === 'ASC' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
             </th>
@@ -490,14 +418,14 @@ onMounted(async () => {
               {{ product.group_id ? productGroupsStore.getGroupName(product.group_id) : t('products_services.groups.none') }}
             </td>
             <td>
-              {{ product.clients && Array.isArray(product.clients) ? product.clients.length : '0' }}
+              {{ Array.isArray(product.clients) ? product.clients.length : '0' }}
             </td>
             <td class="actions">
               <div class="actions-menu">
-                <button class="btn-icon" @click.stop="openEditModal(product)" :title="t('products_services.actions.edit')">
+                <button class="btn-icon" :title="t('products_services.actions.edit')" @click.stop="openEditModal(product)">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn-icon" @click.stop="confirmDelete(product)" :title="t('products_services.actions.delete')">
+                <button class="btn-icon" :title="t('products_services.actions.delete')" @click.stop="confirmDelete(product)">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>

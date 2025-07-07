@@ -6,7 +6,9 @@
     </div>
     
     <div class="modal-body">
-      <form @submit.prevent="handleSubmit" v-if="!isViewMode">
+      <div v-if="loading" class="loader">Chargement...</div>
+      
+      <form v-if="!isViewMode" @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="client">Client</label>
           <select 
@@ -41,9 +43,9 @@
         <div class="form-group">
           <label for="start_date">Date de début</label>
           <input 
-            type="date" 
             id="start_date" 
             v-model="form.start_date" 
+            type="date" 
             class="form-control"
             required
           />
@@ -52,9 +54,9 @@
         <div class="form-group">
           <label for="end_date">Date de fin (optionnel)</label>
           <input 
-            type="date" 
             id="end_date" 
             v-model="form.end_date" 
+            type="date" 
             class="form-control"
           />
         </div>
@@ -62,9 +64,9 @@
         <div class="form-group">
           <label for="price">Prix</label>
           <input 
-            type="number" 
             id="price" 
             v-model="form.price" 
+            type="number" 
             class="form-control"
             step="0.01"
             min="0"
@@ -104,9 +106,9 @@
         
         <div class="form-group form-check">
           <input 
-            type="checkbox" 
             id="auto_renew" 
             v-model="form.auto_renew" 
+            type="checkbox" 
             class="form-check-input"
           />
           <label class="form-check-label" for="auto_renew">Renouvellement automatique</label>
@@ -188,7 +190,7 @@
           <div class="detail-value">{{ formatDate(subscription.created_at) }}</div>
         </div>
         
-        <div class="detail-row" v-if="subscription.updated_at">
+        <div v-if="subscription.updated_at" class="detail-row">
           <div class="detail-label">Mis à jour le:</div>
           <div class="detail-value">{{ formatDate(subscription.updated_at) }}</div>
         </div>
@@ -244,15 +246,73 @@
           <button type="button" class="btn btn-danger" @click="handleCancel">Oui, annuler</button>
         </div>
       </div>
+  </div>
+        
+  <div v-if="subscription.updated_at" class="detail-row">
+    <div class="detail-label">Mis à jour le:</div>
+    <div class="detail-value">{{ formatDate(subscription.updated_at) }}</div>
+  </div>
+        
+  <div class="form-actions">
+    <button type="button" class="btn btn-secondary" @click="$emit('close')">Fermer</button>
+    <button 
+      v-if="subscription.status === 'active'" 
+      type="button" 
+      class="btn btn-danger" 
+      @click="showCancelConfirmation = true"
+    >
+      Annuler l'abonnement
+    </button>
+    <button 
+      v-if="subscription.status !== 'active'" 
+      type="button" 
+      class="btn btn-success" 
+      @click="handleRenew"
+    >
+      Renouveler
+    </button>
+    <button 
+      type="button" 
+      class="btn btn-primary"
+      @click="switchToEditMode"
+    >
+      Modifier
+    </button>
+  </div>
+</div>
+    
+<!-- Modal de confirmation d'annulation -->
+<div v-if="showCancelConfirmation" class="confirmation-modal">
+  <div class="confirmation-content">
+    <h4>Confirmer l'annulation</h4>
+    <p>Êtes-vous sûr de vouloir annuler cet abonnement ?</p>
+        
+    <div class="form-group">
+      <label for="cancel_reason">Raison de l'annulation</label>
+      <textarea 
+        id="cancel_reason" 
+        v-model="cancelReason" 
+        class="form-control"
+        rows="3"
+        required
+      ></textarea>
+    </div>
+        
+    <div class="confirmation-actions">
+      <button type="button" class="btn btn-secondary" @click="showCancelConfirmation = false">Non</button>
+      <button type="button" class="btn btn-danger" @click="handleCancel">Oui, annuler</button>
     </div>
   </div>
+</div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useSubscriptionStore } from '@/stores/subscriptions'
 import { useClientsStore } from '@/stores/clients'
 import { useProductStore } from '@/stores/products'
+import { useNotificationStore } from '@/stores/notifications'
+import type { Subscription } from '@/types/subscription'
 
 const props = defineProps({
   subscriptionId: {
@@ -266,39 +326,90 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'created', 'updated', 'cancelled', 'renewed'])
+const emit = defineEmits(['close', 'created', 'updated', 'cancelled', 'renewed', 'edit'])
 
 // Stores
 const subscriptionStore = useSubscriptionStore()
 const clientStore = useClientsStore()
 const productStore = useProductStore()
+const notificationStore = useNotificationStore()
 
 // State
-const form = ref({
-  id: null as number | null,
+interface FormData {
+  id?: number | null
+  client_id: number | string
+  product_id: number | string
+  start_date: string
+  end_date: string
+  next_billing_date?: string
+  renewal_date?: string | null
+  price: number | string
+  billing_cycle: 'monthly' | 'quarterly' | 'semi_annual' | 'annual'
+  status: 'active' | 'pending' | 'expired' | 'cancelled'
+  auto_renew: boolean
+  send_notifications?: boolean
+  server_id?: number | string | null
+  domain?: string
+  username?: string
+  notes: string
+  
+  // Propriétés relationnelles
+  client_name?: string
+  product_name?: string
+  server_name?: string
+}
+
+const form = ref<FormData>({
+  id: null as unknown as number,
   client_id: '',
   product_id: '',
   start_date: new Date().toISOString().split('T')[0],
   end_date: '',
+  next_billing_date: '',
   price: 0,
   billing_cycle: 'monthly',
   status: 'active',
   auto_renew: true,
+  send_notifications: true,
+  server_id: '',
+  domain: '',
+  username: '',
   notes: ''
 })
 
 const showCancelConfirmation = ref(false)
 const cancelReason = ref('')
+const loading = ref(false)
 
 // Computed
 const isEditMode = computed(() => props.mode === 'edit')
 const isViewMode = computed(() => props.mode === 'view')
 const clients = computed(() => clientStore.clients)
 const products = computed(() => productStore.products)
-const subscription = computed(() => subscriptionStore.currentSubscription || {})
+const subscription = computed<Subscription>(() => subscriptionStore.currentSubscription || {
+  id: 0,
+  client_id: 0,
+  product_id: 0,
+  start_date: '',
+  end_date: null,
+  renewal_date: null,
+  next_billing_date: '',
+  status: 'pending',
+  price: 0,
+  billing_cycle: 'monthly',
+  auto_renew: false,
+  send_notifications: false,
+  server_id: null,
+  domain: '',
+  username: '',
+  notes: null,
+  created_at: '',
+  updated_at: null,
+  cancelled_at: null
+})
 
 // Methods
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string | undefined) => {
   if (!dateString) return ''
   const date = new Date(dateString)
   return date.toLocaleDateString('fr-FR')
@@ -330,58 +441,143 @@ const getStatusName = (status: string) => {
 
 const loadSubscription = async () => {
   if (props.subscriptionId) {
-    await subscriptionStore.fetchSubscription(props.subscriptionId)
-    if (subscriptionStore.currentSubscription) {
-      const sub = subscriptionStore.currentSubscription
-      form.value = {
-        id: sub.id,
-        client_id: sub.client_id,
-        product_id: sub.product_id,
-        start_date: sub.start_date.split('T')[0],
-        end_date: sub.end_date ? sub.end_date.split('T')[0] : '',
-        price: sub.price,
-        billing_cycle: sub.billing_cycle,
-        status: sub.status,
-        auto_renew: sub.auto_renew,
-        notes: sub.notes || ''
+    loading.value = true
+    try {
+      await subscriptionStore.fetchSubscription(props.subscriptionId)
+      if (subscriptionStore.currentSubscription) {
+        const sub = subscriptionStore.currentSubscription
+        form.value = {
+          id: sub.id,
+          client_id: sub.client_id,
+          product_id: sub.product_id,
+          start_date: sub.start_date.split('T')[0],
+          end_date: sub.end_date ? sub.end_date.split('T')[0] : '',
+          next_billing_date: sub.next_billing_date || '',
+          price: sub.price,
+          billing_cycle: sub.billing_cycle,
+          status: sub.status,
+          auto_renew: sub.auto_renew,
+          send_notifications: sub.send_notifications || true,
+          server_id: sub.server_id || '',
+          domain: sub.domain || '',
+          username: sub.username || '',
+          notes: sub.notes || ''
+        }
       }
+    } catch (error) {
+      notificationStore.addNotification({
+        type: 'error',
+        title: 'Erreur',
+        message: 'Erreur lors du chargement de l\'abonnement'
+      })
+      console.error('Erreur de chargement:', error)
+    } finally {
+      loading.value = false
     }
   }
 }
 
 const handleSubmit = async () => {
-  if (isEditMode.value && form.value.id) {
-    const updated = await subscriptionStore.updateSubscription(form.value)
-    if (updated) {
-      emit('updated', updated)
-      emit('close')
+  loading.value = true
+  try {
+    // Convertir les types de chaînes en nombres et filtrer les valeurs null
+    const formData = {
+      ...form.value,
+      id: form.value.id || undefined, // Remplace null par undefined
+      client_id: typeof form.value.client_id === 'string' ? parseInt(form.value.client_id) : form.value.client_id,
+      product_id: typeof form.value.product_id === 'string' ? parseInt(form.value.product_id) : form.value.product_id,
+      server_id: form.value.server_id ? (typeof form.value.server_id === 'string' ? parseInt(form.value.server_id as string) : form.value.server_id) : undefined,
+      price: typeof form.value.price === 'string' ? parseFloat(form.value.price as string) : form.value.price
+    } as Partial<Subscription>
+    
+    if (isEditMode.value && formData.id) {
+      // Correction: fournir l'ID et les données séparément comme attendu par la fonction
+      const updated = await subscriptionStore.updateSubscription(formData.id, formData)
+      if (updated) {
+        notificationStore.addNotification({
+          type: 'success',
+          title: 'Succès',
+          message: 'Abonnement mis à jour avec succès'
+        })
+        emit('updated', updated)
+        emit('close')
+      }
+    } else {
+      const created = await subscriptionStore.createSubscription(formData)
+      if (created) {
+        notificationStore.addNotification({
+          type: 'success',
+          title: 'Succès',
+          message: 'Abonnement créé avec succès'
+        })
+        emit('created', created)
+        emit('close')
+      }
     }
-  } else {
-    const created = await subscriptionStore.createSubscription(form.value)
-    if (created) {
-      emit('created', created)
-      emit('close')
-    }
+  } catch (error) {
+    notificationStore.addNotification({
+      type: 'error',
+      title: 'Erreur',
+      message: 'Une erreur est survenue lors de l\'enregistrement de l\'abonnement'
+    })
+    console.error(error)
+  } finally {
+    loading.value = false
   }
 }
 
 const handleCancel = async () => {
   if (props.subscriptionId && cancelReason.value.trim()) {
-    const cancelled = await subscriptionStore.cancelSubscription(props.subscriptionId, cancelReason.value)
-    if (cancelled) {
-      emit('cancelled', cancelled)
-      showCancelConfirmation.value = false
-      emit('close')
+    loading.value = true
+    try {
+      // La méthode accepte maintenant le motif d'annulation comme paramètre optionnel
+      const cancelled = await subscriptionStore.cancelSubscription(props.subscriptionId, cancelReason.value)
+      if (cancelled) {
+        notificationStore.addNotification({
+          type: 'success',
+          title: 'Succès',
+          message: 'Abonnement annulé avec succès'
+        })
+        emit('cancelled', cancelled)
+        showCancelConfirmation.value = false
+        emit('close')
+      }
+    } catch (error) {
+      notificationStore.addNotification({
+        type: 'error',
+        title: 'Erreur',
+        message: 'Une erreur est survenue lors de l\'annulation de l\'abonnement'
+      })
+      console.error(error)
+    } finally {
+      loading.value = false
     }
   }
 }
 
 const handleRenew = async () => {
   if (props.subscriptionId) {
-    const renewed = await subscriptionStore.renewSubscription(props.subscriptionId)
-    if (renewed) {
-      emit('renewed', renewed)
-      emit('close')
+    loading.value = true
+    try {
+      const renewed = await subscriptionStore.renewSubscription(props.subscriptionId)
+      if (renewed) {
+        notificationStore.addNotification({
+          type: 'success',
+          title: 'Succès',
+          message: 'Abonnement renouvelé avec succès'
+        })
+        emit('renewed', renewed)
+        emit('close')
+      }
+    } catch (error) {
+      notificationStore.addNotification({
+        type: 'error',
+        title: 'Erreur',
+        message: 'Une erreur est survenue lors du renouvellement de l\'abonnement'
+      })
+      console.error(error)
+    } finally {
+      loading.value = false
     }
   }
 }
@@ -393,16 +589,29 @@ const switchToEditMode = () => {
 
 // Lifecycle
 onMounted(async () => {
-  if (!clientStore.clients.length) {
-    await clientStore.fetchClients()
-  }
-  
-  if (!productStore.products.length) {
-    await productStore.fetchProducts()
-  }
-  
-  if (props.mode !== 'create') {
-    await loadSubscription()
+  loading.value = true
+  try {
+    // Charger les clients et produits en parallèle
+    const promises = []
+    
+    if (!clientStore.clients.length) {
+      promises.push(clientStore.fetchClients())
+    }
+    
+    if (!productStore.products.length) {
+      promises.push(productStore.fetchProducts())
+    }
+    
+    await Promise.all(promises)
+    
+    // Charger l'abonnement si on est en mode édition ou visualisation
+    if (props.mode !== 'create') {
+      await loadSubscription()
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement initial:', error)
+  } finally {
+    loading.value = false
   }
 })
 
@@ -417,7 +626,7 @@ watch(() => props.subscriptionId, async (newVal) => {
 .modal-container {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 10%);
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
@@ -564,11 +773,8 @@ watch(() => props.subscriptionId, async (newVal) => {
 
 .confirmation-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background-color: rgb(0 0 0 / 50%);
   display: flex;
   justify-content: center;
   align-items: center;

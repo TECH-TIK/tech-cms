@@ -3,19 +3,48 @@
     width: var(--sidebar-width, 280px);
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-right: 1px solid rgba(0, 102, 255, 0.1);
+    border-right: 1px solid rgb(0 102 255 / 10%);
     padding: var(--spacing-md);
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: fixed;
-    top: var(--header-height, 64px);
+    top: 0;
     left: 0;
     bottom: 0;
     overflow: hidden;
     z-index: 100;
+}
+
+/* Sidebar réduite */
+.sidebar-collapsed {
+    width: 80px;
+}
+
+/* Ajustements pour le mode réduit */
+.sidebar-collapsed .sidebar-nav li a span,
+.sidebar-collapsed .submenu-header span,
+.sidebar-collapsed .submenu-toggle::after {
+    display: none;
+}
+
+.sidebar-collapsed .logo img {
+    transform: scale(0.8);
+}
+
+/* Ajustement du header et du contenu principal quand la sidebar est réduite */
+body.sidebar-collapsed .app-header {
+    left: 80px;
+    width: calc(100% - 80px);
+}
+
+body.sidebar-collapsed .app-content {
+    margin-left: 80px;
+}
+
+body.sidebar-collapsed .sidebar-collapsed {
+    width: 80px;
 }
 
 .sidebar::before {
@@ -34,7 +63,7 @@
     align-items: center;
     justify-content: space-between;
     padding: var(--spacing-md);
-    border-bottom: 1px solid rgba(0, 102, 255, 0.1);
+    border-bottom: 1px solid rgb(0 102 255 / 10%);
     margin-bottom: 1rem;
 }
 
@@ -48,7 +77,7 @@
     height: 100%;
     object-fit: contain;
     transition: transform 0.3s ease;
-    filter: drop-shadow(0 0 10px rgba(0, 102, 255, 0.3));
+    filter: drop-shadow(0 0 10px rgb(0 102 255 / 30%));
 }
 
 .logo:hover img {
@@ -99,7 +128,7 @@
 }
 
 .sidebar-nav li.active a {
-    background: rgba(0, 102, 255, 0.1);
+    background: rgb(0 102 255 / 10%);
     color: var(--primary-blue);
     font-weight: 500;
 }
@@ -126,7 +155,7 @@
     position: relative;
     z-index: 1;
     background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-    -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 1.1rem;
 }
@@ -138,7 +167,8 @@
     margin-top: 0.25rem;
 }
 
-.has-submenu.open .submenu {
+/* Classe 'show' utilisée dans le template Vue pour afficher les sous-menus */
+.has-submenu .submenu.show {
     display: block;
 }
 
@@ -147,7 +177,8 @@
     color: var(--text-muted);
 }
 
-.has-submenu.open .menu-arrow {
+/* Classe 'submenu-open' utilisée dans le template Vue pour la rotation de la flèche */
+.has-submenu.submenu-open .menu-arrow {
     transform: rotate(90deg);
     color: var(--primary-blue);
 }
@@ -156,7 +187,7 @@
     padding: 0.625rem 1rem;
     font-size: 0.9rem;
     opacity: 0.8;
-    border-left: 1px solid rgba(0, 102, 255, 0.2);
+    border-left: 1px solid rgb(0 102 255 / 20%);
 }
 
 .submenu li a:hover {
@@ -165,7 +196,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .sidebar {
         left: calc(-1 * var(--sidebar-width, 280px));
         box-shadow: none;
@@ -175,7 +206,7 @@
 
     body.sidebar-open .sidebar {
         left: 0;
-        box-shadow: 0 0 50px rgba(0, 102, 255, 0.15);
+        box-shadow: 0 0 50px rgb(0 102 255 / 15%);
         transform: translateX(0);
     }
     
@@ -183,11 +214,8 @@
     body.sidebar-open::after {
         content: '';
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
+        inset: 0;
+        background: rgb(0 0 0 / 50%);
         z-index: 90;
         opacity: 0;
         transition: opacity 0.3s ease;
@@ -208,10 +236,10 @@
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgba(0, 102, 255, 0.2);
+    background: rgb(0 102 255 / 20%);
     border-radius: 4px;
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 102, 255, 0.4);
+    background: rgb(0 102 255 / 40%);
 }

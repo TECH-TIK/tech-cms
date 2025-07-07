@@ -5,24 +5,20 @@
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
-    
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
-    
     --primary-blue: #00C3FF;
-    --secondary-blue: #0066FF;
+    --secondary-blue: #06F;
     --primary-color: var(--primary-blue);
-    --secondary-color: rgba(255, 255, 255, 0.7);
+    --secondary-color: rgb(255 255 255 / 70%);
     --error: #EF4444;
     --success: #10B981;
     --warning: #F59E0B;
-    
-    --glass-bg: rgba(255, 255, 255, 0.02);
-    --glass-border: rgba(0, 102, 255, 0.1);
+    --glass-bg: rgb(255 255 255 / 2%);
+    --glass-border: rgb(0 102 255 / 10%);
     --text-color: #E4E6EB;
     --text-muted: #B0B3B8;
-    
     --transition-fast: 0.2s ease;
 }
 
@@ -46,9 +42,8 @@
     background: var(--glass-bg);
     border-radius: 20px;
     padding: 1.5rem;
-    box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgb(0 102 255 / 10%);
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
 }
 
@@ -60,7 +55,7 @@
     font-size: 1.75rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-    -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
 }
@@ -80,7 +75,7 @@
     background: var(--glass-bg);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgb(0 102 255 / 10%);
 }
 
 .list-table th,
@@ -91,7 +86,7 @@
 }
 
 .list-table th {
-    background: rgba(0, 102, 255, 0.05);
+    background: rgb(0 102 255 / 5%);
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -104,7 +99,7 @@
 }
 
 .list-table tbody tr:hover {
-    background: rgba(0, 102, 255, 0.03);
+    background: rgb(0 102 255 / 3%);
 }
 
 /* Statut des serveurs */
@@ -118,17 +113,17 @@
 }
 
 .server-status.online {
-    background: rgba(16, 185, 129, 0.1);
+    background: rgb(16 185 129 / 10%);
     color: var(--success);
 }
 
 .server-status.offline {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgb(239 68 68 / 10%);
     color: var(--error);
 }
 
 .server-status.maintenance {
-    background: rgba(245, 158, 11, 0.1);
+    background: rgb(245 158 11 / 10%);
     color: var(--warning);
 }
 
@@ -148,7 +143,7 @@
 }
 
 .btn-action:hover {
-    background: rgba(0, 102, 255, 0.1);
+    background: rgb(0 102 255 / 10%);
     border-color: var(--primary-blue);
     color: var(--primary-blue);
 }
@@ -234,17 +229,17 @@
 }
 
 .test-connection.success {
-    background: rgba(16, 185, 129, 0.1);
+    background: rgb(16 185 129 / 10%);
     color: var(--success);
 }
 
 .test-connection.error {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgb(239 68 68 / 10%);
     color: var(--error);
 }
 
 .test-connection.loading {
-    background: rgba(0, 102, 255, 0.1);
+    background: rgb(0 102 255 / 10%);
     color: var(--primary-blue);
 }
 
@@ -254,7 +249,7 @@
     width: 1rem;
     height: 1rem;
     border: 2px solid transparent;
-    border-top-color: currentColor;
+    border-top-color: currentcolor;
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
 }
@@ -271,9 +266,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgb(0 0 0 / 70%);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     z-index: 1000;
 }
 
@@ -284,12 +278,11 @@
     transform: translate(-50%, -50%);
     width: 100%;
     max-width: 800px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgb(255 255 255 / 3%);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
-    box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgb(0 102 255 / 10%);
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     padding: 2rem;
     max-height: 90vh;
     overflow-y: auto;
@@ -305,6 +298,7 @@
         opacity: 0;
         transform: translate(-50%, -45%);
     }
+
     to {
         opacity: 1;
         transform: translate(-50%, -50%);
@@ -326,7 +320,7 @@
     color: var(--text-color);
     margin: 0;
     background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-    -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -348,7 +342,7 @@
 
 .modal-close:hover {
     color: var(--text-color);
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(255 255 255 / 10%);
 }
 
 .modal-body {
@@ -381,18 +375,18 @@
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(255 255 255 / 10%);
     border-color: var(--primary-blue);
 }
 
 .btn-primary {
-    background: rgba(0, 102, 255, 0.1);
+    background: rgb(0 102 255 / 10%);
     border: 1px solid var(--primary-blue);
     color: var(--primary-blue);
 }
 
 .btn-primary:hover {
-    background: rgba(0, 102, 255, 0.2);
+    background: rgb(0 102 255 / 20%);
 }
 
 .btn-gradient {
@@ -426,7 +420,7 @@
 }
 
 .server-action-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgb(255 255 255 / 5%);
     color: var(--text-primary);
 }
 
@@ -456,7 +450,7 @@
     grid-column: span 2;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .server-form {
         grid-template-columns: 1fr;
     }
@@ -467,7 +461,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .modal {
         padding: 1rem;
     }
@@ -496,13 +490,13 @@
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgb(0 102 255 / 5%);
     transition: all var(--transition-fast);
 }
 
 .server-stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px 0 rgba(0, 102, 255, 0.1);
+    box-shadow: 0 12px 32px 0 rgb(0 102 255 / 10%);
 }
 
 .stat-header {
@@ -521,7 +515,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(0, 102, 255, 0.1);
+    background: rgb(0 102 255 / 10%);
     color: var(--primary-blue);
     font-size: 1.25rem;
 }
@@ -540,7 +534,7 @@
 
 .progress {
     height: 0.5rem;
-    background: rgba(0, 0, 0, 0.05);
+    background: rgb(0 0 0 / 5%);
     border-radius: 9999px;
     overflow: hidden;
     margin-top: 1rem;
@@ -573,9 +567,9 @@
 
 /* Mode sombre pour les statistiques */
 .dark .server-stat-card {
-    background: rgba(16, 20, 35, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    background: rgb(16 20 35 / 70%);
+    border: 1px solid rgb(255 255 255 / 8%);
+    box-shadow: 0 8px 32px 0 rgb(0 0 0 / 20%);
 }
 
 .dark .stat-header {
@@ -591,8 +585,8 @@
 }
 
 .dark .server-details-container .header-box {
-    background: rgba(16, 20, 35, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgb(16 20 35 / 70%);
+    border: 1px solid rgb(255 255 255 / 8%);
 }
 
 .dark .last-updated {
@@ -600,30 +594,30 @@
 }
 
 .dark .progress {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(255 255 255 / 10%);
 }
 
 .dark .progress-bar.low {
-    background: linear-gradient(90deg, var(--success), rgba(16, 185, 129, 0.7));
+    background: linear-gradient(90deg, var(--success), rgb(16 185 129 / 70%));
 }
 
 .dark .progress-bar.medium {
-    background: linear-gradient(90deg, var(--warning), rgba(245, 158, 11, 0.7));
+    background: linear-gradient(90deg, var(--warning), rgb(245 158 11 / 70%));
 }
 
 .dark .progress-bar.high {
-    background: linear-gradient(90deg, var(--error), rgba(239, 68, 68, 0.7));
+    background: linear-gradient(90deg, var(--error), rgb(239 68 68 / 70%));
 }
 
 .dark .server-stat-card:hover {
-    border-color: rgba(0, 102, 255, 0.3);
-    box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.3);
+    border-color: rgb(0 102 255 / 30%);
+    box-shadow: 0 12px 32px 0 rgb(0 0 0 / 30%);
 }
 
 .dark .server-stats-grid.table-box {
-    background: rgba(16, 20, 35, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    background: rgb(16 20 35 / 70%);
+    border: 1px solid rgb(255 255 255 / 8%);
+    box-shadow: 0 8px 32px 0 rgb(0 0 0 / 20%);
 }
 
 .dark .stat-header i {

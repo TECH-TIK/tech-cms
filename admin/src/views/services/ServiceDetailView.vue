@@ -45,19 +45,19 @@
             {{ service.product_name || t('services.details.unknown_product') }}
             <span class="service-id">#{{ service.id }}</span>
           </h2>
-          <p class="service-domain" v-if="service.domain">{{ service.domain }}</p>
+          <p v-if="service.domain" class="service-domain">{{ service.domain }}</p>
         </div>
         
         <div class="service-status">
           <span class="status-badge" :class="'status-' + service.status">
             {{ t(`services.status.${service.status}`) }}
           </span>
-          <div class="status-actions" v-if="service.status !== 'terminated'">
+          <div v-if="service.status !== 'terminated'" class="status-actions">
             <button 
-              class="btn btn-sm" 
-              :class="getStatusActionClass(action)" 
               v-for="action in availableStatusActions" 
-              :key="action"
+              :key="action" 
+              class="btn btn-sm" 
+              :class="getStatusActionClass(action)"
               @click="showStatusChangeModal(action)"
             >
               <i :class="getStatusActionIcon(action)"></i>
@@ -167,15 +167,15 @@
               <div class="info-label">{{ t('services.details.created_at') }}</div>
               <div class="info-value">{{ service.created_at ? formatDateTime(service.created_at) : t('services.details.unknown') }}</div>
             </div>
-            <div class="info-item" v-if="service.status === 'suspended' && service.suspension_date">
+            <div v-if="service.status === 'suspended' && service.suspension_date" class="info-item">
               <div class="info-label">{{ t('services.details.suspension_date') }}</div>
               <div class="info-value">{{ formatDateTime(service.suspension_date) }}</div>
             </div>
-            <div class="info-item" v-if="service.status === 'cancelled' && service.cancellation_date">
+            <div v-if="service.status === 'cancelled' && service.cancellation_date" class="info-item">
               <div class="info-label">{{ t('services.details.cancellation_date') }}</div>
               <div class="info-value">{{ formatDateTime(service.cancellation_date) }}</div>
             </div>
-            <div class="info-item" v-if="service.status === 'terminated' && service.termination_date">
+            <div v-if="service.status === 'terminated' && service.termination_date" class="info-item">
               <div class="info-label">{{ t('services.details.termination_date') }}</div>
               <div class="info-value">{{ formatDateTime(service.termination_date) }}</div>
             </div>
@@ -189,11 +189,11 @@
           </div>
           <div class="card-content">
             <div v-if="service.username || service.password">
-              <div class="info-item" v-if="service.username">
+              <div v-if="service.username" class="info-item">
                 <div class="info-label">{{ t('services.details.username') }}</div>
                 <div class="info-value">{{ service.username }}</div>
               </div>
-              <div class="info-item" v-if="service.password">
+              <div v-if="service.password" class="info-item">
                 <div class="info-label">{{ t('services.details.password') }}</div>
                 <div class="info-value password-field">
                   <span v-if="showPassword">{{ service.password }}</span>
@@ -211,12 +211,12 @@
         </div>
 
         <!-- Configuration personnalisée -->
-        <div class="detail-card" v-if="service.configuration && Object.keys(service.configuration).length > 0">
+        <div v-if="service.configuration && Object.keys(service.configuration).length > 0" class="detail-card">
           <div class="card-header">
             <h3><i class="fas fa-cogs"></i> {{ t('services.details.configuration') }}</h3>
           </div>
           <div class="card-content">
-            <div class="info-item" v-for="(value, key) in service.configuration" :key="key">
+            <div v-for="(value, key) in service.configuration" :key="key" class="info-item">
               <div class="info-label">{{ key }}</div>
               <div class="info-value">{{ value }}</div>
             </div>
@@ -224,7 +224,7 @@
         </div>
 
         <!-- Notes -->
-        <div class="detail-card" v-if="service.notes">
+        <div v-if="service.notes" class="detail-card">
           <div class="card-header">
             <h3><i class="fas fa-sticky-note"></i> {{ t('services.details.notes') }}</h3>
           </div>
@@ -238,9 +238,9 @@
     </div>
 
     <!-- Modal de changement de statut -->
-    <div class="modal show" v-if="showStatusModal" style="display: flex; align-items: center; justify-content: center;">
+    <div v-if="showStatusModal" class="modal show" style="display: flex; align-items: center; justify-content: center;">
       <div class="modal-backdrop" @click="closeStatusModal"></div>
-      <div class="modal-content" style="position: fixed; z-index: 1052; max-height: 80vh; backdrop-filter: none; -webkit-backdrop-filter: none;">
+      <div class="modal-content" style="position: fixed; z-index: 1052; max-height: 80vh; backdrop-filter: none;">
         <div class="modal-header">
           <h3>{{ t(`services.status_change.${statusAction}_title`) }}</h3>
           <button class="close-btn" @click="closeStatusModal">
@@ -268,8 +268,8 @@
           <button 
             class="btn" 
             :class="getStatusActionButtonClass(statusAction)"
-            @click="confirmStatusChange"
             :disabled="statusChangeLoading"
+            @click="confirmStatusChange"
           >
             <i v-if="statusChangeLoading" class="fas fa-spinner fa-spin"></i>
             <i v-else :class="getStatusActionIcon(statusAction)"></i>
@@ -282,14 +282,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useServicesStore } from '@/stores/services'
 import { useNotificationStore } from '@/stores/notifications'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import type { Service } from '@/types'
+import logger from '@/services/logger'
 
 // Stores et router
 const servicesStore = useServicesStore()
@@ -337,7 +337,7 @@ const availableStatusActions = computed(() => {
 const formatDate = (date: string) => {
   try {
     return format(new Date(date), 'dd/MM/yyyy', { locale: fr })
-  } catch (e) {
+  } catch {
     return date
   }
 }
@@ -345,7 +345,7 @@ const formatDate = (date: string) => {
 const formatDateTime = (date: string) => {
   try {
     return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: fr })
-  } catch (e) {
+  } catch {
     return date
   }
 }
@@ -400,7 +400,7 @@ const fetchService = async () => {
   try {
     await servicesStore.fetchServiceById(serviceId.value)
   } catch (err) {
-    console.error('Erreur lors de la récupération du service:', err)
+    logger.error('Erreur lors de la récupération du service', { error: err })
     error.value = t('services.details.error_loading')
   } finally {
     loading.value = false
@@ -429,22 +429,22 @@ const goToServer = (serverId: number) => {
 }
 
 const showStatusChangeModal = (action: string) => {
-  console.log(`[ServiceDetailView] showStatusChangeModal appelé avec action: ${action}`);
+  logger.debug(`[ServiceDetailView] showStatusChangeModal appelé avec action: ${action}`);
   statusAction.value = action
   statusNotes.value = ''
   showStatusModal.value = true
-  console.log(`[ServiceDetailView] Modal de changement de statut affichée pour l'action ${action}`);
+  logger.debug(`[ServiceDetailView] Modal de changement de statut affichée pour l'action ${action}`);
 }
 
 const closeStatusModal = () => {
-  console.log(`[ServiceDetailView] closeStatusModal appelé`);
+  logger.debug(`[ServiceDetailView] closeStatusModal appelé`);
   showStatusModal.value = false
   statusAction.value = ''
   statusNotes.value = ''
 }
 
 const confirmStatusChange = async () => {
-  console.log(`[ServiceDetailView] confirmStatusChange appelé pour l'action ${statusAction.value}`);
+  logger.debug(`[ServiceDetailView] confirmStatusChange appelé pour l'action ${statusAction.value}`);
   if (!serviceId.value) return
   
   statusChangeLoading.value = true
@@ -469,12 +469,12 @@ const confirmStatusChange = async () => {
         throw new Error(t('services.status_change.invalid_action'))
     }
     
-    console.log(`[ServiceDetailView] Appel de servicesStore.changeServiceStatus pour le service ${serviceId.value} avec le nouveau statut ${newStatus}`);
+    logger.debug(`[ServiceDetailView] Appel de servicesStore.changeServiceStatus pour le service ${serviceId.value} avec le nouveau statut ${newStatus}`);
     
     // Appeler l'API pour changer le statut
     await servicesStore.changeServiceStatus(serviceId.value, newStatus, statusNotes.value)
     
-    console.log(`[ServiceDetailView] Statut du service ${serviceId.value} changé avec succès en ${newStatus}`);
+    logger.info(`Statut du service ${serviceId.value} changé avec succès en ${newStatus}`);
     
     // Afficher une notification de succès
     notificationStore.showNotification({
@@ -486,7 +486,7 @@ const confirmStatusChange = async () => {
     // Fermer la modal
     closeStatusModal()
   } catch (err) {
-    console.error('Erreur lors du changement de statut:', err)
+    logger.error('Erreur lors du changement de statut', { error: err })
     notificationStore.showNotification({
       title: t('common.error'),
       message: t('services.status_change.error'),
@@ -497,9 +497,49 @@ const confirmStatusChange = async () => {
   }
 }
 
+/**
+ * Initialise les écouteurs d'événements en temps réel
+ */
+const initRealtime = () => {
+  logger.info('[SERVICE DETAIL] Initialisation des écouteurs temps réel')
+  
+  if (!servicesStore.realtimeInitialized) {
+    servicesStore.initRealtimeListeners()
+  }
+  
+  // Observer les changements du dernier événement temps réel
+  watch(() => servicesStore.lastRealtimeEvent, (newEvent) => {
+    if (!newEvent || !serviceId.value) return
+    
+    const { action, service: updatedService } = newEvent
+    
+    // Si l'événement concerne le service actuel
+    if (updatedService && updatedService.id === serviceId.value) {
+      logger.info(`[SERVICE DETAIL] Événement temps réel reçu pour le service courant: ${action}`, {
+        service_id: updatedService.id,
+        action: action
+      })
+      
+      if (action === 'delete' || action === 'deleted') {
+        // Si le service a été supprimé, rediriger vers la liste des services
+        notificationStore.showNotification({
+          title: 'Service supprimé',
+          message: `Le service que vous consultez a été supprimé`,
+          type: 'warning'
+        })
+        goToServices()
+      } else {
+        // Pour les autres actions, rafraîchir les données du service
+        fetchService()
+      }
+    }
+  }, { deep: true })
+}
+
 // Cycle de vie
 onMounted(() => {
   fetchService()
+  initRealtime()
 })
 </script>
 
@@ -735,7 +775,7 @@ onMounted(() => {
 
 .form-control:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+  box-shadow: 0 0 0 0.25rem rgb(var(--primary-color-rgb), 0.25);
   outline: none;
 }
 

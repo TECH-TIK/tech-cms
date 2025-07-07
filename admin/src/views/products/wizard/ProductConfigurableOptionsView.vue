@@ -1,369 +1,268 @@
 <template>
-  <div class="product-configurable-options-view">
-    <div class="wizard-content">
-      <div class="section-header">
-        <h3 class="section-title">{{ t('products_services.configurable_options.title') }}</h3>
-        <button 
-          v-if="!showAddOptionForm" 
-          type="button" 
-          class="btn btn-primary"
-          @click="showAddOptionForm = true"
-        >
-          <i class="fas fa-plus"></i> {{ t('products_services.configurable_options.add_option') }}
-        </button>
-      </div>
+  <div>
+    <p class="section-description">
+      {{ t('products_services.configurable_options.description') }}
+    </p>
 
-      <p class="section-description">
-        {{ t('products_services.configurable_options.description') }}
-      </p>
+    <div v-if="loading" class="text-center" style="padding: var(--spacing-xl)">
+      <div class="spinner-loading" style="margin: 0 auto;"></div>
+    </div>
 
-      <!-- Formulaire d'ajout/édition d'option -->
-      <div v-if="showAddOptionForm" class="custom-field-form">
-        <h4 class="form-title">
-          {{ editingOption !== null 
-            ? t('products_services.configurable_options.edit_option') 
-            : t('products_services.configurable_options.new_option') 
-          }}
-        </h4>
-
-        <div class="form-section">
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <label for="option-name">{{ t('products_services.configurable_options.fields.name') }}</label>
-              <input
-                id="option-name"
-                v-model="newOption.name"
-                type="text"
-                class="form-control"
-                :class="{ 'is-invalid': errors.name }"
-              />
-              <div v-if="errors.name" class="invalid-feedback">{{ errors.name }}</div>
+    <div v-else>
+      <div v-if="configurableOptions.length > 0" class="options-list">
+        <div v-for="option in configurableOptions" :key="option.id" class="option-item">
+          <div class="option-header" @click="toggleOption(option)">
+            <div class="option-name">
+              {{ option.name }}
+              <span class="option-type-badge">{{ getOptionTypeName(option.type) }}</span>
             </div>
 
-            <div class="form-group col-md-6">
-              <label for="option-type">{{ t('products_services.configurable_options.fields.type') }}</label>
-              <select
-                id="option-type"
-                v-model="newOption.type"
-                class="form-control"
-              >
-                <option 
-                  v-for="type in optionTypes" 
-                  :key="type.value" 
-                  :value="type.value"
-                >
-                  {{ type.label }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <label for="option-group">{{ t('products_services.configurable_options.fields.option_group') }}</label>
-              <select
-                id="option-group"
-                v-model="newOption.optionGroup"
-                class="form-control"
-              >
-                <option :value="null">{{ t('products_services.configurable_options.no_group') }}</option>
-                <option 
-                  v-for="group in optionGroups" 
-                  :key="group.id" 
-                  :value="group.id"
-                >
-                  {{ group.name }}
-                </option>
-              </select>
-            </div>
-
-            <div class="form-group col-md-6">
-              <label for="option-description">{{ t('products_services.configurable_options.fields.description') }}</label>
-              <input
-                id="option-description"
-                v-model="newOption.description"
-                type="text"
-                class="form-control"
-              />
-              <div class="form-text">
-                {{ t('products_services.configurable_options.fields.description_help') }}
-              </div>
-            </div>
-          </div>
-
-          <div class="form-check">
-            <input
-              id="option-required"
-              v-model="newOption.required"
-              type="checkbox"
-              class="form-check-input"
-            />
-            <label class="form-check-label" for="option-required">
-              {{ t('products_services.configurable_options.fields.required') }}
-            </label>
-          </div>
-        </div>
-
-        <!-- Section pour les éléments d'option (dropdown, radio, checkbox) -->
-        <div 
-          v-if="['dropdown', 'radio', 'checkbox'].includes(newOption.type)"
-          class="form-section option-items"
-        >
-          <h5>{{ t('products_services.configurable_options.option_items') }}</h5>
-
-          <div v-if="errors.items" class="invalid-feedback d-block mb-3">{{ errors.items }}</div>
-
-          <!-- Tableau des éléments existants -->
-          <div v-if="newOption.items.length > 0" class="option-items-table">
-            <div class="option-items-header">
-              <div>{{ t('products_services.configurable_options.fields.item_name') }}</div>
-              <div>{{ t('products_services.configurable_options.fields.price') }}</div>
-              <div>{{ t('products_services.configurable_options.fields.setup_fee') }}</div>
-              <div>{{ t('products_services.configurable_options.fields.default') }}</div>
-              <div>{{ t('common.actions') }}</div>
-            </div>
-
-            <div 
-              v-for="item in newOption.items" 
-              :key="item.id" 
-              class="option-item-row"
-            >
-              <div>{{ item.name }}</div>
-              <div>{{ item.price }}</div>
-              <div>{{ item.setupFee }}</div>
-              <div>
-                <button 
-                  class="btn btn-icon" 
-                  :class="{ 'text-success': item.isDefault }"
-                  @click="setItemAsDefault(item.id)"
-                  type="button"
-                >
-                  <i class="fas" :class="item.isDefault ? 'fa-check-circle' : 'fa-circle'"></i>
-                </button>
-              </div>
-              <div class="field-actions">
-                <button 
-                  class="btn btn-icon text-danger" 
-                  @click="removeItemFromOption(item.id)"
-                  type="button"
-                >
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Formulaire d'ajout d'élément -->
-          <div class="option-item-form">
-            <div class="form-row">
-              <div class="form-group col-md-4">
-                <label for="item-name">{{ t('products_services.configurable_options.fields.item_name') }}</label>
-                <input
-                  id="item-name"
-                  v-model="newItem.name"
-                  type="text"
-                  class="form-control"
-                  :class="{ 'is-invalid': errors.item }"
-                />
-                <div v-if="errors.item" class="invalid-feedback">{{ errors.item }}</div>
-              </div>
-
-              <div class="form-group col-md-3">
-                <label for="item-price">{{ t('products_services.configurable_options.fields.price') }}</label>
-                <input
-                  id="item-price"
-                  v-model.number="newItem.price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  class="form-control"
-                />
-              </div>
-
-              <div class="form-group col-md-3">
-                <label for="item-setup-fee">{{ t('products_services.configurable_options.fields.setup_fee') }}</label>
-                <input
-                  id="item-setup-fee"
-                  v-model.number="newItem.setupFee"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  class="form-control"
-                />
-              </div>
-
-              <div class="form-group col-md-2 d-flex align-items-end">
-                <button 
-                  class="btn btn-primary btn-sm w-100"
-                  @click="addItemToOption"
-                  type="button"
-                >
-                  <i class="fas fa-plus"></i> {{ t('common.add') }}
-                </button>
-              </div>
-            </div>
-
-            <div class="form-check">
-              <input
-                id="item-default"
-                v-model="newItem.isDefault"
-                type="checkbox"
-                class="form-check-input"
-              />
-              <label class="form-check-label" for="item-default">
-                {{ t('products_services.configurable_options.fields.set_as_default') }}
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Options pour le type Quantity -->
-        <div v-if="newOption.type === 'quantity'" class="form-section">
-          <h5>{{ t('products_services.configurable_options.quantity_options') }}</h5>
-          
-          <div class="form-row">
-            <div class="form-group col-md-3">
-              <label for="min-quantity">{{ t('products_services.configurable_options.fields.min_quantity') }}</label>
-              <input
-                id="min-quantity"
-                type="number"
-                min="0"
-                class="form-control"
-              />
-            </div>
-            
-            <div class="form-group col-md-3">
-              <label for="max-quantity">{{ t('products_services.configurable_options.fields.max_quantity') }}</label>
-              <input
-                id="max-quantity"
-                type="number"
-                min="0"
-                class="form-control"
-              />
-            </div>
-            
-            <div class="form-group col-md-3">
-              <label for="quantity-price">{{ t('products_services.configurable_options.fields.price_per_unit') }}</label>
-              <input
-                id="quantity-price"
-                type="number"
-                step="0.01"
-                min="0"
-                class="form-control"
-              />
-            </div>
-            
-            <div class="form-group col-md-3">
-              <label for="quantity-setup-fee">{{ t('products_services.configurable_options.fields.setup_fee') }}</label>
-              <input
-                id="quantity-setup-fee"
-                type="number"
-                step="0.01"
-                min="0"
-                class="form-control"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <button 
-            class="btn btn-outline-secondary" 
-            @click="resetNewOption"
-            type="button"
-          >
-            {{ t('common.cancel') }}
-          </button>
-          <button 
-            class="btn btn-primary" 
-            @click="saveOption"
-            type="button"
-          >
-            {{ editingOption !== null ? t('common.update') : t('common.add') }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Liste des options configurables -->
-      <div v-else>
-        <div v-if="configurableOptionsData.options.length === 0" class="empty-state">
-          <div class="empty-state-content">
-            <i class="fas fa-sliders-h"></i>
-            <p>{{ t('products_services.configurable_options.empty_state') }}</p>
-            <button 
-              class="btn btn-primary btn-sm" 
-              @click="showAddOptionForm = true"
-            >
-              {{ t('products_services.configurable_options.add_first_option') }}
-            </button>
-          </div>
-        </div>
-
-        <div v-else class="configurable-options-table">
-          <div class="configurable-options-header">
-            <div>{{ t('products_services.configurable_options.fields.name') }}</div>
-            <div>{{ t('products_services.configurable_options.fields.type') }}</div>
-            <div>{{ t('products_services.configurable_options.fields.items') }}</div>
-            <div>{{ t('products_services.configurable_options.fields.required') }}</div>
-            <div>{{ t('common.actions') }}</div>
-          </div>
-
-          <div 
-            v-for="option in configurableOptionsData.options" 
-            :key="option.id" 
-            class="configurable-option-row"
-          >
-            <div>
-              <div class="option-name">{{ option.name }}</div>
-              <div v-if="option.description" class="option-description text-muted">{{ option.description }}</div>
-            </div>
-            <div>
-              {{ optionTypes.find(type => type.value === option.type)?.label || option.type }}
-            </div>
-            <div>{{ option.items.length }}</div>
-            <div>
-              <i 
-                class="fas" 
-                :class="option.required ? 'fa-check text-success' : 'fa-times text-muted'"
-              ></i>
-            </div>
-            <div class="field-actions">
-              <button 
-                class="btn btn-icon" 
-                @click="editOption(option.id)"
-                type="button"
-              >
-                <i class="fas fa-edit"></i>
+            <div class="option-actions">
+              <button class="btn-icon edit" @click.stop="editOption(option)">
+                <i class="fas fa-pencil-alt"></i>
               </button>
-              <button 
-                class="btn btn-icon text-danger" 
-                @click="deleteOption(option.id)"
-                type="button"
-              >
+              <button class="btn-icon delete" @click.stop="deleteOption(option)">
                 <i class="fas fa-trash"></i>
               </button>
             </div>
+          </div>
+          
+          <div v-if="expandedOption === option.id" class="option-content">
+            <div class="form-group">
+              <label class="form-label">{{ t('products_services.configurable_options.required') }}</label>
+              <div>{{ option.required ? t('common.yes') : t('common.no') }}</div>
+            </div>
+            
+            <div v-if="option.choices && option.choices.length > 0" class="option-choices">
+              <h4 class="form-label">{{ t('products_services.configurable_options.choices') }}</h4>
+              <table class="choices-table">
+                <thead>
+                  <tr>
+                    <th>{{ t('products_services.configurable_options.choice_name') }}</th>
+                    <th>{{ t('products_services.configurable_options.choice_price') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="choice in option.choices" :key="choice.id">
+                    <td>{{ choice.name }}</td>
+                    <td>
+                      <span v-if="choice.pricing_type === 'free'">{{ t('products_services.pricing.free') }}</span>
+                      <span v-else-if="choice.pricing_type === 'one_time'">
+                        {{ formatPrice(choice.price) }} ({{ t('products_services.pricing.one_time') }})
+                      </span>
+                      <span v-else-if="choice.pricing_type === 'recurring'">
+                        {{ formatPrice(choice.price) }} ({{ t('products_services.pricing.recurring') }})
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div v-else class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-sliders-h"></i>
+        </div>
+        <h4>{{ t('products_services.configurable_options.no_options') }}</h4>
+        <p>{{ t('products_services.configurable_options.no_options_description') }}</p>
+      </div>
+      
+      <div class="options-footer">
+        <button 
+          type="button" 
+          class="btn btn-primary" 
+          @click="showAddOption = true"
+        >
+          <i class="fas fa-plus"></i>
+          {{ t('products_services.configurable_options.add_option') }}
+        </button>
+      </div>
+      
+      <!-- Modal d'ajout/édition d'option -->
+      <div v-if="showAddOption || editingOption" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>
+              {{ editingOption ? t('products_services.configurable_options.edit_option') : t('products_services.configurable_options.add_option') }}
+            </h3>
+            <button class="close-button" @click="closeOptionModal">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="modal-body">
+            <form @submit.prevent="saveOption">
+              <div class="form-group">
+                <label class="form-label">{{ t('products_services.configurable_options.option_name') }} *</label>
+                <input 
+                  v-model="newOption.name" 
+                  type="text" 
+                  class="form-control" 
+                  required
+                />
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">{{ t('products_services.configurable_options.option_type') }} *</label>
+                <select v-model="newOption.type" class="form-control" required>
+                  <option value="dropdown">{{ t('products_services.configurable_options.type_dropdown') }}</option>
+                  <option value="radio">{{ t('products_services.configurable_options.type_radio') }}</option>
+                  <option value="checkbox">{{ t('products_services.configurable_options.type_checkbox') }}</option>
+                  <option value="quantity">{{ t('products_services.configurable_options.type_quantity') }}</option>
+                </select>
+              </div>
+              
+              <div class="form-group form-checkbox">
+                <input 
+                  id="option-required" 
+                  v-model="newOption.required" 
+                  type="checkbox" 
+                  class="form-checkbox-input" 
+                />
+                <label for="option-required" class="form-checkbox-label">
+                  {{ t('products_services.configurable_options.required') }}
+                </label>
+              </div>
+              
+              <div v-if="newOption.type !== 'quantity'" class="option-choices-section">
+                <h4>{{ t('products_services.configurable_options.choices') }}</h4>
+                
+                <div class="choice-items">
+                  <div v-for="(choice, index) in newOption.choices" :key="index" class="choice-item">
+                    <div class="form-group">
+                      <label class="form-label">{{ t('products_services.configurable_options.choice_name') }}</label>
+                      <input 
+                        v-model="choice.name" 
+                        type="text" 
+                        class="form-control" 
+                      />
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="form-label">{{ t('products_services.configurable_options.pricing_type') }}</label>
+                      <select v-model="choice.pricing_type" class="form-control">
+                        <option value="free">{{ t('products_services.pricing.free') }}</option>
+                        <option value="one_time">{{ t('products_services.pricing.one_time') }}</option>
+                        <option value="recurring">{{ t('products_services.pricing.recurring') }}</option>
+                      </select>
+                    </div>
+                    
+                    <div v-if="choice.pricing_type !== 'free'" class="form-group">
+                      <label class="form-label">{{ t('products_services.configurable_options.price') }}</label>
+                      <div class="price-field">
+                        <span class="currency-symbol">€</span>
+                        <input 
+                          v-model="choice.price" 
+                          type="number" 
+                          class="form-control" 
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+                    
+                    <button 
+                      type="button" 
+                      class="btn btn-danger btn-sm" 
+                      @click="removeChoice(index)"
+                    >
+                      {{ t('common.remove') }}
+                    </button>
+                  </div>
+                </div>
+                
+                <button 
+                  type="button" 
+                  class="btn btn-outline-primary" 
+                  @click="addChoice"
+                >
+                  {{ t('products_services.configurable_options.add_choice') }}
+                </button>
+              </div>
+              
+              <div v-if="newOption.type === 'quantity'" class="option-quantity-section">
+                <div class="form-row">
+                  <div class="form-col">
+                    <div class="form-group">
+                      <label class="form-label">{{ t('products_services.configurable_options.min_quantity') }}</label>
+                      <input 
+                        v-model="newOption.min_quantity" 
+                        type="number" 
+                        class="form-control" 
+                        min="1"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div class="form-col">
+                    <div class="form-group">
+                      <label class="form-label">{{ t('products_services.configurable_options.max_quantity') }}</label>
+                      <input 
+                        v-model="newOption.max_quantity" 
+                        type="number" 
+                        class="form-control" 
+                        min="1"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">{{ t('products_services.configurable_options.pricing_type') }}</label>
+                  <select v-model="newOption.pricing_type" class="form-control">
+                    <option value="free">{{ t('products_services.pricing.free') }}</option>
+                    <option value="one_time">{{ t('products_services.pricing.one_time') }}</option>
+                    <option value="recurring">{{ t('products_services.pricing.recurring') }}</option>
+                  </select>
+                </div>
+                
+                <div v-if="newOption.pricing_type !== 'free'" class="form-group">
+                  <label class="form-label">{{ t('products_services.configurable_options.price_per_unit') }}</label>
+                  <div class="price-field">
+                    <span class="currency-symbol">€</span>
+                    <input 
+                      v-model="newOption.price" 
+                      type="number" 
+                      class="form-control" 
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div class="modal-footer">
+                <button 
+                  type="button" 
+                  class="btn btn-secondary" 
+                  @click="closeOptionModal"
+                >
+                  {{ t('common.cancel') }}
+                </button>
+                <button 
+                  type="submit" 
+                  class="btn btn-primary"
+                >
+                  {{ t('common.save') }}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Actions du wizard -->
+    <!-- Boutons de navigation -->
     <div class="wizard-actions">
-      <button 
-        type="button" 
-        class="btn btn-outline-secondary"
-        @click="goBack"
-      >
+      <button class="btn btn-secondary" @click="$router.push('/products/wizard/links')">
         {{ t('common.back') }}
       </button>
       
-      <button 
-        type="button" 
-        class="btn btn-primary"
-        @click="continueToNextStep"
-      >
-        {{ t('common.continue') }}
+      <button class="btn btn-primary" @click="proceedToNext">
+        {{ t('common.next') }}
       </button>
     </div>
   </div>
@@ -371,386 +270,302 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { useProductWizardStore } from '@/stores/product-wizard'
 import { useNotificationStore } from '@/stores/notifications'
-import { useProductStore } from '@/stores/products'
+import logger from '@/services/logger'
+import type { ConfigurableOption, NewOptionForm } from '@/types/product-options'
 
 const { t } = useI18n()
 const router = useRouter()
-const route = useRoute()
+const productWizardStore = useProductWizardStore()
 const notificationStore = useNotificationStore()
-const productsStore = useProductStore()
 
-// Récupérer le type de produit depuis les paramètres de route
-const productType = computed(() => route.params.type as string || 'shared_hosting')
+// Ces variables sont maintenant définies comme des fonctions plus bas dans le code
 
-// Déterminer si nous sommes en mode édition
-const productId = computed(() => {
-  const idOrAction = route.params.idOrAction as string
-  if (idOrAction && idOrAction !== 'create') {
-    return parseInt(idOrAction, 10)
-  }
-  return null
-})
-
-const isEditMode = computed(() => !!productId.value)
-
-// Récupérer les données précédentes
-const previousData = computed(() => {
-  const savedProductData = localStorage.getItem('currentProductData')
-  if (savedProductData) {
-    try {
-      return JSON.parse(savedProductData)
-    } catch (error) {
-      console.error('Erreur lors de la récupération des données précédentes:', error)
-    }
-  }
-  return {}
-})
-
-// Définition des onglets
-const tabs = [
-  { id: 'type', label: t('products_services.tabs.type'), icon: 'tag', route: 'create-product' },
-  { id: 'details', label: t('products_services.tabs.details'), icon: 'info-circle', route: 'product-details' },
-  { id: 'pricing', label: t('products_services.tabs.pricing'), icon: 'money-bill', route: 'product-pricing' },
-  { id: 'module', label: t('products_services.tabs.module'), icon: 'puzzle-piece', route: 'product-module' },
-  { id: 'custom_fields', label: t('products_services.tabs.custom_fields'), icon: 'list-alt', route: 'product-custom-fields' },
-  { id: 'configurable_options', label: t('products_services.tabs.configurable_options'), icon: 'cogs', route: 'product-configurable-options' },
-  { id: 'upgrades', label: t('products_services.tabs.upgrades'), icon: 'arrow-up', route: 'product-upgrades' },
-  { id: 'freedomain', label: t('products_services.tabs.freedomain'), icon: 'globe', route: 'product-freedomain' },
-  { id: 'cross_sells', label: t('products_services.tabs.cross_sells'), icon: 'shopping-cart', route: 'product-cross-sells' },
-  { id: 'other', label: t('products_services.tabs.other'), icon: 'ellipsis-h', route: 'product-other' },
-  { id: 'links', label: t('products_services.tabs.links'), icon: 'link', route: 'product-links' }
-]
-
-// Onglet actif
-const activeTab = computed(() => {
-  const currentRouteName = route.name as string
-  const tab = tabs.find(tab => tab.route === currentRouteName)
-  return tab ? tab.id : 'configurable_options'
-})
-
-// Naviguer vers un onglet spécifique
-const navigateToTab = (tab) => {
-  // Sauvegarder les données dans localStorage
-  localStorage.setItem('configurableOptionsData', JSON.stringify(configurableOptionsData.value))
-  
-  if (tab.id === 'type') {
-    // Si nous sommes en mode édition, rediriger vers la page d'édition du produit
-    if (isEditMode.value) {
-      router.push({ path: `/products/${productId.value}` })
-    } else {
-      // Sinon, rediriger vers la création de produit
-      router.push({ name: 'create-product' })
-    }
-  } else {
-    const idOrAction = isEditMode.value ? productId.value : 'create'
-    router.push({
-      name: tab.route,
-      params: { idOrAction }
-    })
-  }
-}
-
-// État
+// État local
 const loading = ref(false)
-const errors = ref({})
-const showAddOptionForm = ref(false)
-const editingOption = ref(null as number | null)
-const optionGroups = ref<Array<{ id: number; name: string }>>([])
-const submitting = ref(false)
-const success = ref(false)
-
-// Données des options configurables
-const configurableOptionsData = ref({
-  options: [] as Array<{
-    id: number;
-    name: string;
-    type: string;
-    description: string;
-    required: boolean;
-    optionGroup: number | null;
-    items: Array<{
-      id: number;
-      name: string;
-      price: number;
-      setupFee: number;
-      isDefault: boolean;
-    }>;
-  }>
-})
-
-// Types d'options disponibles
-const optionTypes = [
-  { value: 'dropdown', label: t('products_services.configurable_options.types.dropdown') },
-  { value: 'radio', label: t('products_services.configurable_options.types.radio') },
-  { value: 'checkbox', label: t('products_services.configurable_options.types.checkbox') },
-  { value: 'quantity', label: t('products_services.configurable_options.types.quantity') },
-  { value: 'text', label: t('products_services.configurable_options.types.text') }
-]
-
-// Nouvelle option configurable
-const newOption = ref({
+const configurableOptions = ref<ConfigurableOption[]>([])
+const expandedOption = ref<number | null>(null)
+const showAddOption = ref(false)
+const editingOption = ref<ConfigurableOption | null>(null)
+const newOption = ref<NewOptionForm>({
+  id: null,
   name: '',
   type: 'dropdown',
-  description: '',
-  required: true,
-  optionGroup: null as number | null,
-  items: [] as Array<{
-    id: number;
-    name: string;
-    price: number;
-    setupFee: number;
-    isDefault: boolean;
-  }>
-})
-
-// Nouvel élément d'option
-const newItem = ref({
-  name: '',
+  required: false,
+  pricing_type: 'free',
   price: 0,
-  setupFee: 0,
-  isDefault: false
+  min_quantity: 1,
+  max_quantity: 10,
+  choices: []
 })
 
-// Récupérer les groupes d'options
-const fetchOptionGroups = async () => {
-  try {
-    // Simuler la récupération des groupes d'options depuis l'API
-    // Dans une implémentation réelle, vous remplaceriez cela par un appel API
-    optionGroups.value = [
-      { id: 1, name: 'Ressources serveur' },
-      { id: 2, name: 'Licences' },
-      { id: 3, name: 'Services additionnels' }
-    ]
-  } catch (error) {
-    console.error('Erreur lors de la récupération des groupes d\'options:', error)
-  }
+// Vérifier si on est en mode édition basé sur editingProductId
+const isEditMode = computed(() => productWizardStore.editingProductId !== null)
+
+// Formater le prix avec le symbole de devise
+const formatPrice = (price: number): string => {
+  return `€${parseFloat(price.toString()).toFixed(2)}`
 }
 
-// Réinitialiser le formulaire de nouvelle option
-const resetNewOption = () => {
-  newOption.value = {
-    name: '',
-    type: 'dropdown',
-    description: '',
-    required: true,
-    optionGroup: null,
-    items: []
-  }
-  newItem.value = {
-    name: '',
-    price: 0,
-    setupFee: 0,
-    isDefault: false
-  }
-  showAddOptionForm.value = false
-  editingOption.value = null
-}
-
-// Ajouter un élément à l'option
-const addItemToOption = () => {
-  if (!newItem.value.name) {
-    errors.value = { item: t('products_services.configurable_options.errors.item_name_required') }
-    return
+// Convertir les données du store au format ConfigurableOption
+const convertToConfigurableOption = (option: any): ConfigurableOption => {
+  // Si l'option est déjà au bon format, on la retourne telle quelle
+  if (option.id && option.choices) {
+    return option as ConfigurableOption
   }
   
-  const newId = newOption.value.items.length > 0 
-    ? Math.max(...newOption.value.items.map(i => i.id)) + 1 
-    : 1
-    
-  newOption.value.items.push({
-    id: newId,
-    name: newItem.value.name,
-    price: newItem.value.price,
-    setupFee: newItem.value.setupFee,
-    isDefault: newItem.value.isDefault
+  // Sinon on la convertit du format ProductWizardState.configurable_options
+  return {
+    id: option.id || Date.now(),
+    name: option.name,
+    type: option.type as 'dropdown' | 'radio' | 'checkbox' | 'quantity',
+    required: option.required,
+    pricing_type: 'free',
+    price: 0,
+    min_quantity: option.type === 'quantity' ? 1 : undefined,
+    max_quantity: option.type === 'quantity' ? 10 : undefined,
+    choices: option.options?.map((opt: any) => ({
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      name: opt.name,
+      pricing_type: opt.price > 0 ? 'recurring' : 'free',
+      price: opt.price || 0
+    })) || []
+  }
+}
+
+// Obtenir le nom du type d'option
+const getOptionTypeName = (type: string): string => {
+  const types: Record<string, string> = {
+    'dropdown': t('products_services.configurable_options.type_dropdown'),
+    'radio': t('products_services.configurable_options.type_radio'),
+    'checkbox': t('products_services.configurable_options.type_checkbox'),
+    'quantity': t('products_services.configurable_options.type_quantity')
+  }
+  return types[type] || type
+}
+
+// Afficher/masquer le contenu de l'option
+const toggleOption = (option: ConfigurableOption): void => {
+  if (expandedOption.value === option.id) {
+    expandedOption.value = null
+  } else {
+    expandedOption.value = option.id
+  }
+}
+
+// Ajouter un nouveau choix
+const addChoice = (): void => {
+  newOption.value.choices.push({
+    id: Date.now(),
+    name: '',
+    pricing_type: 'free',
+    price: 0
+  })
+}
+
+// Supprimer un choix
+const removeChoice = (index: number): void => {
+  newOption.value.choices.splice(index, 1)
+}
+
+// Éditer une option existante
+const editOption = (option: ConfigurableOption): void => {
+  editingOption.value = option
+  
+  // Cloner l'option pour éviter la modification directe
+  newOption.value = JSON.parse(JSON.stringify(option))
+  showAddOption.value = true
+}
+
+// Supprimer une option
+const deleteOption = (option: ConfigurableOption): void => {
+  const confirmMessage = t('products_services.configurable_options.delete_confirm', {
+    name: option.name
   })
   
-  // Réinitialiser le formulaire d'élément
-  newItem.value = {
-    name: '',
-    price: 0,
-    setupFee: 0,
-    isDefault: false
+  if (window.confirm(confirmMessage)) {
+    const index = configurableOptions.value.findIndex(item => item.id === option.id)
+    if (index !== -1) {
+      configurableOptions.value.splice(index, 1)
+      expandedOption.value = null
+      
+      // Mise à jour automatique
+      // Convertir les ConfigurableOption au format du store ProductWizardState.configurable_options
+      const storeCompatibleOptions = configurableOptions.value.map(option => ({
+        name: option.name,
+        type: option.type,
+        required: option.required,
+        options: option.choices.map(choice => ({
+          name: choice.name,
+          price: choice.price || 0,
+          setup_fee: 0 // Valeur par défaut car non présent dans OptionChoice
+        }))
+      }))
+      productWizardStore.productData.configurable_options = storeCompatibleOptions
+      
+      // Notification de succès
+      notificationStore.showNotification({ 
+        type: 'success',
+        title: t('common.success'),
+        message: t('products_services.configurable_options.deleted_success')
+      })
+    }
   }
-  
-  errors.value = {}
 }
 
-// Supprimer un élément de l'option
-const removeItemFromOption = (itemId: number) => {
-  newOption.value.items = newOption.value.items.filter(i => i.id !== itemId)
-}
-
-// Définir un élément comme défaut
-const setItemAsDefault = (itemId: number) => {
-  newOption.value.items = newOption.value.items.map(item => ({
-    ...item,
-    isDefault: item.id === itemId
-  }))
-}
-
-// Ajouter ou mettre à jour une option configurable
+// Sauvegarder l'option
 const saveOption = () => {
-  const formErrors = {} as Record<string, string>
-  
-  // Validation
+  // Validation de base
   if (!newOption.value.name) {
-    formErrors.name = t('products_services.configurable_options.errors.name_required')
-  } else if (newOption.value.name.length < 3) {
-    formErrors.name = t('products_services.configurable_options.errors.name_too_short')
-  }
-  
-  if (['dropdown', 'radio', 'checkbox'].includes(newOption.value.type) && newOption.value.items.length === 0) {
-    formErrors.items = t('products_services.configurable_options.errors.items_required')
-  }
-  
-  if (Object.keys(formErrors).length > 0) {
-    errors.value = formErrors
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('products_services.configurable_options.name_required')
+    })
     return
+  }
+  
+  if (newOption.value.type !== 'quantity' && (!newOption.value.choices || newOption.value.choices.length === 0)) {
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('products_services.configurable_options.choices_required')
+    })
+    return
+  }
+  
+  // S'assurer que l'ID est un nombre valide (non null)
+  const optionToSave = { ...newOption.value }
+  if (optionToSave.id === null) {
+    optionToSave.id = Date.now()
   }
   
   if (editingOption.value !== null) {
-    // Mettre à jour une option existante
-    const index = configurableOptionsData.value.options.findIndex(o => o.id === editingOption.value)
+    // S'assurer que editingOption.value n'est pas null avant d'y accéder
+    const editingId = editingOption.value.id
+    const index = configurableOptions.value.findIndex(item => item.id === editingId)
     if (index !== -1) {
-      configurableOptionsData.value.options[index] = {
-        ...configurableOptionsData.value.options[index],
-        ...newOption.value
-      }
-      
-      notificationStore.addNotification({
-        type: 'success',
-        title: t('products_services.configurable_options.success.option_updated_title'),
-        message: t('products_services.configurable_options.success.option_updated_message')
-      })
+      // S'assurer que l'option a une ID valide
+      configurableOptions.value[index] = optionToSave as ConfigurableOption
     }
   } else {
-    // Ajouter une nouvelle option
-    const newId = configurableOptionsData.value.options.length > 0 
-      ? Math.max(...configurableOptionsData.value.options.map(o => o.id)) + 1 
-      : 1
-      
-    configurableOptionsData.value.options.push({
-      id: newId,
-      ...newOption.value
-    })
-    
-    notificationStore.addNotification({
-      type: 'success',
-      title: t('products_services.configurable_options.success.option_added_title'),
-      message: t('products_services.configurable_options.success.option_added_message')
-    })
+    // Ajouter la nouvelle option avec ID généré
+    configurableOptions.value.push(optionToSave as ConfigurableOption)
   }
   
-  resetNewOption()
-}
-
-// Éditer une option configurable
-const editOption = (optionId: number) => {
-  const option = configurableOptionsData.value.options.find(o => o.id === optionId)
-  if (option) {
-    newOption.value = JSON.parse(JSON.stringify(option)) // Deep clone
-    editingOption.value = optionId
-    showAddOptionForm.value = true
-  }
-}
-
-// Supprimer une option configurable
-const deleteOption = (optionId: number) => {
-  configurableOptionsData.value.options = configurableOptionsData.value.options.filter(o => o.id !== optionId)
+  // Réinitialiser le formulaire
+  resetForm()
   
-  notificationStore.addNotification({
+  // Message de confirmation
+  notificationStore.showNotification({ 
     type: 'success',
-    title: t('products_services.configurable_options.success.option_deleted_title'),
-    message: t('products_services.configurable_options.success.option_deleted_message')
+    title: t('common.success'),
+    message: editingOption.value !== null ? 
+      t('products_services.configurable_options.updated_success') : 
+      t('products_services.configurable_options.added_success')
   })
 }
 
-// Continuer vers l'étape suivante
-const continueToNextStep = () => {
-  // Sauvegarder les données
-  localStorage.setItem('configurableOptionsData', JSON.stringify(configurableOptionsData.value))
-  
-  // Naviguer vers la prochaine étape
-  const idOrAction = isEditMode.value ? productId.value : 'create'
-  router.push({
-    name: 'product-upgrades',
-    params: { idOrAction }
-  })
-}
-
-// Finaliser et enregistrer le produit
-const saveProduct = async () => {
-  submitting.value = true
+// Sauvegarder toutes les options
+const saveOptions = async (): Promise<void> => {
+  loading.value = true
   
   try {
-    // Fusionner toutes les données du produit
-    const productData = {
-      ...previousData.value,
-      configurableOptions: configurableOptionsData.value.options
-    }
+    // Convertir les ConfigurableOption au format du store ProductWizardState.configurable_options
+    const storeCompatibleOptions = configurableOptions.value.map(option => ({
+      name: option.name,
+      type: option.type,
+      required: option.required,
+      options: option.choices.map(choice => ({
+        name: choice.name,
+        price: choice.price || 0,
+        setup_fee: 0 // Valeur par défaut car non présent dans OptionChoice
+      }))
+    }))
     
-    // Sauvegarder dans localStorage
-    localStorage.setItem('currentProductData', JSON.stringify(productData))
+    // Mise à jour des options configurables dans les données du produit
+    productWizardStore.productData.configurable_options = storeCompatibleOptions
     
-    // Appel à l'API pour créer/mettre à jour le produit
-    await productsStore.createProduct(productData)
-    
-    success.value = true
-    
-    notificationStore.addNotification({
+    // Message de confirmation
+    notificationStore.showNotification({ 
       type: 'success',
-      title: t('products_services.success.product_created_title'),
-      message: t('products_services.success.product_created_message')
+      title: t('common.success'),
+      message: t('products_services.configurable_options.all_saved')
     })
     
-    // Nettoyer le localStorage
-    localStorage.removeItem('currentProductData')
-    
-    // Rediriger vers la liste des produits après un court délai
-    setTimeout(() => {
-      router.push({ name: 'products' })
-    }, 1500)
+    // La redirection est déjà gérée dans la fonction proceedToNext
   } catch (error) {
-    console.error('Erreur lors de la création du produit:', error)
-    
-    notificationStore.addNotification({
+    logger.error('Erreur lors de l\'enregistrement des options', { error })
+    notificationStore.showNotification({ 
       type: 'error',
-      title: t('products_services.errors.product_creation_failed_title'),
-      message: t('products_services.errors.product_creation_failed_message')
+      title: t('common.error'),
+      message: t('products_services.configurable_options.save_error')
     })
   } finally {
-    submitting.value = false
+    loading.value = false
   }
 }
 
-// Fusionner les données précédentes avec les données des options configurables
+// Réinitialiser le formulaire
+const resetForm = (): void => {
+  newOption.value = {
+    id: null,
+    name: '',
+    type: 'dropdown',
+    required: false,
+    pricing_type: 'free',
+    price: 0,
+    min_quantity: 1,
+    max_quantity: 10,
+    choices: []
+  }
+  editingOption.value = null
+  showAddOption.value = false
+}
+
+// Fermer le modal d'option
+const closeOptionModal = (): void => {
+  resetForm()
+}
+
+// Charger les données initiales
+const loadData = async (): Promise<void> => {
+  loading.value = true
+  
+  try {
+    if (isEditMode.value && productWizardStore.productData.configurable_options) {
+      // Convertir chaque option au format ConfigurableOption
+      configurableOptions.value = productWizardStore.productData.configurable_options
+        .map((option: any) => convertToConfigurableOption(option))
+    }
+  } catch (error) {
+    logger.error('Erreur lors du chargement des données', { error })
+    notificationStore.showNotification({ 
+      type: 'error',
+      title: t('common.error'), 
+      message: t('products_services.error_loading_data')
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+
+// Naviguer vers la page suivante
+const proceedToNext = async (): Promise<void> => {
+  await saveOptions()
+  router.push('/products/wizard/pricing')
+}
+
+// Hook de cycle de vie - Au montage du composant
 onMounted(() => {
-  fetchOptionGroups()
-  
-  if (previousData.value && previousData.value.configurableOptions) {
-    configurableOptionsData.value.options = previousData.value.configurableOptions
-  }
+  loadData()
 })
-
-// Retour à l'étape précédente
-const goBack = () => {
-  // Sauvegarder les données
-  localStorage.setItem('configurableOptionsData', JSON.stringify(configurableOptionsData.value))
-  
-  // Naviguer vers l'étape précédente
-  const idOrAction = isEditMode.value ? productId.value : 'create'
-  router.push({
-    name: 'product-custom-fields',
-    params: { idOrAction }
-  })
-}
 </script>
 
 <style scoped>
-@import '@/assets/css/components/common-layout.css';
-@import '@/assets/styles/wizard-tabs.css';
+@import '@/assets/css/pages/products/product-configurable-options.css';
 </style>

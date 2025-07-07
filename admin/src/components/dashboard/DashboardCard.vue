@@ -22,12 +22,12 @@
 
     <div class="mt-4 pt-4 border-t border-gray-100">
       <slot name="footer">
-        <a 
-          href="#" 
+        <a
+          href="#"
           class="text-sm font-medium hover:underline"
           :class="`text-${color}-600 hover:text-${color}-700`"
         >
-          Voir plus
+          {{ $t('dashboard.viewMore') }}
         </a>
       </slot>
     </div>
@@ -35,6 +35,8 @@
 </template>
 
 <script setup lang="ts">
+
+
 interface Props {
   title: string
   stats: number | Record<string, number>
@@ -47,15 +49,19 @@ defineProps<Props>()
 
 <style scoped>
 .dashboard-card {
-  @apply relative overflow-hidden;
+  position: relative;
+  overflow: hidden;
 }
 
 .dashboard-card::before {
   content: '';
-  @apply absolute inset-0 bg-gradient-to-br opacity-5;
+  position: absolute;
+  inset: 0; /* inset-0 */
+  background-image: linear-gradient(to bottom right, var(--gradient-from, currentColor), var(--gradient-to, currentColor)); /* bg-gradient-to-br */
+  opacity: 0.05; /* opacity-5 */
 }
 
 .dashboard-card:hover::before {
-  @apply opacity-10;
+  opacity: 0.1; /* opacity-10 */
 }
 </style>

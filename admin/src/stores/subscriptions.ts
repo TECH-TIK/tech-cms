@@ -1,24 +1,7 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import { ApiService } from '@/services/api'
 import { useNotificationStore } from './notifications'
-
-interface Subscription {
-  id: number
-  client_id: number
-  product_id: number
-  start_date: string
-  end_date: string | null
-  renewal_date: string | null
-  status: 'active' | 'cancelled' | 'expired' | 'pending'
-  price: number
-  billing_cycle: 'monthly' | 'quarterly' | 'semi_annual' | 'annual'
-  auto_renew: boolean
-  notes: string | null
-  created_at: string
-  updated_at: string | null
-  client_name?: string
-  product_name?: string
-}
+import type { Subscription } from '@/types/subscription'
 
 export const useSubscriptionStore = defineStore('subscriptions', {
   state: () => ({
@@ -62,7 +45,7 @@ export const useSubscriptionStore = defineStore('subscriptions', {
       this.error = null
       
       try {
-        const response = await axios.get('/api/v1/subscriptions')
+        const response = await ApiService.routes.admin.subscription.list()
         
         if (response.data && response.data.subscriptions) {
           this.subscriptions = response.data.subscriptions
@@ -70,8 +53,72 @@ export const useSubscriptionStore = defineStore('subscriptions', {
           this.subscriptions = []
         }
       } catch (error) {
-        this.error = error.response?.data?.message || 'Erreur lors de la récupération des abonnements'
-        useNotificationStore().addNotification(this.error, 'error')
+        if (error instanceof Error) {
+          this.error = (error as any).response?.data?.message || 'Erreur lors de la récupération des abonnements'
+        } else {
+          this.error = 'Erreur lors de la récupération des abonnements'
+        }
+        useNotificationStore().addNotification({
+          message: this.error || 'Une erreur est survenue',
+          type: 'error',
+          title: 'Erreur'
+        })
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    async fetchSubscriptionsByClient(clientId: number) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        const response = await ApiService.routes.admin.subscription.getByClient(clientId.toString())
+        
+        if (response.data && response.data.subscriptions) {
+          return response.data.subscriptions
+        }
+        return []
+      } catch (error) {
+        if (error instanceof Error) {
+          this.error = (error as any).response?.data?.message || 'Erreur lors de la récupération des abonnements du client'
+        } else {
+          this.error = 'Erreur lors de la récupération des abonnements du client'
+        }
+        useNotificationStore().addNotification({
+          message: this.error || 'Une erreur est survenue',
+          type: 'error',
+          title: 'Erreur'
+        })
+        return []
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    async fetchSubscriptionsByStatus(status: string) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        const response = await ApiService.routes.admin.subscription.getByStatus(status)
+        
+        if (response.data && response.data.subscriptions) {
+          return response.data.subscriptions
+        }
+        return []
+      } catch (error) {
+        if (error instanceof Error) {
+          this.error = (error as any).response?.data?.message || 'Erreur lors de la récupération des abonnements'
+        } else {
+          this.error = 'Erreur lors de la récupération des abonnements'
+        }
+        useNotificationStore().addNotification({
+          message: this.error || 'Une erreur est survenue',
+          type: 'error',
+          title: 'Erreur'
+        })
+        return []
       } finally {
         this.loading = false
       }
@@ -82,90 +129,151 @@ export const useSubscriptionStore = defineStore('subscriptions', {
       this.error = null
       
       try {
-        const response = await axios.get(`/api/v1/subscriptions/${id}`)
+        const response = await ApiService.routes.admin.subscription.get(id.toString())
         
         if (response.data && response.data.subscription) {
           this.currentSubscription = response.data.subscription
-          
-          // Mettre à jour l'abonnement dans la liste si présent
-          const index = this.subscriptions.findIndex(s => s.id === id)
-          if (index !== -1) {
-            this.subscriptions[index] = response.data.subscription
-          }
-        }
-      } catch (error) {
-        this.error = error.response?.data?.message || `Erreur lors de la récupération de l'abonnement #${id}`
-        useNotificationStore().addNotification(this.error, 'error')
-      } finally {
-        this.loading = false
-      }
-    },
-    
-    async createSubscription(subscription: Partial<Subscription>) {
-      this.loading = true
-      this.error = null
-      
-      try {
-        const response = await axios.post('/api/v1/subscriptions', subscription)
-        
-        if (response.data && response.data.subscription) {
-          this.subscriptions.push(response.data.subscription)
-          useNotificationStore().addNotification('Abonnement créé avec succès', 'success')
           return response.data.subscription
         }
+        return null
       } catch (error) {
-        this.error = error.response?.data?.message || 'Erreur lors de la création de l\'abonnement'
-        useNotificationStore().addNotification(this.error, 'error')
+        if (error instanceof Error) {
+          this.error = (error as any).response?.data?.message || `Erreur lors de la récupération de l'abonnement #${id}`
+        } else {
+          this.error = `Erreur lors de la récupération de l'abonnement #${id}`
+        }
+        useNotificationStore().addNotification({
+          message: this.error || 'Une erreur est survenue',
+          type: 'error',
+          title: 'Erreur'
+        })
         return null
       } finally {
         this.loading = false
       }
     },
     
-    async updateSubscription(subscription: Partial<Subscription>) {
-      if (!subscription.id) {
-        this.error = 'ID d\'abonnement manquant'
-        useNotificationStore().addNotification(this.error, 'error')
-        return null
-      }
-      
+    async createSubscription(subscriptionData: Partial<Subscription>) {
       this.loading = true
       this.error = null
       
       try {
-        const response = await axios.put(`/api/v1/subscriptions/${subscription.id}`, subscription)
+        const response = await ApiService.routes.admin.subscription.create(subscriptionData)
+        
+        if (response.data && response.data.subscription) {
+          this.subscriptions.unshift(response.data.subscription)
+          useNotificationStore().addNotification({
+            message: 'Abonnement créé avec succès',
+            type: 'success',
+            title: 'Succès'
+          })
+          return response.data.subscription
+        }
+        return null
+      } catch (error) {
+        if (error instanceof Error) {
+          this.error = (error as any).response?.data?.message || 'Erreur lors de la création de l\'abonnement'
+        } else {
+          this.error = 'Erreur lors de la création de l\'abonnement'
+        }
+        useNotificationStore().addNotification({
+          message: this.error || 'Une erreur est survenue',
+          type: 'error',
+          title: 'Erreur'
+        })
+        return null
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    async updateSubscription(id: number, subscriptionData: Partial<Subscription>) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        const response = await ApiService.routes.admin.subscription.update(id.toString(), subscriptionData)
         
         if (response.data && response.data.subscription) {
           // Mettre à jour l'abonnement dans la liste
-          const index = this.subscriptions.findIndex(s => s.id === subscription.id)
+          const index = this.subscriptions.findIndex(s => s.id === id)
           if (index !== -1) {
             this.subscriptions[index] = response.data.subscription
           }
           
           // Mettre à jour l'abonnement courant si c'est celui qui est modifié
-          if (this.currentSubscription && this.currentSubscription.id === subscription.id) {
+          if (this.currentSubscription && this.currentSubscription.id === id) {
             this.currentSubscription = response.data.subscription
           }
-          
-          useNotificationStore().addNotification('Abonnement mis à jour avec succès', 'success')
+          useNotificationStore().addNotification({
+            message: `Abonnement #${id} mis à jour avec succès`,
+            type: 'success',
+            title: 'Succès'
+          })
           return response.data.subscription
         }
+        return null
       } catch (error) {
-        this.error = error.response?.data?.message || 'Erreur lors de la mise à jour de l\'abonnement'
-        useNotificationStore().addNotification(this.error, 'error')
+        if (error instanceof Error) {
+          this.error = (error as any).response?.data?.message || 'Erreur lors de la mise à jour de l\'abonnement'
+        } else {
+          this.error = 'Erreur lors de la mise à jour de l\'abonnement'
+        }
+        useNotificationStore().addNotification({
+          message: this.error || 'Une erreur est survenue',
+          type: 'error',
+          title: 'Erreur'
+        })
         return null
       } finally {
         this.loading = false
       }
     },
     
-    async cancelSubscription(id: number, reason: string = '') {
+    async deleteSubscription(id: number) {
       this.loading = true
       this.error = null
       
       try {
-        const response = await axios.post(`/api/v1/subscriptions/${id}/cancel`, { reason })
+        await ApiService.routes.admin.subscription.delete(id.toString())
         
+        // Supprimer l'abonnement de la liste
+        this.subscriptions = this.subscriptions.filter(s => s.id !== id)
+        
+        // Réinitialiser l'abonnement courant si c'est celui qui est supprimé
+        if (this.currentSubscription && this.currentSubscription.id === id) {
+          this.currentSubscription = null
+        }
+        useNotificationStore().addNotification({
+          message: `Abonnement #${id} supprimé avec succès`,
+          type: 'success',
+          title: 'Succès'
+        })
+        return true
+      } catch (error) {
+        if (error instanceof Error) {
+          this.error = (error as any).response?.data?.message || 'Erreur lors de la suppression de l\'abonnement'
+        } else {
+          this.error = 'Erreur lors de la suppression de l\'abonnement'
+        }
+        useNotificationStore().addNotification({
+          message: this.error || 'Une erreur est survenue',
+          type: 'error',
+          title: 'Erreur'
+        })
+        return false
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    async cancelSubscription(id: number, cancelReason: string = '') {
+      this.loading = true
+      this.error = null
+      
+      try {
+        // Utilisation de la route centralisée pour l'annulation d'abonnement
+        const response = await ApiService.routes.admin.subscription.cancel(id.toString(), cancelReason)      
         if (response.data && response.data.subscription) {
           // Mettre à jour l'abonnement dans la liste
           const index = this.subscriptions.findIndex(s => s.id === id)
@@ -177,13 +285,25 @@ export const useSubscriptionStore = defineStore('subscriptions', {
           if (this.currentSubscription && this.currentSubscription.id === id) {
             this.currentSubscription = response.data.subscription
           }
-          
-          useNotificationStore().addNotification('Abonnement annulé avec succès', 'success')
+          useNotificationStore().addNotification({
+            message: `Abonnement #${id} annulé avec succès`,
+            type: 'success',
+            title: 'Succès'
+          })
           return response.data.subscription
         }
+        return null
       } catch (error) {
-        this.error = error.response?.data?.message || 'Erreur lors de l\'annulation de l\'abonnement'
-        useNotificationStore().addNotification(this.error, 'error')
+        if (error instanceof Error) {
+          this.error = (error as any).response?.data?.message || 'Erreur lors de l\'annulation de l\'abonnement'
+        } else {
+          this.error = 'Erreur lors de l\'annulation de l\'abonnement'
+        }
+        useNotificationStore().addNotification({
+          message: this.error || 'Une erreur est survenue',
+          type: 'error',
+          title: 'Erreur'
+        })
         return null
       } finally {
         this.loading = false
@@ -195,7 +315,8 @@ export const useSubscriptionStore = defineStore('subscriptions', {
       this.error = null
       
       try {
-        const response = await axios.post(`/api/v1/subscriptions/${id}/renew`)
+        // Utilisation de la route centralisée pour le renouvellement d'abonnement
+        const response = await ApiService.routes.admin.subscription.renew(id.toString())
         
         if (response.data && response.data.subscription) {
           // Mettre à jour l'abonnement dans la liste
@@ -208,13 +329,25 @@ export const useSubscriptionStore = defineStore('subscriptions', {
           if (this.currentSubscription && this.currentSubscription.id === id) {
             this.currentSubscription = response.data.subscription
           }
-          
-          useNotificationStore().addNotification('Abonnement renouvelé avec succès', 'success')
+          useNotificationStore().addNotification({
+            message: `Abonnement #${id} renouvelé avec succès.`,
+            type: 'success',
+            title: 'Succès'
+          })
           return response.data.subscription
         }
+        return null
       } catch (error) {
-        this.error = error.response?.data?.message || 'Erreur lors du renouvellement de l\'abonnement'
-        useNotificationStore().addNotification(this.error, 'error')
+        if (error instanceof Error) {
+          this.error = (error as any).response?.data?.message || 'Erreur lors du renouvellement de l\'abonnement'
+        } else {
+          this.error = 'Erreur lors du renouvellement de l\'abonnement'
+        }
+        useNotificationStore().addNotification({
+          message: this.error || 'Une erreur est survenue',
+          type: 'error',
+          title: 'Erreur'
+        })
         return null
       } finally {
         this.loading = false

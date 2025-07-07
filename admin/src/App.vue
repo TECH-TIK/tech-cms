@@ -17,7 +17,7 @@
     <div v-if="realtimeError" class="realtime-error-banner">
       <div class="realtime-error-content">
         <span>{{ $t('errors.realtime_connection') }}</span>
-        <button @click="retryRealtimeConnection" class="retry-button">
+        <button class="retry-button" @click="retryRealtimeConnection">
           {{ $t('common.retry') }}
         </button>
       </div>
@@ -26,12 +26,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, computed, watch } from 'vue'
+
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { useRealtimeStore } from '@/stores/realtime'
-import AppLayout from '@/components/layout/AppLayout.vue'
+import AppLayout from '@/components/layout/AppLayout.vue';
+import logger from '@/services/logger';
 import NotificationsContainer from '@/components/common/NotificationsContainer.vue'
 
 const authStore = useAuthStore()
@@ -42,12 +43,12 @@ const realtimeError = computed(() => realtimeStore.hasError && authStore.isAuthe
 
 // Configuration initiale
 onMounted(async () => {
-  console.log('TechCMS Admin - Initialisation...')
+    logger.info('TechCMS Admin - Initialisation...');
   await authStore.init()
   
   // Initialiser le service de temps réel si l'utilisateur est authentifié
   if (authStore.isAuthenticated) {
-    console.log('TechCMS Admin - Initialisation du temps réel...')
+        logger.info('TechCMS Admin - Initialisation du temps réel...');
     initRealtimeService()
   }
 })
@@ -55,10 +56,10 @@ onMounted(async () => {
 // Observation du changement d'état d'authentification
 watch(() => authStore.isAuthenticated, (isAuthenticated) => {
   if (isAuthenticated) {
-    console.log('TechCMS Admin - Utilisateur authentifié, initialisation du temps réel...')
+        logger.info('TechCMS Admin - Utilisateur authentifié, initialisation du temps réel...');
     initRealtimeService()
   } else {
-    console.log('TechCMS Admin - Utilisateur déconnecté, déconnexion du temps réel...')
+        logger.info('TechCMS Admin - Utilisateur déconnecté, déconnexion du temps réel...');
     realtimeStore.disconnect()
   }
 })
@@ -68,13 +69,13 @@ const initRealtimeService = async () => {
   try {
     await realtimeStore.init()
   } catch (err) {
-    console.error('TechCMS Admin - Erreur d\'initialisation du temps réel:', err)
+        logger.error('TechCMS Admin - Erreur d\'initialisation du temps réel:', { error: err });
   }
 }
 
 // Fonction pour réessayer la connexion temps réel
 const retryRealtimeConnection = async () => {
-  console.log('TechCMS Admin - Tentative de reconnexion au service temps réel...')
+    logger.info('TechCMS Admin - Tentative de reconnexion au service temps réel...');
   await realtimeStore.retry()
 }
 </script>
@@ -98,7 +99,7 @@ const retryRealtimeConnection = async () => {
   color: #721c24;
   padding: 0.75rem 1.25rem;
   border-radius: 0.25rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
   z-index: 9999;
   max-width: 400px;
 }

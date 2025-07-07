@@ -17,17 +17,17 @@
         <div class="loading-state-text">{{ t('common.loading') }}</div>
       </div>
       
-      <form v-else @submit.prevent="saveNotificationSettings" class="table-box">
+      <form v-else class="table-box" @submit.prevent="saveNotificationSettings">
         <div class="settings-group">
           <h3>{{ t('settings.notifications.email') }}</h3>
           
           <div class="form-group">
             <div class="form-check">
               <input 
+                id="enableEmailNotifications"
+                v-model="notificationSettings.enableEmailNotifications"
                 type="checkbox"
                 class="form-check-input"
-                v-model="notificationSettings.enableEmailNotifications"
-                id="enableEmailNotifications"
               />
               <label class="form-check-label" for="enableEmailNotifications">
                 {{ t('settings.notifications.enableEmailNotifications') }}
@@ -39,9 +39,9 @@
             <div class="form-group">
               <label class="form-label">{{ t('settings.notifications.smtpHost') }}</label>
               <input 
-                type="text" 
+                v-model="notificationSettings.smtpHost" 
+                type="text"
                 class="form-control"
-                v-model="notificationSettings.smtpHost"
                 required
               />
             </div>
@@ -50,9 +50,9 @@
               <div class="form-group">
                 <label class="form-label">{{ t('settings.notifications.smtpPort') }}</label>
                 <input 
-                  type="number" 
+                  v-model="notificationSettings.smtpPort" 
+                  type="number"
                   class="form-control"
-                  v-model="notificationSettings.smtpPort"
                   required
                 />
               </div>
@@ -60,8 +60,8 @@
               <div class="form-group">
                 <label class="form-label">{{ t('settings.notifications.smtpSecurity') }}</label>
                 <select 
-                  class="form-control"
                   v-model="notificationSettings.smtpSecurity"
+                  class="form-control"
                 >
                   <option value="none">{{ t('settings.notifications.none') }}</option>
                   <option value="ssl">SSL</option>
@@ -73,27 +73,27 @@
             <div class="form-group">
               <label class="form-label">{{ t('settings.notifications.smtpUsername') }}</label>
               <input 
-                type="text" 
+                v-model="notificationSettings.smtpUsername" 
+                type="text"
                 class="form-control"
-                v-model="notificationSettings.smtpUsername"
               />
             </div>
 
             <div class="form-group">
               <label class="form-label">{{ t('settings.notifications.smtpPassword') }}</label>
               <input 
-                type="password" 
+                v-model="notificationSettings.smtpPassword" 
+                type="password"
                 class="form-control"
-                v-model="notificationSettings.smtpPassword"
               />
             </div>
 
             <div class="form-group">
               <label class="form-label">{{ t('settings.notifications.emailFrom') }}</label>
               <input 
-                type="email" 
+                v-model="notificationSettings.emailFrom" 
+                type="email"
                 class="form-control"
-                v-model="notificationSettings.emailFrom"
                 required
               />
             </div>
@@ -101,9 +101,9 @@
             <div class="form-group">
               <label class="form-label">{{ t('settings.notifications.emailFromName') }}</label>
               <input 
-                type="text" 
+                v-model="notificationSettings.emailFromName" 
+                type="text"
                 class="form-control"
-                v-model="notificationSettings.emailFromName"
                 required
               />
             </div>
@@ -112,8 +112,8 @@
               <button 
                 type="button"
                 class="btn btn-secondary"
-                @click="testEmailConnection"
                 :disabled="testingEmail"
+                @click="testEmailConnection"
               >
                 <i v-if="testingEmail" class="fas fa-spinner fa-spin" />
                 {{ t('settings.notifications.testConnection') }}
@@ -134,10 +134,10 @@
               <div class="notification-type-header">
                 <div class="form-check">
                   <input 
+                    :id="`notification-${type.id}`"
+                    v-model="type.enabled"
                     type="checkbox"
                     class="form-check-input"
-                    v-model="type.enabled"
-                    :id="`notification-${type.id}`"
                   />
                   <label class="form-check-label" :for="`notification-${type.id}`">
                     {{ type.name }}
@@ -148,10 +148,10 @@
               <div v-if="type.enabled" class="notification-type-channels">
                 <div class="form-check">
                   <input 
+                    :id="`notification-${type.id}-email`"
+                    v-model="type.email"
                     type="checkbox"
                     class="form-check-input"
-                    v-model="type.email"
-                    :id="`notification-${type.id}-email`"
                     :disabled="!notificationSettings.enableEmailNotifications"
                   />
                   <label class="form-check-label" :for="`notification-${type.id}-email`">
@@ -161,10 +161,10 @@
                 
                 <div class="form-check">
                   <input 
+                    :id="`notification-${type.id}-inApp`"
+                    v-model="type.inApp"
                     type="checkbox"
                     class="form-check-input"
-                    v-model="type.inApp"
-                    :id="`notification-${type.id}-inApp`"
                   />
                   <label class="form-check-label" :for="`notification-${type.id}-inApp`">
                     {{ t('settings.notifications.inApp') }}
@@ -191,10 +191,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '@/stores/settings'
 import { useNotificationStore } from '@/stores/notifications'
+import logger from '@/services/logger'
+import { NotificationSettings, NotificationSettingsData, NotificationType } from '@/types/settings'
 import '@/assets/css/components/common-layout.css'
 import '@/assets/css/pages/settings.css'
 
@@ -207,7 +209,8 @@ const loading = ref(true)
 const saving = ref(false)
 const testingEmail = ref(false)
 
-const notificationSettings = ref({
+// Variables réactives
+const notificationSettings = ref<NotificationSettingsData>({
   enableEmailNotifications: false,
   smtpHost: '',
   smtpPort: 587,
@@ -218,63 +221,15 @@ const notificationSettings = ref({
   emailFromName: ''
 })
 
-const notificationTypes = reactive([
-  { 
-    id: 'new_client', 
-    name: t('settings.notifications.types.newClient'), 
-    enabled: true, 
-    email: true, 
-    inApp: true 
-  },
-  { 
-    id: 'new_invoice', 
-    name: t('settings.notifications.types.newInvoice'), 
-    enabled: true, 
-    email: true, 
-    inApp: true 
-  },
-  { 
-    id: 'payment_received', 
-    name: t('settings.notifications.types.paymentReceived'), 
-    enabled: true, 
-    email: true, 
-    inApp: true 
-  },
-  { 
-    id: 'invoice_reminder', 
-    name: t('settings.notifications.types.invoiceReminder'), 
-    enabled: true, 
-    email: true, 
-    inApp: false 
-  },
-  { 
-    id: 'new_ticket', 
-    name: t('settings.notifications.types.newTicket'), 
-    enabled: true, 
-    email: true, 
-    inApp: true 
-  },
-  { 
-    id: 'ticket_reply', 
-    name: t('settings.notifications.types.ticketReply'), 
-    enabled: true, 
-    email: true, 
-    inApp: true 
-  },
-  { 
-    id: 'service_expiry', 
-    name: t('settings.notifications.types.serviceExpiry'), 
-    enabled: true, 
-    email: true, 
-    inApp: true 
-  },
-  { 
-    id: 'system_alert', 
-    name: t('settings.notifications.types.systemAlert'), 
-    enabled: true, 
-    email: true, 
-    inApp: true 
-  }
+const notificationTypes = ref<NotificationType[]>([
+  { id: 'new_client', name: t('settings.notifications.types.newClient'), enabled: true, email: true, inApp: true },
+  { id: 'new_invoice', name: t('settings.notifications.types.newInvoice'), enabled: true, email: true, inApp: true },
+  { id: 'payment_received', name: t('settings.notifications.types.paymentReceived'), enabled: true, email: true, inApp: true },
+  { id: 'invoice_reminder', name: t('settings.notifications.types.invoiceReminder'), enabled: true, email: true, inApp: false },
+  { id: 'new_ticket', name: t('settings.notifications.types.newTicket'), enabled: true, email: true, inApp: true },
+  { id: 'ticket_reply', name: t('settings.notifications.types.ticketReply'), enabled: true, email: true, inApp: true },
+  { id: 'service_expiry', name: t('settings.notifications.types.serviceExpiry'), enabled: true, email: true, inApp: true },
+  { id: 'system_alert', name: t('settings.notifications.types.systemAlert'), enabled: true, email: true, inApp: true }
 ])
 
 // Méthodes
@@ -285,11 +240,23 @@ const fetchSettings = async () => {
     
     if (notifications.settings) {
       notificationSettings.value = notifications.settings
+    } else {
+      // Compatibilité avec l'ancienne structure
+      notificationSettings.value = {
+        enableEmailNotifications: false,
+        smtpHost: '',
+        smtpPort: 587,
+        smtpSecurity: 'tls',
+        smtpUsername: '',
+        smtpPassword: '',
+        emailFrom: '',
+        emailFromName: ''
+      }
     }
     
     if (notifications.types) {
-      notifications.types.forEach((type: any) => {
-        const existingType = notificationTypes.find(t => t.id === type.id)
+      notifications.types.forEach((type: NotificationType) => {
+        const existingType = notificationTypes.value.find((t: NotificationType) => t.id === type.id)
         if (existingType) {
           existingType.enabled = type.enabled
           existingType.email = type.email
@@ -298,7 +265,7 @@ const fetchSettings = async () => {
       })
     }
   } catch (error) {
-    console.error('Erreur lors du chargement des paramètres de notifications:', error)
+    logger.error('Erreur lors du chargement des paramètres de notifications', { error })
     notificationStore.notificationError(t('settings.loadError'))
   } finally {
     loading.value = false
@@ -309,15 +276,16 @@ const saveNotificationSettings = async () => {
   try {
     saving.value = true
     
-    const settings = {
+    // Préparer les données au format NotificationSettings
+    const notifSettings: NotificationSettings = {
       settings: notificationSettings.value,
-      types: notificationTypes
+      types: notificationTypes.value
     }
     
-    await settingsStore.updateNotificationSettings(settings)
+    await settingsStore.updateNotificationSettings(notifSettings)
     notificationStore.success(t('settings.saveSuccess'))
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde des paramètres de notifications:', error)
+    logger.error('Erreur lors de la sauvegarde des paramètres de notifications', { error })
     notificationStore.notificationError(t('settings.saveError'))
   } finally {
     saving.value = false
@@ -330,7 +298,7 @@ const testEmailConnection = async () => {
     await settingsStore.testEmailNotification()
     notificationStore.success(t('settings.notifications.testSuccess'))
   } catch (error) {
-    console.error('Erreur lors du test de connexion email:', error)
+    logger.error('Erreur lors du test de connexion email', { error })
     notificationStore.notificationError(t('settings.notifications.testError'))
   } finally {
     testingEmail.value = false

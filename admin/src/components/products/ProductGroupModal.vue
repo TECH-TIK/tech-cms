@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useProductGroupsStore, type ProductGroup } from '@/stores/product-groups'
+import logger from '@/services/logger'
 
 const { t } = useI18n()
 const productGroupsStore = useProductGroupsStore()
@@ -90,7 +91,7 @@ const submitForm = async () => {
     resetForm()
     emit('close')
   } catch (error) {
-    console.error('Erreur lors de la soumission du formulaire:', error)
+    logger.error('Erreur lors de la soumission du formulaire', { error })
   }
 }
 
@@ -175,11 +176,8 @@ const modalTitle = computed(() => {
 <style scoped>
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background-color: rgb(0 0 0 / 50%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -193,7 +191,7 @@ const modalTitle = computed(() => {
   max-width: 90%;
   max-height: 90%;
   overflow-y: auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 33%);
 }
 
 .modal-header {

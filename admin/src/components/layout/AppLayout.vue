@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isPublicRoute" class="app-layout" :class="{ 'dark': isDarkMode }">
+  <div v-if="!isPublicRoute" class="app-layout" :class="{ 'dark': isDarkMode, 'sidebar-collapsed-layout': isSidebarCollapsed }">
     <!-- En-tête -->
     <header>
       <AppHeader />
@@ -7,7 +7,7 @@
 
     <div class="app-container">
       <!-- Sidebar -->
-      <AppSidebar />
+      <AppSidebar :collapsed="isSidebarCollapsed" @sidebar-toggle="handleSidebarToggle" />
 
       <!-- Contenu principal -->
       <main class="app-content">
@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useThemeStore } from '@/stores/theme'
 import AppHeader from './AppHeader.vue'
@@ -31,43 +31,40 @@ const route = useRoute()
 const themeStore = useThemeStore()
 const isPublicRoute = computed(() => route.meta.public)
 const isDarkMode = computed(() => themeStore.darkMode)
+
+// Ajout de la gestion de l'état de la sidebar
+const isSidebarCollapsed = ref(false)
+
+// Fonction pour gérer le toggle de la sidebar
+const handleSidebarToggle = () => {
+  isSidebarCollapsed.value = !isSidebarCollapsed.value
+}
 </script>
 
 <style scoped>
 .app-layout {
-  @apply min-h-screen bg-gray-100 dark:bg-gray-900;
+  min-height: 100vh;
+  background-color: #f3f4f6; /* bg-gray-100 */
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
 }
 
+/* Ajout du mode sombre */
+@media (prefers-color-scheme: dark) {
+  .dark .app-layout {
+    background-color: #111827; /* dark:bg-gray-900 */
+  }
+}
+
 .app-container {
-  @apply flex;
+  display: flex;
   flex: 1;
   overflow: hidden;
   margin-top: var(--header-height, 64px); /* Ajouter une marge pour le header */
-  display: flex; /* Ajouter display: flex pour un meilleur positionnement */
   flex-direction: row; /* Définir la direction des éléments */
 }
 
-.app-content {
-  @apply p-6;
-  flex: 1;
-  overflow-y: auto;
-  height: calc(100vh - var(--header-height, 64px));
-  margin-left: var(--sidebar-width, 280px); /* Ajouter une marge à gauche pour la sidebar */
-  transition: all 0.3s ease;
-}
-
-/* Ajustement pour le mode responsive */
-@media (max-width: 768px) {
-  .app-content {
-    margin-left: 0; /* Pas de marge sur mobile quand la sidebar est fermée */
-  }
-  
-  body.sidebar-open .app-content {
-    margin-left: var(--sidebar-width, 280px); /* Ajouter la marge quand la sidebar est ouverte */
-  }
-}
+/* Styles .app-content déplacés vers variables.css pour centraliser les styles et éviter les conflits CSS */
 </style>

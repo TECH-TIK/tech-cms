@@ -1,0 +1,84 @@
+/* Styles pour la page de création de produit */
+
+.create-product-page {
+  padding: var(--spacing-md);
+  width: 100%;
+}
+
+.product-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.product-type-card {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  background: var(--glass-bg);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.product-type-card:hover {
+  border-color: var(--primary-blue);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgb(0 0 0 / 20%);
+}
+
+.product-type-card.selected {
+  border: 2px solid var(--primary-blue);
+  background: rgb(0 102 255 / 10%);
+}
+
+.product-type-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--primary-blue);
+}
+
+.product-type-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-color);
+}
+
+.product-type-description {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  flex-grow: 1;
+}
+
+.content-container {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  backdrop-filter: blur(10px);
+}
+
+.section-description {
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Spinner de chargement */
+.spinner-loading {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgb(255 255 255 / 10%);
+  border-radius: 50%;
+  border-top: 4px solid var(--primary-blue);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

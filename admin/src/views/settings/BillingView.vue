@@ -17,16 +17,16 @@
         <div class="loading-state-text">{{ t('common.loading') }}</div>
       </div>
       
-      <form v-else @submit.prevent="saveBillingSettings" class="table-box">
+      <form v-else class="table-box" @submit.prevent="saveBillingSettings">
         <div class="settings-group">
           <h3>{{ t('settings.billing.general') }}</h3>
           
           <div class="form-group">
             <label class="form-label">{{ t('settings.billing.invoicePrefix') }}</label>
             <input 
-              type="text" 
+              v-model="billingSettings.invoicePrefix" 
+              type="text"
               class="form-control"
-              v-model="billingSettings.invoicePrefix"
               placeholder="INV-"
             />
           </div>
@@ -34,9 +34,9 @@
           <div class="form-group">
             <label class="form-label">{{ t('settings.billing.nextInvoiceNumber') }}</label>
             <input 
-              type="number" 
+              v-model="billingSettings.nextInvoiceNumber" 
+              type="number"
               class="form-control"
-              v-model="billingSettings.nextInvoiceNumber"
               min="1"
             />
           </div>
@@ -44,9 +44,9 @@
           <div class="form-group">
             <label class="form-label">{{ t('settings.billing.defaultDueDays') }}</label>
             <input 
-              type="number" 
+              v-model="billingSettings.defaultDueDays" 
+              type="number"
               class="form-control"
-              v-model="billingSettings.defaultDueDays"
               min="0"
             />
           </div>
@@ -54,10 +54,10 @@
           <div class="form-group">
             <div class="form-check">
               <input 
+                id="autoSendInvoices"
+                v-model="billingSettings.autoSendInvoices"
                 type="checkbox"
                 class="form-check-input"
-                v-model="billingSettings.autoSendInvoices"
-                id="autoSendInvoices"
               />
               <label class="form-check-label" for="autoSendInvoices">
                 {{ t('settings.billing.autoSendInvoices') }}
@@ -68,10 +68,10 @@
           <div class="form-group">
             <div class="form-check">
               <input 
+                id="autoSendReceipts"
+                v-model="billingSettings.autoSendReceipts"
                 type="checkbox"
                 class="form-check-input"
-                v-model="billingSettings.autoSendReceipts"
-                id="autoSendReceipts"
               />
               <label class="form-check-label" for="autoSendReceipts">
                 {{ t('settings.billing.autoSendReceipts') }}
@@ -86,10 +86,10 @@
           <div class="form-group">
             <div class="form-check">
               <input 
+                id="enableTaxes"
+                v-model="billingSettings.enableTaxes"
                 type="checkbox"
                 class="form-check-input"
-                v-model="billingSettings.enableTaxes"
-                id="enableTaxes"
               />
               <label class="form-check-label" for="enableTaxes">
                 {{ t('settings.billing.enableTaxes') }}
@@ -101,9 +101,9 @@
             <div class="form-group">
               <label class="form-label">{{ t('settings.billing.defaultTaxName') }}</label>
               <input 
-                type="text" 
+                v-model="billingSettings.defaultTaxName" 
+                type="text"
                 class="form-control"
-                v-model="billingSettings.defaultTaxName"
                 placeholder="TVA"
               />
             </div>
@@ -112,9 +112,9 @@
               <label class="form-label">{{ t('settings.billing.defaultTaxRate') }}</label>
               <div class="input-group">
                 <input 
-                  type="number" 
+                  v-model="billingSettings.defaultTaxRate" 
+                  type="number"
                   class="form-control"
-                  v-model="billingSettings.defaultTaxRate"
                   min="0"
                   step="0.01"
                 />
@@ -127,10 +127,10 @@
             <div class="form-group">
               <div class="form-check">
                 <input 
+                  id="taxNumberRequired"
+                  v-model="billingSettings.taxNumberRequired"
                   type="checkbox"
                   class="form-check-input"
-                  v-model="billingSettings.taxNumberRequired"
-                  id="taxNumberRequired"
                 />
                 <label class="form-check-label" for="taxNumberRequired">
                   {{ t('settings.billing.taxNumberRequired') }}
@@ -152,10 +152,10 @@
               <div class="payment-method-header">
                 <div class="form-check">
                   <input 
+                    :id="`payment-${method.id}`"
+                    v-model="method.enabled"
                     type="checkbox"
                     class="form-check-input"
-                    v-model="method.enabled"
-                    :id="`payment-${method.id}`"
                   />
                   <label class="form-check-label" :for="`payment-${method.id}`">
                     {{ method.name }}
@@ -168,17 +168,17 @@
                   <div class="form-group">
                     <label class="form-label">{{ t('settings.billing.stripePublicKey') }}</label>
                     <input 
-                      type="text" 
+                      v-model="method.config.publicKey" 
+                      type="text"
                       class="form-control"
-                      v-model="method.config.publicKey"
                     />
                   </div>
                   <div class="form-group">
                     <label class="form-label">{{ t('settings.billing.stripeSecretKey') }}</label>
                     <input 
-                      type="password" 
+                      v-model="method.config.secretKey" 
+                      type="password"
                       class="form-control"
-                      v-model="method.config.secretKey"
                     />
                   </div>
                 </div>
@@ -187,26 +187,26 @@
                   <div class="form-group">
                     <label class="form-label">{{ t('settings.billing.paypalClientId') }}</label>
                     <input 
-                      type="text" 
+                      v-model="method.config.clientId" 
+                      type="text"
                       class="form-control"
-                      v-model="method.config.clientId"
                     />
                   </div>
                   <div class="form-group">
                     <label class="form-label">{{ t('settings.billing.paypalClientSecret') }}</label>
                     <input 
-                      type="password" 
+                      v-model="method.config.clientSecret" 
+                      type="password"
                       class="form-control"
-                      v-model="method.config.clientSecret"
                     />
                   </div>
                   <div class="form-group">
                     <div class="form-check">
                       <input 
+                        id="paypal-sandbox"
+                        v-model="method.config.sandbox"
                         type="checkbox"
                         class="form-check-input"
-                        v-model="method.config.sandbox"
-                        id="paypal-sandbox"
                       />
                       <label class="form-check-label" for="paypal-sandbox">
                         {{ t('settings.billing.paypalSandbox') }}
@@ -219,8 +219,8 @@
                   <div class="form-group">
                     <label class="form-label">{{ t('settings.billing.bankDetails') }}</label>
                     <textarea 
-                      class="form-control"
                       v-model="method.config.details"
+                      class="form-control"
                       rows="4"
                     ></textarea>
                   </div>
@@ -250,6 +250,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '@/stores/settings'
 import { useNotificationStore } from '@/stores/notifications'
+import logger from '@/services/logger'
 import '@/assets/css/components/common-layout.css'
 import '@/assets/css/pages/settings.css'
 
@@ -320,18 +321,32 @@ const fetchSettings = async () => {
     }
     
     if (billing.paymentMethods) {
-      billing.paymentMethods.forEach((method: any) => {
-        const existingMethod = paymentMethods.find(m => m.id === method.id)
-        if (existingMethod) {
-          existingMethod.enabled = method.enabled
-          if (method.config) {
-            existingMethod.config = { ...existingMethod.config, ...method.config }
+      // Vérifier si paymentMethods est un tableau
+      if (Array.isArray(billing.paymentMethods)) {
+        billing.paymentMethods.forEach((method: any) => {
+          const existingMethod = paymentMethods.find(m => m.id === method.id)
+          if (existingMethod) {
+            existingMethod.enabled = method.enabled
+            if (method.config) {
+              existingMethod.config = { ...existingMethod.config, ...method.config }
+            }
           }
-        }
-      })
+        })
+      } else {
+        // Si c'est un objet avec stripe, paypal, etc.
+        Object.entries(billing.paymentMethods).forEach(([key, method]: [string, any]) => {
+          const existingMethod = paymentMethods.find(m => m.id === key)
+          if (existingMethod && method) {
+            existingMethod.enabled = method.enabled
+            if (method.config) {
+              existingMethod.config = { ...existingMethod.config, ...method.config }
+            }
+          }
+        })
+      }
     }
   } catch (error) {
-    console.error('Erreur lors du chargement des paramètres de facturation:', error)
+    logger.error('Erreur lors du chargement des paramètres de facturation', { error })
     notificationStore.notificationError(t('settings.loadError'))
   } finally {
     loading.value = false
@@ -350,7 +365,7 @@ const saveBillingSettings = async () => {
     await settingsStore.updateBillingSettings(settings)
     notificationStore.success(t('settings.saveSuccess'))
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde des paramètres de facturation:', error)
+    logger.error('Erreur lors de la sauvegarde des paramètres de facturation', { error })
     notificationStore.notificationError(t('settings.saveError'))
   } finally {
     saving.value = false

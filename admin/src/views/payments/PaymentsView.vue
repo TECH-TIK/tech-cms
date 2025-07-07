@@ -5,9 +5,10 @@
         <h1 class="page-title">{{ $t('payments.title') }}</h1>
         <span class="page-description">{{ $t('payments.description') }}</span>
       </div>
-      <button class="btn btn-primary" @click="openCreateModal">
-        <i class="fas fa-plus"></i> {{ $t('payments.actions.add') }}
-      </button>
+      <router-link to="/payments/create" class="btn btn-gradient">
+        <i class="fas fa-plus"></i>
+        {{ $t('payments.actions.add') }}
+      </router-link>
     </div>
 
     <div class="filter-box">
@@ -17,8 +18,8 @@
           <div class="filter-input-wrapper">
             <i class="fas fa-search"></i>
             <input 
-              type="text" 
               v-model="searchQuery" 
+              type="text" 
               class="filter-input" 
               :placeholder="$t('payments.search.placeholder')"
             />
@@ -28,263 +29,292 @@
         <div class="filter-group">
           <label class="filter-label">{{ $t('payments.filters.status') }}</label>
           <div class="filter-input-wrapper">
-            <i class="fas fa-money-bill-wave"></i>
-            <select v-model="currentStatusFilter" class="filter-input">
-              <option v-for="status in statusFilters" :key="status.value" :value="status.value">
-                {{ status.label }} ({{ getFilteredPaymentsCount(status.value) }})
-              </option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="filter-group">
-          <label class="filter-label">{{ $t('payments.filters.payment_method') }}</label>
-          <div class="filter-input-wrapper">
             <i class="fas fa-credit-card"></i>
-            <select v-model="paymentMethodFilter" class="filter-input">
-              <option value="">{{ $t('payments.filters.all_methods') }}</option>
-              <option value="card">{{ $t('payments.methods.card') }}</option>
-              <option value="bank_transfer">{{ $t('payments.methods.bank_transfer') }}</option>
-              <option value="paypal">{{ $t('payments.methods.paypal') }}</option>
+            <select v-model="statusFilter" class="filter-input">
+              <option value="">{{ $t('payments.status.all') }}</option>
+              <option value="completed">{{ $t('payments.status.completed') }}</option>
+              <option value="pending">{{ $t('payments.status.pending') }}</option>
+              <option value="failed">{{ $t('payments.status.failed') }}</option>
+              <option value="refunded">{{ $t('payments.status.refunded') }}</option>
             </select>
           </div>
         </div>
-        
+
         <div class="filter-group">
-          <label class="filter-label">&nbsp;</label>
+          <label class="filter-label">{{ $t('payments.filters.method') }}</label>
           <div class="filter-input-wrapper">
-            <button @click="applyFilters" class="btn btn-gradient filter-button">
-              <i class="fas fa-filter"></i>
-              {{ $t('payments.filters.apply') }}
-            </button>
+            <i class="fas fa-money-bill-wave"></i>
+            <select v-model="methodFilter" class="filter-input">
+              <option value="">{{ $t('payments.methods.all') }}</option>
+              <option value="stripe">Stripe</option>
+              <option value="paypal">PayPal</option>
+              <option value="bank_transfer">{{ $t('payments.methods.bank_transfer') }}</option>
+              <option value="cash">{{ $t('payments.methods.cash') }}</option>
+            </select>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="table-box">
-      <table v-if="!loading && filteredPayments.length > 0" class="payments-table">
+    <!-- Liste des paiements -->
+    <div v-if="paymentStore.loading" class="loading-state box">
+      <div class="spinner"></div>
+      <p>{{ t('common.loading') }}</p>
+    </div>
+
+    <div v-else-if="filteredPayments.length === 0" class="empty-state box">
+      <div class="empty-icon">
+        <i class="fas fa-money-bill-wave"></i>
+      </div>
+      <h3 class="empty-title">{{ t('payments.empty.title') }}</h3>
+      <p class="empty-description">{{ t('payments.empty.description') }}</p>
+    </div>
+
+    <div v-else class="table-box">
+      <table class="data-table">
         <thead>
           <tr>
-            <th>{{ $t('payments.table.id') }}</th>
-            <th>{{ $t('payments.table.client') }}</th>
-            <th>{{ $t('payments.table.invoice') }}</th>
-            <th>{{ $t('payments.table.date') }}</th>
-            <th>{{ $t('payments.table.amount') }}</th>
-            <th>{{ $t('payments.table.method') }}</th>
-            <th>{{ $t('payments.table.status') }}</th>
-            <th>{{ $t('payments.table.actions') }}</th>
+            <th>ID</th>
+            <th>{{ t('payments.table.client') }}</th>
+            <th>{{ t('payments.table.invoice') }}</th>
+            <th>{{ t('payments.table.date') }}</th>
+            <th>{{ t('payments.table.amount') }}</th>
+            <th>{{ t('payments.table.method') }}</th>
+            <th>{{ t('payments.table.status') }}</th>
+            <th>{{ t('payments.table.actions') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="payment in filteredPayments" :key="payment.id">
-            <td>{{ payment.id }}</td>
+          <tr v-for="payment in paginatedPayments" :key="payment.id" @click="viewPaymentDetails(payment.id)">
+            <td>#{{ payment.id }}</td>
             <td>{{ payment.client_name }}</td>
-            <td>{{ payment.invoice_id }}</td>
-            <td>{{ formatDate(payment.date) }}</td>
+            <td>#{{ payment.invoice_id }}</td>
+            <td>{{ formatDate(payment.payment_date) }}</td>
             <td>{{ formatPrice(payment.amount) }}</td>
-            <td>{{ getPaymentMethodName(payment.method) }}</td>
+            <td>{{ getPaymentMethodName(payment.payment_method) }}</td>
             <td>
-              <span :class="['status-badge', payment.status]">
+              <span :class="`status-badge status-${payment.status}`">
                 {{ getStatusName(payment.status) }}
               </span>
             </td>
-            <td class="actions-cell">
-              <button class="action-btn view-btn" @click="openViewModal(payment.id)" title="Voir">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="action-btn edit-btn" @click="openEditModal(payment.id)" title="Modifier">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button 
-                v-if="payment.status === 'completed'" 
-                class="action-btn refund-btn" 
-                @click="openRefundModal(payment.id)" 
-                title="Rembourser"
-              >
-                <i class="fas fa-undo"></i>
-              </button>
+            <td class="actions">
+              <div class="action-buttons">
+                <button class="btn-icon" :title="t('payments.actions.view')" @click.stop="viewPaymentDetails(payment.id)">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn-icon" :title="t('payments.actions.edit')" @click.stop="editPayment(payment.id)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  v-if="payment.status === 'completed'"
+                  class="btn-icon"
+                  :title="t('payments.actions.refund')"
+                  @click.stop="refundPayment(payment.id)"
+                >
+                  <i class="fas fa-undo"></i>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
+</div>
 
-      <div v-else-if="loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>{{ $t('common.loading') }}</p>
-      </div>
-
-      <div v-else class="empty-state">
-        <i class="fas fa-money-bill-wave empty-icon"></i>
-        <h3>{{ $t('payments.empty.title') }}</h3>
-        <p>{{ $t('payments.empty.message') }}</p>
-        <button class="btn btn-primary" @click="openCreateModal">
-          {{ $t('payments.actions.add') }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Teleport pour le modal -->
-    <div v-if="showModal" class="modal-backdrop" @click.self="closeModal">
-      <div class="modal-box">
-        <PaymentModal 
-          :payment-id="selectedPaymentId" 
-          :mode="modalMode"
-          @close="closeModal"
-          @created="handleCreated"
-          @updated="handleUpdated"
-          @refunded="handleRefunded"
-          @edit="openEditModal"
-        />
-      </div>
+    <!-- Pagination -->
+    <div v-if="totalPages > 1" class="pagination">
+      <a
+        v-for="page in totalPages"
+        :key="page"
+        :class="['page-link', { active: page === currentPage }]"
+        @click="changePage(page)"
+      >
+        {{ page }}
+      </a>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { usePaymentStore } from '@/stores/payments'
-import PaymentModal from '@/components/payments/PaymentModal.vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { usePaymentStore } from '@/stores/payments'
+import { useNotificationStore } from '@/stores/notifications'
+import logger from '@/services/logger'
+import type { Payment } from '@/types/payment'
 
 const { t } = useI18n()
-
-// Store
+const router = useRouter()
 const paymentStore = usePaymentStore()
+const notificationStore = useNotificationStore()
 
-// State
-const showModal = ref(false)
-const modalMode = ref('create') // 'create', 'edit', 'view', 'refund'
-const selectedPaymentId = ref<number | null>(null)
-const currentStatusFilter = ref('all')
-const searchQuery = ref('')
-const paymentMethodFilter = ref('')
+// État
+const searchQuery = ref<string>('')
+const statusFilter = ref<string>('')
+const methodFilter = ref<string>('')
+
+const currentPage = ref<number>(1)
+const itemsPerPage = ref<number>(10)
+
+// Watched for automatic filtering
+watch([searchQuery, statusFilter, methodFilter], () => {
+  currentPage.value = 1
+})
 
 // Computed
-const loading = computed(() => paymentStore.loading)
+const filteredPayments = computed<Payment[]>(() => {
+  if (!paymentStore.payments.length) return []
 
-const statusFilters = computed(() => [
-  { value: 'all', label: t('payments.filters.all') },
-  { value: 'completed', label: t('payments.filters.completed') },
-  { value: 'pending', label: t('payments.filters.pending') },
-  { value: 'refunded', label: t('payments.filters.refunded') },
-  { value: 'failed', label: t('payments.filters.failed') }
-])
+  let result: Payment[] = [...paymentStore.payments]
 
-const filteredPayments = computed(() => {
-  let result = paymentStore.payments
-
-  // Filtrer par statut
-  if (currentStatusFilter.value !== 'all') {
-    result = result.filter(pay => pay.status === currentStatusFilter.value)
-  }
-
-  // Filtrer par méthode de paiement
-  if (paymentMethodFilter.value) {
-    result = result.filter(pay => pay.method === paymentMethodFilter.value)
-  }
-
-  // Filtrer par recherche
-  if (searchQuery.value.trim()) {
+  // Filtrage par recherche
+  if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    result = result.filter(pay => 
-      String(pay.id).includes(query) ||
-      (pay.client_name && pay.client_name.toLowerCase().includes(query)) ||
-      String(pay.invoice_id).includes(query)
+    result = result.filter(payment =>
+      String(payment.id).includes(query) ||
+      (payment.client_name && payment.client_name.toLowerCase().includes(query)) ||
+      String(payment.invoice_id).includes(query) ||
+      (payment.transaction_id && payment.transaction_id.toLowerCase().includes(query))
     )
+  }
+
+  // Filtrage par statut
+  if (statusFilter.value) {
+    result = result.filter(payment => payment.status === statusFilter.value)
+  }
+  if (methodFilter.value) {
+    result = result.filter(payment => payment.payment_method === methodFilter.value)
   }
 
   return result
 })
 
-// Methods
-const getFilteredPaymentsCount = (status: string) => {
-  if (status === 'all') return paymentStore.payments.length
-  return paymentStore.payments.filter(pay => pay.status === status).length
+const totalItems = computed<number>(() => filteredPayments.value.length)
+const totalPages = computed<number>(() => Math.ceil(totalItems.value / itemsPerPage.value))
+
+const paginatedPayments = computed<Payment[]>(() => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage.value
+  const endIndex = startIndex + itemsPerPage.value
+  return filteredPayments.value.slice(startIndex, endIndex)
+})
+
+// Méthodes
+const fetchPayments = async () => {
+  try {
+    await paymentStore.fetchPayments()
+  } catch (error) {
+    logger.error('[PaymentsView] Erreur lors du chargement des paiements', { error })
+  }
 }
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return ''
+const changePage = (page: number) => {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const viewPaymentDetails = (paymentId: number) => {
+  router.push({ name: 'payment-details', params: { id: paymentId.toString() } })
+}
+
+const editPayment = (paymentId: number) => {
+  router.push({ name: 'edit-payment', params: { id: paymentId.toString() } })
+}
+
+const refundPayment = async (paymentId: number) => {
+  if (confirm(t('payments.confirm_refund'))) {
+    try {
+      await paymentStore.processRefund(paymentId, '')
+      notificationStore.addNotification({
+        type: 'success',
+        message: t('payments.messages.refund_success'),
+        title: t('common.success')
+      })
+      await fetchPayments()
+    } catch (error) {
+      logger.error('[PaymentsView] Erreur lors du remboursement', { error })
+    }
+  }
+}
+
+const formatDate = (dateString: string): string => {
+  if (!dateString) return '-'
   const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR')
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' }
+  return date.toLocaleDateString('fr-FR', options)
 }
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
 }
 
-const getPaymentMethodName = (method: string) => {
+const getPaymentMethodName = (method: string): string => {
   const methods: Record<string, string> = {
-    'card': t('payments.methods.card'),
-    'bank_transfer': t('payments.methods.bankTransfer'),
-    'paypal': t('payments.methods.paypal'),
-    'cash': t('payments.methods.cash')
+    stripe: 'Stripe',
+    paypal: 'PayPal',
+    bank_transfer: t('payments.methods.bank_transfer'),
+    cash: t('payments.methods.cash')
   }
-  return methods[method] || method
+  // Utilisation d'un cast de type pour éviter l'erreur d'indexation avec une chaîne
+  return (methods as any)[method] || method
 }
 
-const getStatusName = (status: string) => {
+const getStatusName = (status: string): string => {
   const statuses: Record<string, string> = {
-    'completed': t('payments.statuses.completed'),
-    'pending': t('payments.statuses.pending'),
-    'refunded': t('payments.statuses.refunded'),
-    'failed': t('payments.statuses.failed')
+    completed: t('payments.status.completed'),
+    pending: t('payments.status.pending'),
+    failed: t('payments.status.failed'),
+    refunded: t('payments.status.refunded')
   }
-  return statuses[status] || status
+  // Utilisation d'un cast de type pour éviter l'erreur d'indexation avec une chaîne
+  return (statuses as any)[status] || status
 }
 
-const openCreateModal = () => {
-  selectedPaymentId.value = null
-  modalMode.value = 'create'
-  showModal.value = true
+// Initialisation du temps réel
+const initRealtime = () => {
+  logger.info('[PaymentsView] Initialisation des écouteurs temps réel')
+  paymentStore.initRealtimeListeners()
 }
 
-const openEditModal = (id: number) => {
-  selectedPaymentId.value = id
-  modalMode.value = 'edit'
-  showModal.value = true
-}
-
-const openViewModal = (id: number) => {
-  selectedPaymentId.value = id
-  modalMode.value = 'view'
-  showModal.value = true
-}
-
-const openRefundModal = (id: number) => {
-  selectedPaymentId.value = id
-  modalMode.value = 'refund'
-  showModal.value = true
-}
-
-const closeModal = () => {
-  showModal.value = false
-}
-
-const handleCreated = () => {
-  paymentStore.fetchPayments()
-}
-
-const handleUpdated = () => {
-  paymentStore.fetchPayments()
-}
-
-const handleRefunded = () => {
-  paymentStore.fetchPayments()
-}
-
-const applyFilters = () => {
-  // TODO: implémenter la logique de filtrage
-}
-
-// Lifecycle
+// Cycle de vie
 onMounted(async () => {
-  console.log('PaymentsView - Chargement des données')
-  await paymentStore.fetchPayments()
+  await fetchPayments()
+  initRealtime()
 })
 </script>
 
-<style>
+<style scoped>
+/* Utiliser les styles existants du fichier CSS */
 @import '@/assets/css/pages/payments.css';
 @import '@/assets/css/components/common-layout.css';
+
+/* Styles additionnels */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+/* Alignement du texte dans les cellules du tableau */
+.data-table th, .data-table td {
+  text-align: center;
+}
+
+/* Garder l'alignement à gauche pour les colonnes de texte */
+.data-table th:nth-child(1),
+.data-table th:nth-child(2),
+.data-table th:nth-child(3),
+.data-table td:nth-child(1),
+.data-table td:nth-child(2),
+.data-table td:nth-child(3) {
+  text-align: left;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
 </style>

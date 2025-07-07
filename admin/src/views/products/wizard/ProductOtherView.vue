@@ -1,94 +1,31 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useNotificationStore } from '@/stores/notifications'
+import { useProductWizardStore } from '@/stores/product-wizard'
 
 const { t } = useI18n()
-const router = useRouter()
-const route = useRoute()
-const notificationStore = useNotificationStore()
 
-// Récupérer le type de produit et les données précédentes
-const productType = computed(() => route.params.type as string || 'shared_hosting')
-const previousData = computed(() => {
-  const savedProductData = localStorage.getItem('currentProductData')
-  if (savedProductData) {
-    try {
-      return JSON.parse(savedProductData)
-    } catch (e) {
-      console.error('Erreur lors du parsing des données:', e)
-      return {}
-    }
-  }
-  return {}
-})
+const productWizardStore = useProductWizardStore()
 
-// Déterminer si nous sommes en mode édition
-const productId = computed(() => {
-  const idOrAction = route.params.idOrAction as string
-  if (idOrAction && idOrAction !== 'create') {
-    return parseInt(idOrAction, 10)
-  }
-  return null
-})
 
-const isEditMode = computed(() => !!productId.value)
 
-// Définition des onglets
-const tabs = [
-  { id: 'type', label: t('products_services.tabs.type'), icon: 'tag', route: 'create-product' },
-  { id: 'details', label: t('products_services.tabs.details'), icon: 'info-circle', route: 'product-details' },
-  { id: 'pricing', label: t('products_services.tabs.pricing'), icon: 'money-bill', route: 'product-pricing' },
-  { id: 'module', label: t('products_services.tabs.module'), icon: 'puzzle-piece', route: 'product-module' },
-  { id: 'custom_fields', label: t('products_services.tabs.custom_fields'), icon: 'list-alt', route: 'product-custom-fields' },
-  { id: 'configurable_options', label: t('products_services.tabs.configurable_options'), icon: 'cogs', route: 'product-configurable-options' },
-  { id: 'upgrades', label: t('products_services.tabs.upgrades'), icon: 'arrow-up', route: 'product-upgrades' },
-  { id: 'freedomain', label: t('products_services.tabs.freedomain'), icon: 'globe', route: 'product-freedomain' },
-  { id: 'cross_sells', label: t('products_services.tabs.cross_sells'), icon: 'shopping-cart', route: 'product-cross-sells' },
-  { id: 'other', label: t('products_services.tabs.other'), icon: 'ellipsis-h', route: 'product-other' },
-  { id: 'links', label: t('products_services.tabs.links'), icon: 'link', route: 'product-links' }
-]
 
-// Déterminer l'onglet actif en fonction de la route actuelle
-const activeTab = computed(() => {
-  const currentRouteName = route.name as string
-  const tab = tabs.find(tab => tab.route === currentRouteName)
-  return tab ? tab.id : 'other'
-})
 
-// Naviguer vers un onglet spécifique
-const navigateToTab = (tab) => {
-  // Sauvegarder les données dans localStorage
-  localStorage.setItem('otherData', JSON.stringify(otherOptions.value))
-  
-  if (tab.id === 'type') {
-    // Si nous sommes en mode édition, rediriger vers la page d'édition du produit
-    if (isEditMode.value) {
-      router.push({ path: `/products/${productId.value}` })
-    } else {
-      // Sinon, rediriger vers la création de produit
-      router.push({ name: 'create-product' })
-    }
-  } else {
-    const idOrAction = isEditMode.value ? productId.value : 'create'
-    router.push({
-      name: tab.route,
-      params: { idOrAction }
-    })
-  }
-}
 
-// États locaux pour les autres options
+
+
+
+
+// États locaux pour les autres options - initialisés depuis le store Pinia
 const otherOptions = ref({
-  requireDomain: false,
-  autoSetup: true,
-  stockControl: false,
-  stockQuantity: 0,
-  hidden: false,
-  featured: false,
-  welcomeEmail: 0,
-  notes: ''
+  requireDomain: productWizardStore.productData.other?.requireDomain || false,
+  autoSetup: productWizardStore.productData.other?.autoSetup !== undefined ? productWizardStore.productData.other.autoSetup : true,
+  stockControl: productWizardStore.productData.other?.stockControl || false,
+  stockQuantity: productWizardStore.productData.other?.stockQuantity || 0,
+  hidden: productWizardStore.productData.other?.hidden || false,
+  featured: productWizardStore.productData.other?.featured || false,
+  welcomeEmail: productWizardStore.productData.other?.welcomeEmail || 0,
+  notes: productWizardStore.productData.other?.notes || ''
 })
 
 // Options d'emails de bienvenue
@@ -100,13 +37,13 @@ const welcomeEmailOptions = ref([
 ])
 
 // Mise à jour de la quantité de stock
-const updateStockQuantity = (value) => {
-  otherOptions.value.stockQuantity = parseInt(value) || 0
+const updateStockQuantity = (value: string | number): void => {
+  otherOptions.value.stockQuantity = parseInt(String(value)) || 0
 }
 
 // Mise à jour de l'email de bienvenue
-const updateWelcomeEmail = (value) => {
-  otherOptions.value.welcomeEmail = parseInt(value)
+const updateWelcomeEmail = (value: string | number): void => {
+  otherOptions.value.welcomeEmail = parseInt(String(value))
 }
 
 // Activer/désactiver le contrôle de stock
@@ -137,48 +74,20 @@ const toggleFeatured = () => {
   otherOptions.value.featured = !otherOptions.value.featured
 }
 
-// Continuer vers l'étape suivante
-const continueToNextStep = () => {
-  // Sauvegarder les données
-  localStorage.setItem('otherData', JSON.stringify(otherOptions.value))
-  
-  // Naviguer vers la prochaine étape
-  const idOrAction = isEditMode.value ? productId.value : 'create'
-  router.push({
-    name: 'product-links',
-    params: { idOrAction }
-  })
-}
 
-// Retour à l'étape précédente
-const goBack = () => {
-  // Sauvegarder les données
-  localStorage.setItem('otherData', JSON.stringify(otherOptions.value))
-  
-  // Naviguer vers l'étape précédente
-  const idOrAction = isEditMode.value ? productId.value : 'create'
-  router.push({
-    name: 'product-cross-sells',
-    params: { idOrAction }
-  })
-}
 
-// Sauvegarder la progression
-const saveProgress = () => {
-  // TODO: implémenter la sauvegarde de la progression
-}
 
-// Initialiser avec les données précédentes, si disponibles
+
+
+
+
+// Initialisation
 onMounted(() => {
-  if (previousData.value && previousData.value.otherOptions) {
-    otherOptions.value = {
-      ...otherOptions.value,
-      ...previousData.value.otherOptions
-    }
-  }
+  // Définir l'étape courante
+  productWizardStore.currentStep = 'other';
 })
 
-const loading = ref(false)
+
 </script>
 
 <template>
@@ -194,8 +103,8 @@ const loading = ref(false)
             <div class="form-group form-group-checkbox">
               <div class="form-check">
                 <input 
-                  type="checkbox" 
                   id="require-domain" 
+                  type="checkbox" 
                   class="form-check-input" 
                   :checked="otherOptions.requireDomain"
                   @change="toggleRequireDomain"
@@ -212,8 +121,8 @@ const loading = ref(false)
             <div class="form-group form-group-checkbox">
               <div class="form-check">
                 <input 
-                  type="checkbox" 
                   id="auto-setup" 
+                  type="checkbox" 
                   class="form-check-input" 
                   :checked="otherOptions.autoSetup"
                   @change="toggleAutoSetup"
@@ -232,8 +141,8 @@ const loading = ref(false)
             <div class="form-group form-group-checkbox">
               <div class="form-check">
                 <input 
-                  type="checkbox" 
                   id="stock-control" 
+                  type="checkbox" 
                   class="form-check-input" 
                   :checked="otherOptions.stockControl"
                   @change="toggleStockControl"
@@ -247,15 +156,15 @@ const loading = ref(false)
               </small>
             </div>
             
-            <div class="form-group" v-if="otherOptions.stockControl">
+            <div v-if="otherOptions.stockControl" class="form-group">
               <label for="stock-quantity">{{ t('products_services.other.stock_quantity') }}</label>
               <input 
-                type="number" 
                 id="stock-quantity" 
+                type="number" 
                 class="form-control" 
                 min="0" 
                 :value="otherOptions.stockQuantity"
-                @input="e => updateStockQuantity(e.target.value)"
+                @input="(e: Event) => updateStockQuantity((e.target as HTMLInputElement)?.value)"
               />
               <small class="form-text text-muted">
                 {{ t('products_services.other.stock_quantity_help') }}
@@ -267,8 +176,8 @@ const loading = ref(false)
             <div class="form-group form-group-checkbox">
               <div class="form-check">
                 <input 
-                  type="checkbox" 
                   id="hidden" 
+                  type="checkbox" 
                   class="form-check-input" 
                   :checked="otherOptions.hidden"
                   @change="toggleHidden"
@@ -285,8 +194,8 @@ const loading = ref(false)
             <div class="form-group form-group-checkbox">
               <div class="form-check">
                 <input 
-                  type="checkbox" 
                   id="featured" 
+                  type="checkbox" 
                   class="form-check-input" 
                   :checked="otherOptions.featured"
                   @change="toggleFeatured"
@@ -308,7 +217,7 @@ const loading = ref(false)
                 id="welcome-email" 
                 class="form-control" 
                 :value="otherOptions.welcomeEmail"
-                @change="e => updateWelcomeEmail(e.target.value)"
+                @change="(e: Event) => updateWelcomeEmail((e.target as HTMLSelectElement)?.value)"
               >
                 <option 
                   v-for="option in welcomeEmailOptions" 
@@ -329,9 +238,9 @@ const loading = ref(false)
               <label for="notes">{{ t('products_services.other.notes') }}</label>
               <textarea 
                 id="notes" 
-                class="form-control" 
+                v-model="otherOptions.notes" 
+                class="form-control"
                 rows="4"
-                v-model="otherOptions.notes"
                 :placeholder="t('products_services.other.notes_placeholder')"
               ></textarea>
               <small class="form-text text-muted">
@@ -342,39 +251,7 @@ const loading = ref(false)
         </div>
       </div>
     </div>
-    
-    <div class="wizard-actions">
-      <button 
-        type="button" 
-        class="btn btn-outline-secondary"
-        @click="goBack"
-        :disabled="loading"
-      >
-        {{ t('common.back') }}
-      </button>
-      
-      <div class="action-buttons">
-        <button 
-          type="button" 
-          class="btn btn-success"
-          @click="saveProgress"
-          :disabled="loading"
-        >
-          <span v-if="loading">{{ t('common.saving') }}...</span>
-          <span v-else>{{ t('common.save') }}</span>
-        </button>
-        
-        <button 
-          type="button" 
-          class="btn btn-primary"
-          @click="continueToNextStep"
-          :disabled="loading"
-        >
-          {{ t('common.continue') }}
-        </button>
-      </div>
-    </div>
-  </div>
+</div>
 </template>
 
 <style scoped>
@@ -481,7 +358,7 @@ const loading = ref(false)
 .form-control:focus {
   border-color: var(--primary-blue);
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(var(--primary-blue-rgb), 0.25);
+  box-shadow: 0 0 0 0.2rem rgb(var(--primary-blue-rgb), 0.25);
 }
 
 select.form-control {
@@ -565,7 +442,7 @@ textarea.form-control {
 }
 
 /* Style responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .form-row {
     flex-direction: column;
     gap: var(--spacing-md);

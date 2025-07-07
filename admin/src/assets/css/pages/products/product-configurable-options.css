@@ -1,0 +1,203 @@
+/* Styles pour la page des options configurables */
+
+.product-options-page {
+  padding: var(--spacing-md);
+  width: 100%;
+}
+
+.options-section {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  backdrop-filter: blur(10px);
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.options-list {
+  margin-bottom: var(--spacing-lg);
+}
+
+.option-item {
+  background: rgb(0 0 0 / 10%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-md);
+  transition: all var(--transition-fast);
+  overflow: hidden;
+}
+
+.option-item:hover {
+  border-color: rgb(0 102 255 / 30%);
+}
+
+.option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  cursor: pointer;
+  background: rgb(0 0 0 / 20%);
+}
+
+.option-name {
+  font-weight: 500;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+}
+
+.option-type-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  background: rgb(0 102 255 / 20%);
+  color: var(--primary-blue);
+  border-radius: var(--radius-sm);
+  margin-left: var(--spacing-sm);
+}
+
+.option-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.option-content {
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--glass-border);
+}
+
+.option-choices {
+  margin-top: var(--spacing-md);
+}
+
+.choice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+  background: rgb(0 0 0 / 10%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.choice-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.choice-price {
+  color: var(--primary-blue);
+}
+
+.add-option-panel {
+  background: rgb(0 0 0 / 10%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+}
+
+.panel-title {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+}
+
+.panel-title i {
+  margin-right: var(--spacing-sm);
+  color: var(--primary-blue);
+}
+
+.option-types {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.option-type-card {
+  background: rgb(0 0 0 / 20%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.option-type-card:hover {
+  border-color: var(--primary-blue);
+  transform: translateY(-2px);
+}
+
+.option-type-card.selected {
+  border-color: var(--primary-blue);
+  background: rgb(0 102 255 / 10%);
+}
+
+.option-type-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--primary-blue);
+}
+
+.option-type-label {
+  font-weight: 500;
+  color: var(--text-color);
+  font-size: 0.875rem;
+}
+
+.option-details-form {
+  margin-top: var(--spacing-md);
+}
+
+.choice-list {
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.add-choice-button {
+  margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-title {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-description {
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Responsive */
+@media (width <= 768px) {
+  .option-types {
+    grid-template-columns: 1fr 1fr;
+  }
+}

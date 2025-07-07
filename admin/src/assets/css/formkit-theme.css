@@ -1,0 +1,104 @@
+/* Thème FormKit personnalisé pour TechCMS - v3 (Final) */
+
+/* Variables globales du thème FormKit */
+[data-formkit-theme="genesis"] {
+  --fk-font-family: inherit;
+  --fk-color-primary: var(--primary-blue);
+  --fk-color-success: var(--success);
+  --fk-color-warning: var(--warning);
+  --fk-color-danger: var(--danger);
+  --fk-color-input: var(--text-primary);
+  --fk-color-label: var(--text-primary);
+  --fk-color-help: var(--text-secondary);
+  --fk-color-placeholder: var(--text-muted);
+  --fk-bg-input: var(--glass-bg, var(--bg-primary));
+  --fk-border-color: var(--glass-border, var(--border-color));
+  --fk-border-color-hover: var(--primary-blue);
+  --fk-border-color-active: var(--primary-blue);
+  --fk-border-radius: var(--radius-md);
+  --fk-max-width-input: 100%;
+  --fk-spacing-input: 0.75rem 1rem;
+  --fk-spacing-label: 0 0 var(--spacing-xs) 0;
+}
+
+/* Style général du conteneur interne pour correspondre à .form-input */
+.formkit-inner {
+  border: 1px solid var(--fk-border-color);
+  background: var(--fk-bg-input);
+  border-radius: var(--fk-border-radius);
+  transition: all 0.2s ease-in-out;
+  box-shadow: none;
+  width: 100%;
+}
+
+.formkit-inner:focus-within {
+  border-color: var(--fk-color-primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+/* Style du champ de saisie lui-même */
+.formkit-input {
+  padding: var(--fk-spacing-input);
+  background: none;
+  border: none;
+  width: 100%;
+  color: var(--fk-color-input);
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.formkit-input::placeholder {
+  color: var(--fk-color-placeholder);
+}
+
+/* Style des labels pour correspondre à .form-label */
+.formkit-label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+  color: var(--fk-color-label);
+}
+
+/* --- STYLES SPÉCIFIQUES AU SELECT --- */
+
+/* 1. On cache l'icône par défaut de FormKit */
+.formkit-select-icon {
+    display: none !important;
+}
+
+/* 2. On applique le style de .form-select au champ de FormKit */
+.formkit-input[data-type='select'] {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem !important; /* Important pour que le texte ne passe pas sous la flèche */
+}
+
+/* --- FIN STYLES SELECT --- */
+
+/* Messages d'aide et d'erreur */
+.formkit-help {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-xs);
+}
+
+.formkit-message {
+  color: var(--danger);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-xs);
+}
+
+/* Mode sombre */
+.dark [data-formkit-theme="genesis"] {
+  --fk-color-input: var(--text-primary);
+  --fk-color-label: var(--text-primary);
+  --fk-bg-input: var(--glass-bg, var(--bg-secondary));
+  --fk-border-color: var(--glass-border, var(--border-color));
+}
+
+.dark .formkit-input[data-type='select'] {
+    /* On s'assure que la flèche est visible en mode sombre */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23D1D5DB' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}

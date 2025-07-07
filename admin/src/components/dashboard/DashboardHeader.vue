@@ -7,12 +7,12 @@
       </div>
       
       <div class="flex space-x-4">
-        <button 
-          @click="refresh"
+        <button
           class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+          @click="refresh"
         >
           <i class="fas fa-sync-alt mr-2"></i>
-          Actualiser
+          {{ $t('dashboard.refresh') }}
         </button>
       </div>
     </div>
@@ -20,7 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+
+
 
 // Props
 interface Props {
@@ -28,9 +29,9 @@ interface Props {
   subtitle?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  title: 'Tableau de bord',
-  subtitle: 'Vue d\'ensemble de votre activité'
+withDefaults(defineProps<Props>(), {
+  title: 'Dashboard',
+  subtitle: 'Overview of your activity'
 })
 
 // Émissions

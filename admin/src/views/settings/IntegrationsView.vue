@@ -29,8 +29,8 @@
             <div class="api-keys-header">
               <button 
                 class="btn btn-primary" 
-                @click="generateNewApiKey"
                 :disabled="generatingKey"
+                @click="generateNewApiKey"
               >
                 <i v-if="generatingKey" class="fas fa-spinner fa-spin" />
                 <i v-else class="fas fa-plus"></i>
@@ -50,8 +50,8 @@
                     <code>{{ newApiKey.token }}</code>
                     <button 
                       class="btn btn-icon" 
-                      @click="copyApiKey(newApiKey.token)"
                       title="Copier"
+                      @click="copyApiKey(newApiKey.token || '')"
                     >
                       <i class="fas fa-copy"></i>
                     </button>
@@ -80,8 +80,8 @@
                     <td>
                       <button 
                         class="btn btn-icon btn-danger" 
-                        @click="deleteApiKey(key.id)"
                         title="Supprimer"
+                        @click="deleteApiKey(key.id)"
                       >
                         <i class="fas fa-trash"></i>
                       </button>
@@ -107,7 +107,7 @@
             <div class="webhooks-header">
               <button 
                 class="btn btn-primary" 
-                @click="showWebhookModal = true"
+                @click="showAddWebhookModal"
               >
                 <i class="fas fa-plus"></i>
                 {{ t('settings.integrations.addWebhook') }}
@@ -130,14 +130,13 @@
                     <td>{{ webhook.name }}</td>
                     <td class="webhook-url">{{ webhook.url }}</td>
                     <td>
-                      <div class="webhook-events">
-                        <span 
-                          v-for="event in webhook.events" 
-                          :key="event"
-                          class="webhook-event-badge"
-                        >
-                          {{ event }}
-                        </span>
+                      <div v-if="webhook.events.length > 0" class="webhook-events">
+                        <label>{{ t('settings.integrations.events') }}:</label>
+                        <div class="event-badges">
+                          <span v-for="eventId in webhook.events" :key="eventId" class="event-badge">
+                            {{ availableEvents.find(event => event.id === eventId)?.name || eventId }}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td>
@@ -152,22 +151,22 @@
                       <div class="action-buttons">
                         <button 
                           class="btn btn-icon" 
-                          @click="editWebhook(webhook)"
                           title="Modifier"
+                          @click="editWebhook(webhook)"
                         >
                           <i class="fas fa-edit"></i>
                         </button>
                         <button 
                           class="btn btn-icon" 
-                          @click="toggleWebhookStatus(webhook.id)"
                           title="Activer/Désactiver"
+                          @click="toggleWebhookStatus(webhook.id, !webhook.active)"
                         >
                           <i :class="webhook.active ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"></i>
                         </button>
                         <button 
                           class="btn btn-icon btn-danger" 
-                          @click="deleteWebhook(webhook.id)"
                           title="Supprimer"
+                          @click="deleteWebhook(webhook.id)"
                         >
                           <i class="fas fa-trash"></i>
                         </button>
@@ -189,7 +188,7 @@
     <div v-if="showWebhookModal" class="modal-overlay">
       <div class="modal-container">
         <div class="modal-header">
-          <h3>{{ editingWebhook.id ? t('settings.integrations.editWebhook') : t('settings.integrations.addWebhook') }}</h3>
+          <h3>{{ editingWebhook.id !== null ? t('settings.integrations.editWebhook') : t('settings.integrations.addWebhook') }}</h3>
           <button class="btn-close" @click="closeWebhookModal">
             <i class="fas fa-times"></i>
           </button>
@@ -199,9 +198,9 @@
             <div class="form-group">
               <label class="form-label">{{ t('settings.integrations.webhookName') }}</label>
               <input 
-                type="text" 
+                v-model="editingWebhook.name" 
+                type="text"
                 class="form-control"
-                v-model="editingWebhook.name"
                 required
               />
             </div>
@@ -209,27 +208,27 @@
             <div class="form-group">
               <label class="form-label">{{ t('settings.integrations.webhookUrl') }}</label>
               <input 
-                type="url" 
+                v-model="editingWebhook.url" 
+                type="url"
                 class="form-control"
-                v-model="editingWebhook.url"
                 required
               />
             </div>
             
             <div class="form-group">
-              <label class="form-label">{{ t('settings.integrations.webhookEvents') }}</label>
+              <label for="webhook-events">{{ t('settings.integrations.events') }}</label>
               <div class="webhook-events-selection">
-                <div 
-                  v-for="event in availableEvents" 
+                <div
+v-for="event in availableEvents" 
                   :key="event.id"
                   class="webhook-event-checkbox"
                 >
                   <input 
+                    :id="`event-${event.id}`" 
+                    v-model="editingWebhook.events" 
                     type="checkbox"
-                    :id="`event-${event.id}`"
                     :value="event.id"
-                    v-model="editingWebhook.events"
-                  />
+                  >
                   <label :for="`event-${event.id}`">{{ event.name }}</label>
                 </div>
               </div>
@@ -238,10 +237,10 @@
             <div class="form-group">
               <div class="form-check">
                 <input 
+                  id="webhook-active"
+                  v-model="editingWebhook.active"
                   type="checkbox"
                   class="form-check-input"
-                  v-model="editingWebhook.active"
-                  id="webhook-active"
                 />
                 <label class="form-check-label" for="webhook-active">
                   {{ t('settings.integrations.webhookActive') }}
@@ -252,10 +251,10 @@
             <div class="form-group">
               <div class="form-check">
                 <input 
+                  id="webhook-test"
+                  v-model="editingWebhook.sendTest"
                   type="checkbox"
                   class="form-check-input"
-                  v-model="editingWebhook.sendTest"
-                  id="webhook-test"
                 />
                 <label class="form-check-label" for="webhook-test">
                   {{ t('settings.integrations.sendTestEvent') }}
@@ -290,8 +289,12 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 import { useSettingsStore } from '@/stores/settings'
 import { useNotificationStore } from '@/stores/notifications'
+import type { ApiKey, Webhook, WebhookEvent } from '@/types/integration'
+import logger from '@/services/logger'
 import '@/assets/css/components/common-layout.css'
 import '@/assets/css/pages/settings.css'
 
@@ -300,38 +303,48 @@ const settingsStore = useSettingsStore()
 const notificationStore = useNotificationStore()
 
 // État
+
+// État
 const loading = ref(true)
-const apiKeys = ref([])
-const webhooks = ref([])
-const newApiKey = ref(null)
+const apiKeys = ref<ApiKey[]>([])
+const webhooks = ref<Webhook[]>([])
+const newApiKey = ref<ApiKey | null>(null)
 const generatingKey = ref(false)
 const showWebhookModal = ref(false)
 const savingWebhook = ref(false)
+const deleting = ref<string | number | null>(null)
+const deletingWebhook = ref<string | number | null>(null)
 
 // Webhook en cours d'édition
-const editingWebhook = reactive({
+interface EditingWebhook extends Omit<Webhook, 'id'> {
+  id: string | number | null;
+  sendTest: boolean;
+}
+
+const editingWebhook = reactive<EditingWebhook>({ 
   id: null,
   name: '',
   url: '',
   events: [],
   active: true,
-  sendTest: false
+  sendTest: false,
+  secret: ''
 })
 
 // Événements disponibles pour les webhooks
-const availableEvents = [
-  { id: 'client.created', name: t('settings.integrations.events.clientCreated') },
-  { id: 'client.updated', name: t('settings.integrations.events.clientUpdated') },
-  { id: 'invoice.created', name: t('settings.integrations.events.invoiceCreated') },
-  { id: 'invoice.paid', name: t('settings.integrations.events.invoicePaid') },
-  { id: 'payment.received', name: t('settings.integrations.events.paymentReceived') },
-  { id: 'ticket.created', name: t('settings.integrations.events.ticketCreated') },
-  { id: 'ticket.replied', name: t('settings.integrations.events.ticketReplied') },
-  { id: 'ticket.closed', name: t('settings.integrations.events.ticketClosed') },
-  { id: 'service.created', name: t('settings.integrations.events.serviceCreated') },
-  { id: 'service.updated', name: t('settings.integrations.events.serviceUpdated') },
-  { id: 'service.expired', name: t('settings.integrations.events.serviceExpired') }
-]
+const availableEvents = ref<WebhookEvent[]>([
+  { id: 'client.created', name: t('settings.integrations.events.clientCreated'), group: 'clients' },
+  { id: 'client.updated', name: t('settings.integrations.events.clientUpdated'), group: 'clients' },
+  { id: 'invoice.created', name: t('settings.integrations.events.invoiceCreated'), group: 'billing' },
+  { id: 'invoice.paid', name: t('settings.integrations.events.invoicePaid'), group: 'billing' },
+  { id: 'payment.received', name: t('settings.integrations.events.paymentReceived'), group: 'billing' },
+  { id: 'ticket.created', name: t('settings.integrations.events.ticketCreated'), group: 'support' },
+  { id: 'ticket.replied', name: t('settings.integrations.events.ticketReplied'), group: 'support' },
+  { id: 'ticket.closed', name: t('settings.integrations.events.ticketClosed'), group: 'support' },
+  { id: 'service.created', name: t('settings.integrations.events.serviceCreated'), group: 'services' },
+  { id: 'service.updated', name: t('settings.integrations.events.serviceUpdated'), group: 'services' },
+  { id: 'service.expired', name: t('settings.integrations.events.serviceExpired'), group: 'services' }
+])
 
 // Méthodes
 const fetchIntegrationSettings = async () => {
@@ -346,9 +359,13 @@ const fetchIntegrationSettings = async () => {
     if (response.webhooks) {
       webhooks.value = response.webhooks
     }
-  } catch (error) {
-    console.error('Erreur lors du chargement des paramètres d\'intégration:', error)
-    notificationStore.notificationError(t('settings.loadError'))
+  } catch (_error) {
+    logger.error('Erreur lors du chargement des paramètres d\'intégration', { error: _error })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('settings.loadError')
+    })
   } finally {
     loading.value = false
   }
@@ -365,44 +382,71 @@ const generateNewApiKey = async () => {
       apiKeys.value.push(response)
     }
     
-    notificationStore.success(t('settings.integrations.keyGeneratedSuccess'))
-  } catch (error) {
-    console.error('Erreur lors de la génération de la clé API:', error)
-    notificationStore.notificationError(t('settings.integrations.keyGenerationError'))
+    notificationStore.showNotification({
+      type: 'success',
+      title: t('common.success'),
+      message: t('settings.integrations.keyGeneratedSuccess')
+    })
+  } catch (_error) {
+    logger.error('Erreur lors de la génération de la clé API', { error: _error })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('settings.integrations.keyGenerationError')
+    })
   } finally {
     generatingKey.value = false
   }
 }
 
-const deleteApiKey = async (keyId) => {
+const deleteApiKey = async (id: string | number) => {
   if (!confirm(t('settings.integrations.confirmDeleteKey'))) {
     return
   }
   
   try {
-    await settingsStore.deleteApiKey(keyId)
+    deleting.value = id
+    await settingsStore.deleteApiKey(id.toString())
     
     // Supprimer la clé de la liste
-    apiKeys.value = apiKeys.value.filter(key => key.id !== keyId)
+    apiKeys.value = apiKeys.value.filter(key => key.id !== id)
     
-    notificationStore.success(t('settings.integrations.keyDeletedSuccess'))
-  } catch (error) {
-    console.error('Erreur lors de la suppression de la clé API:', error)
-    notificationStore.notificationError(t('settings.integrations.keyDeletionError'))
+    notificationStore.showNotification({
+      type: 'success',
+      title: t('common.success'),
+      message: t('settings.integrations.keyDeletedSuccess')
+    })
+  } catch (_error) {
+    logger.error('Erreur lors de la suppression de la clé API', { id, error: _error })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('settings.integrations.keyDeletionError')
+    })
+  } finally {
+    deleting.value = null
   }
 }
 
-const copyApiKey = (token) => {
+const copyApiKey = (token: string) => {
   navigator.clipboard.writeText(token)
     .then(() => {
-      notificationStore.success(t('settings.integrations.keyCopiedSuccess'))
+      notificationStore.showNotification({
+        type: 'success',
+        title: t('common.success'),
+        message: t('settings.integrations.keyCopiedSuccess')
+      })
     })
     .catch(() => {
-      notificationStore.notificationError(t('settings.integrations.keyCopyError'))
+      notificationStore.showNotification({
+        type: 'error',
+        title: t('common.error'),
+        message: t('settings.integrations.keyCopyError')
+      })
     })
 }
 
-const editWebhook = (webhook) => {
+const editWebhook = (webhook: Webhook) => {
   editingWebhook.id = webhook.id
   editingWebhook.name = webhook.name
   editingWebhook.url = webhook.url
@@ -427,90 +471,136 @@ const closeWebhookModal = () => {
   }, 300)
 }
 
+const showAddWebhookModal = () => {
+  // Réinitialiser le webhook en édition
+  editingWebhook.id = null
+  editingWebhook.name = ''
+  editingWebhook.url = ''
+  editingWebhook.events = []
+  editingWebhook.active = true
+  editingWebhook.secret = ''
+  editingWebhook.sendTest = false
+  
+  showWebhookModal.value = true
+}
+
 const saveWebhook = async () => {
   try {
     savingWebhook.value = true
     
-    const webhookData = {
-      id: editingWebhook.id,
+    // Convertir l'ID null en undefined pour le typage Partial<Webhook>
+    const webhookData: Partial<Webhook> & { sendTest: boolean } = {
       name: editingWebhook.name,
       url: editingWebhook.url,
       events: editingWebhook.events,
       active: editingWebhook.active,
+      secret: editingWebhook.secret,
       sendTest: editingWebhook.sendTest
     }
     
-    const response = await settingsStore.saveWebhook(webhookData)
+    // Ajouter l'ID seulement s'il n'est pas null
+    if (editingWebhook.id !== null) {
+      webhookData.id = editingWebhook.id
+    }
+    
+    const result = await settingsStore.saveWebhook(webhookData)
     
     // Mettre à jour la liste des webhooks
-    if (editingWebhook.id) {
+    if (editingWebhook.id !== null) {
       // Mise à jour d'un webhook existant
       const index = webhooks.value.findIndex(w => w.id === editingWebhook.id)
-      if (index !== -1) {
-        webhooks.value[index] = response
+      if (index !== -1 && result) {
+        webhooks.value[index] = result
       }
     } else {
       // Ajout d'un nouveau webhook
-      webhooks.value.push(response)
+      if (result) {
+        webhooks.value.push(result)
+      }
     }
     
-    notificationStore.success(t('settings.integrations.webhookSavedSuccess'))
+    notificationStore.showNotification({
+      type: 'success',
+      title: t('common.success'),
+      message: t('settings.integrations.webhookSavedSuccess')
+    })
     closeWebhookModal()
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde du webhook:', error)
-    notificationStore.notificationError(t('settings.integrations.webhookSaveError'))
+  } catch (_error) {
+    logger.error('Erreur lors de la sauvegarde du webhook', { webhook: editingWebhook, error: _error })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('settings.integrations.webhookSaveError')
+    })
   } finally {
     savingWebhook.value = false
   }
 }
 
-const deleteWebhook = async (webhookId) => {
+const deleteWebhook = async (id: string | number) => {
   if (!confirm(t('settings.integrations.confirmDeleteWebhook'))) {
     return
   }
   
   try {
-    await settingsStore.deleteWebhook(webhookId)
+    deletingWebhook.value = id
+    await settingsStore.deleteWebhook(id.toString())
     
     // Supprimer le webhook de la liste
-    webhooks.value = webhooks.value.filter(webhook => webhook.id !== webhookId)
+    webhooks.value = webhooks.value.filter(webhook => webhook.id !== id)
     
-    notificationStore.success(t('settings.integrations.webhookDeletedSuccess'))
-  } catch (error) {
-    console.error('Erreur lors de la suppression du webhook:', error)
-    notificationStore.notificationError(t('settings.integrations.webhookDeletionError'))
+    notificationStore.showNotification({
+      type: 'success',
+      title: t('common.success'),
+      message: t('settings.integrations.webhookDeletedSuccess')
+    })
+  } catch (_error) {
+    logger.error('Erreur lors de la suppression du webhook', { id, error: _error })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('settings.integrations.webhookDeletionError')
+    })
+  } finally {
+    deletingWebhook.value = null
   }
 }
 
-const toggleWebhookStatus = async (webhookId) => {
+const toggleWebhookStatus = async (id: string | number, active: boolean) => {
   try {
-    const webhook = webhooks.value.find(w => w.id === webhookId)
-    if (!webhook) return
-    
-    const newStatus = !webhook.active
-    
-    await settingsStore.toggleWebhookStatus(webhookId, newStatus)
+    await settingsStore.toggleWebhookStatus(id.toString(), active)
     
     // Mettre à jour le statut dans la liste
-    webhook.active = newStatus
+    const webhook = webhooks.value.find(w => w.id === id)
+    if (webhook) {
+      webhook.active = active
+    }
     
-    notificationStore.success(
-      newStatus 
-        ? t('settings.integrations.webhookActivatedSuccess') 
-        : t('settings.integrations.webhookDeactivatedSuccess')
-    )
+    notificationStore.showNotification({
+      type: 'success',
+      title: t('common.success'),
+      message: active 
+        ? t('settings.integrations.webhookEnabled') 
+        : t('settings.integrations.webhookDisabled')
+    })
   } catch (error) {
-    console.error('Erreur lors du changement de statut du webhook:', error)
-    notificationStore.notificationError(t('settings.integrations.webhookStatusError'))
+    logger.error('Erreur lors de la modification du statut du webhook', { id, active, error })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('settings.integrations.webhookToggleError')
+    })
   }
 }
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | undefined): string => {
+  if (!dateString) return '-';
+  
   try {
     const date = new Date(dateString)
     return format(date, 'dd MMM yyyy HH:mm', { locale: fr })
-  } catch (error) {
-    return dateString
+  } catch {
+    return dateString || '-'
   }
 }
 

@@ -16,7 +16,7 @@
         <div class="modal-footer">
           <slot name="footer">
             <button class="btn btn-secondary" @click="emit('close')">
-              Fermer
+              {{ $t('common.close') }}
             </button>
           </slot>
         </div>
@@ -28,13 +28,14 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, withDefaults } from 'vue';
 
+
 interface Props {
   show?: boolean;
   title: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   size: 'md',
   show: true
 });
@@ -55,7 +56,7 @@ const handleBackdropClick = (e: MouseEvent) => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgb(0 0 0 / 50%);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -66,7 +67,7 @@ const handleBackdropClick = (e: MouseEvent) => {
 .modal-container {
   background: var(--bg-primary, white);
   border-radius: var(--radius-lg, 8px);
-  box-shadow: var(--shadow-lg, 0 10px 25px rgba(0, 0, 0, 0.1));
+  box-shadow: var(--shadow-lg, 0 10px 25px rgb(0 0 0 / 10%));
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -147,19 +148,19 @@ const handleBackdropClick = (e: MouseEvent) => {
   transform: scale(0.9);
 }
 
-@media (max-width: 1200px) {
+@media (width <= 1200px) {
   .modal-xl { width: 90vw; }
 }
 
-@media (max-width: 992px) {
+@media (width <= 992px) {
   .modal-lg { width: 90vw; }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .modal-md { width: 90vw; }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .modal-sm { width: 90vw; }
   
   .modal-container {

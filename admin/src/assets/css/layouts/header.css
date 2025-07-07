@@ -5,13 +5,26 @@
 
 header {
   display: block;
-  width: 100%;
+  width: calc(100% - var(--sidebar-width, 280px));
   height: var(--header-height, 64px);
   position: fixed;
   top: 0;
-  left: 0;
+  left: var(--sidebar-width, 280px);
   right: 0;
   z-index: 1000;
+}
+
+/* Ajout des styles responsive */
+@media (width <= 768px) {
+  header {
+    width: 100%;
+    left: 0;
+  }
+  
+  body.sidebar-open header {
+    width: calc(100% - var(--sidebar-width, 280px));
+    left: var(--sidebar-width, 280px);
+  }
 }
 
 .top-bar {
@@ -19,7 +32,7 @@ header {
   align-items: center;
   justify-content: space-between;
   background-color: white;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgb(0 0 0 / 10%);
   height: 100%;
   width: 100%;
   padding: 0 1.5rem;
@@ -28,7 +41,7 @@ header {
 /* Styles pour le mode sombre */
 .dark .top-bar {
   background-color: #1f2937;
-  border-bottom-color: rgba(255, 255, 255, 0.1);
+  border-bottom-color: rgb(255 255 255 / 10%);
 }
 
 /* Assurer que le header est toujours visible */
@@ -39,7 +52,7 @@ header {
 }
 
 /* Styles responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .top-bar {
     padding: 0 1rem;
   }

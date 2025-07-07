@@ -20,8 +20,8 @@
           <div class="filter-input-wrapper">
             <i class="fas fa-search"></i>
             <input 
-              type="text" 
               v-model="searchQuery" 
+              type="text" 
               class="filter-input" 
               :placeholder="t('clients.filters.search_placeholder')"
             >
@@ -62,7 +62,7 @@
       <p>{{ t('common.loading') }}</p>
     </div>
     
-    <div v-else-if="filteredClients.length === 0" class="empty-state box">
+    <div v-else-if="filteredAndSortedClients.length === 0" class="empty-state box">
       <div class="empty-icon">
         <i class="fas fa-users"></i>
       </div>
@@ -85,7 +85,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="client in filteredClients" :key="client.id" @click="viewClientDetails(client.id)">
+          <tr v-for="client in paginatedClients" :key="client.id" @click="viewClientDetails(client.id)">
             <td>#{{ client.id }}</td>
             <td>
               <div class="client-details">
@@ -112,16 +112,16 @@
             </td>
             <td class="actions">
               <div class="action-buttons">
-                <button @click.stop="viewClientDetails(client.id)" class="btn-icon" :title="t('clients.actions.view')">
+                <button class="btn-icon" :title="t('clients.actions.view')" @click.stop="viewClientDetails(client.id)">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button @click.stop="editClient(client.id)" class="btn-icon" :title="t('clients.actions.edit')">
+                <button class="btn-icon" :title="t('clients.actions.edit')" @click.stop="editClient(client.id)">
                   <i class="fas fa-edit"></i>
                 </button>
                 <button 
                   class="btn-icon" 
-                  @click.stop="deleteClient(client.id)" 
-                  :title="t('clients.actions.delete')"
+                  :title="t('clients.actions.delete')" 
+                  @click.stop="deleteClient(client.id)"
                 >
                   <i class="fas fa-trash"></i>
                 </button>
@@ -137,8 +137,8 @@
       <a 
         v-for="page in totalPages" 
         :key="page" 
-        @click="changePage(page)" 
-        :class="['page-link', { active: page === currentPage }]"
+        :class="['page-link', { active: page === currentPage }]" 
+        @click="changePage(page)"
       >
         {{ page }}
       </a>
@@ -152,14 +152,17 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useClientsStore } from '@/stores/clients'
 import { useServicesStore } from '@/stores/services'
-import md5 from 'md5'
+import { useRealtimeStore } from '@/stores/realtime'
 
-console.log('[CLIENTS VIEW] Initialisation du composant')
+import logger from '@/services/logger'
+
+logger.debug('[CLIENTS VIEW] Initialisation du composant')
 
 const { t } = useI18n()
 const router = useRouter()
 const clientsStore = useClientsStore()
 const servicesStore = useServicesStore()
+const realtimeStore = useRealtimeStore()
 
 // État
 const sortBy = ref('name')
@@ -169,7 +172,6 @@ const statusFilter = ref('')
 const serviceTypeFilter = ref('')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
-const totalPages = ref(1)
 const clientServicesMap = ref<Record<number, any[]>>({})
 
 // Watched for automatic filtering
@@ -178,7 +180,7 @@ watch([searchQuery, statusFilter, serviceTypeFilter], () => {
 })
 
 // Computed
-const filteredClients = computed(() => {
+const filteredAndSortedClients = computed(() => {
   if (!clientsStore.clients.length) return []
   
   let result = [...clientsStore.clients]
@@ -209,7 +211,7 @@ const filteredClients = computed(() => {
   }
   
   // Tri
-  result.sort((a, b) => {
+  return [...result].sort((a, b) => {
     const aValue = a[sortBy.value]
     const bValue = b[sortBy.value]
     
@@ -217,30 +219,31 @@ const filteredClients = computed(() => {
     if (aValue > bValue) return sortDesc.value ? -1 : 1
     return 0
   })
-  
-  // Calcul du nombre total de pages
-  totalPages.value = Math.ceil(result.length / itemsPerPage.value)
-  
-  // Pagination
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredAndSortedClients.value.length / itemsPerPage.value)
+})
+
+const paginatedClients = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
   const end = start + itemsPerPage.value
-  
-  return result.slice(start, end)
+  return filteredAndSortedClients.value.slice(start, end)
 })
 
 // Méthodes
 const fetchClients = async () => {
-  console.log('[ClientsView] Composant monté')
+  logger.debug('[ClientsView] Composant monté')
   
   try {
-    console.log('[ClientsView] Chargement des clients...')
+    logger.debug('[ClientsView] Chargement des clients...')
     await clientsStore.fetchClients()
-    console.log('[ClientsView] Clients chargés:', clientsStore.clients.length)
+    logger.debug(`[ClientsView] Clients chargés: ${clientsStore.clients.length}`)
     
     // Une fois les clients chargés, récupérer les services pour chaque client
     await fetchServicesForClients()
   } catch (error) {
-    console.error('[ClientsView] Erreur lors du chargement des clients:', error)
+    logger.error('[ClientsView] Erreur lors du chargement des clients', { error })
   }
 }
 
@@ -248,27 +251,24 @@ const fetchServicesForClients = async () => {
   try {
     for (const client of clientsStore.clients) {
       try {
-        console.log(`[ClientsView] Récupération des services pour le client #${client.id}`)
+        logger.debug(`[ClientsView] Récupération des services pour le client #${client.id}`)
         const response = await servicesStore.fetchClientServices(client.id)
-        console.log(`[ClientsView] Services récupérés pour le client #${client.id}:`, response)
+        logger.debug(`[ClientsView] Services récupérés pour le client #${client.id}`, { response })
         
         if (response && response.data) {
           clientServicesMap.value[client.id] = Array.isArray(response.data) ? response.data : [response.data]
         }
       } catch (err) {
-        console.error(`[ClientsView] Erreur lors de la récupération des services pour le client #${client.id}:`, err)
+        logger.error(`[ClientsView] Erreur lors de la récupération des services pour le client #${client.id}`, { error: err })
         clientServicesMap.value[client.id] = []
       }
     }
   } catch (error) {
-    console.error('[ClientsView] Erreur lors de la récupération des services:', error)
+    logger.error('[ClientsView] Erreur lors de la récupération des services', { error })
   }
 }
 
-const handleSort = (column: string, desc: boolean) => {
-  sortBy.value = column
-  sortDesc.value = desc
-}
+
 
 const changePage = (page: number) => {
   currentPage.value = page
@@ -294,14 +294,38 @@ const deleteClient = async (clientId: number) => {
       await clientsStore.deleteClient(clientId)
       await fetchClients()
     } catch (error) {
-      console.error('[ClientsView] Erreur lors de la suppression du client:', error)
+      logger.error('[ClientsView] Erreur lors de la suppression du client', { error })
     }
+  }
+}
+
+/**
+ * Initialiser les fonctionnalités temps réel
+ */
+const initRealtime = () => {
+  logger.debug('[ClientsView] Initialisation des fonctionnalités temps réel')
+  
+  try {
+    // S'assurer que le service temps réel est initialisé
+    if (!realtimeStore.isInitialized) {
+      logger.debug('[ClientsView] Initialisation du store realtime')
+      realtimeStore.init()
+    }
+    
+    // Initialiser les écouteurs d'événements pour les clients
+    clientsStore.initRealtimeListeners()
+    
+    logger.info('[ClientsView] Fonctionnalités temps réel initialisées avec succès')
+  } catch (error) {
+    logger.error('[ClientsView] Erreur lors de l\'initialisation du temps réel', { error })
   }
 }
 
 // Cycle de vie
 onMounted(async () => {
   await fetchClients()
+  // Initialiser le temps réel après le chargement des données
+  initRealtime()
 })
 </script>
 

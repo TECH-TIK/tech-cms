@@ -2,19 +2,19 @@
 import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationStore } from '@/stores/notifications'
-import { useAuthStore } from '@/stores/auth'
 import DataTable from '@/components/common/DataTable.vue'
+import logger from '@/services/logger'
+import type { AppNotification } from '@/types/notifications'
 
 const { t } = useI18n()
 const notificationStore = useNotificationStore()
-const authStore = useAuthStore()
 
 // État
-const notifications = ref([])
+const notifications = ref<AppNotification[]>([])
 const loading = ref(true)
-const activeFilter = ref('all')
+const activeFilter = ref<'all' | 'read' | 'unread'>('all')
 const searchQuery = ref('')
-const selectedTypes = ref([])
+const selectedTypes = ref<string[]>([])
 
 // Types de notifications disponibles
 const notificationTypes = [
@@ -31,8 +31,8 @@ const columns = [
     key: 'type', 
     label: t('notifications.columns.type'),
     sortable: true,
-    formatter: (value) => {
-      const types = {
+    formatter: (value: string) => {
+      const types: Record<string, string> = {
         ticket: t('notifications.types.ticket'),
         invoice: t('notifications.types.invoice'),
         payment: t('notifications.types.payment'),
@@ -56,14 +56,14 @@ const columns = [
     key: 'createdAt', 
     label: t('notifications.columns.date'),
     sortable: true,
-    formatter: (value) => new Date(value).toLocaleString()
+    formatter: (value: string) => new Date(value).toLocaleString()
   },
   { 
     key: 'status', 
     label: t('notifications.columns.status'),
     sortable: true,
-    formatter: (value) => {
-      const statuses = {
+    formatter: (value: string) => {
+      const statuses: Record<string, string> = {
         unread: t('notifications.status.unread'),
         read: t('notifications.status.read')
       }
@@ -90,8 +90,8 @@ const filteredNotifications = computed(() => {
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(n => 
-      n.title.toLowerCase().includes(query) ||
-      n.message.toLowerCase().includes(query)
+      (n.title?.toLowerCase().includes(query) ?? false) ||
+      (n.message?.toLowerCase().includes(query) ?? false)
     )
   }
   
@@ -103,8 +103,9 @@ const statistics = computed(() => ({
   total: notifications.value.length,
   unread: notifications.value.filter(n => n.status === 'unread').length,
   today: notifications.value.filter(n => {
-    const today = new Date()
+    if (!n.createdAt) return false
     const notifDate = new Date(n.createdAt)
+    const today = new Date()
     return notifDate.toDateString() === today.toDateString()
   }).length
 }))
@@ -116,42 +117,67 @@ const fetchNotifications = async () => {
     const data = await notificationStore.fetchNotifications()
     notifications.value = data
   } catch (error) {
-    console.error('Erreur lors du chargement des notifications:', error)
+    logger.error('Erreur lors du chargement des notifications', { error })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('notifications.loadError')
+    })
   } finally {
     loading.value = false
   }
 }
 
-const handleMarkAsRead = async (notification) => {
+const handleMarkAsRead = async (notification: AppNotification) => {
   try {
-    await notificationStore.markAsRead(notification.id)
+    // Convertir l'id en nombre si c'est une chaîne
+    const notifId = typeof notification.id === 'string' ? parseInt(notification.id, 10) : notification.id
+    await notificationStore.markAsRead(notifId)
     const index = notifications.value.findIndex(n => n.id === notification.id)
     if (index !== -1) {
       notifications.value[index].status = 'read'
     }
   } catch (error) {
-    console.error('Erreur lors du marquage de la notification:', error)
+    logger.error('Erreur lors du marquage de la notification', { error, notificationId: notification.id })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('notifications.markAsReadError')
+    })
   }
 }
 
 const handleMarkAllAsRead = async () => {
   try {
-    loading.value = true
     await notificationStore.markAllAsRead()
-    notifications.value = notifications.value.map(n => ({ ...n, status: 'read' }))
+    
+    // Mettre à jour le statut local
+    notifications.value = notifications.value.map(n => ({ ...n as object, status: 'read' } as AppNotification))
   } catch (error) {
-    console.error('Erreur lors du marquage des notifications:', error)
+    logger.error('Erreur lors du marquage des notifications', { error })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('notifications.markAllAsReadError')
+    })
   } finally {
     loading.value = false
   }
 }
 
-const handleDeleteNotification = async (notification) => {
+const handleDeleteNotification = async (notification: AppNotification) => {
   try {
-    await notificationStore.deleteNotification(notification.id)
+    // Convertir l'id en nombre si c'est une chaîne
+    const notifId = typeof notification.id === 'string' ? parseInt(notification.id, 10) : notification.id
+    await notificationStore.deleteNotification(notifId)
     notifications.value = notifications.value.filter(n => n.id !== notification.id)
   } catch (error) {
-    console.error('Erreur lors de la suppression de la notification:', error)
+    logger.error('Erreur lors de la suppression de la notification', { error })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('notifications.deleteError')
+    })
   }
 }
 
@@ -161,7 +187,12 @@ const handleClearAll = async () => {
     await notificationStore.clearAll()
     notifications.value = []
   } catch (error) {
-    console.error('Erreur lors de la suppression des notifications:', error)
+    logger.error('Erreur lors de la suppression des notifications', { error })
+    notificationStore.showNotification({
+      type: 'error',
+      title: t('common.error'),
+      message: t('notifications.clearAllError')
+    })
   } finally {
     loading.value = false
   }
@@ -180,16 +211,16 @@ onMounted(() => {
       <div class="header-actions">
         <button 
           class="btn btn-outline"
-          @click="handleMarkAllAsRead"
           :disabled="!statistics.unread"
+          @click="handleMarkAllAsRead"
         >
           <i class="fas fa-check-double" />
           {{ t('notifications.markAllAsRead') }}
         </button>
         <button 
           class="btn btn-danger"
-          @click="handleClearAll"
           :disabled="!notifications.length"
+          @click="handleClearAll"
         >
           <i class="fas fa-trash" />
           {{ t('notifications.clearAll') }}
@@ -231,14 +262,14 @@ onMounted(() => {
 
     <div class="filters">
       <div class="status-filters">
-        <button 
-          v-for="status in ['all', 'unread', 'read']"
+        <button
+          v-for="status in ['all', 'unread', 'read'] as const"
           :key="status"
-          class="btn"
-          :class="[
+          :class="[  
             activeFilter === status ? 'btn-primary' : 'btn-outline',
             `status-${status}`
           ]"
+          class="btn"
           @click="activeFilter = status"
         >
           {{ t(`notifications.status.${status}`) }}
@@ -249,7 +280,7 @@ onMounted(() => {
         <div class="type-selector">
           <label>{{ t('notifications.filterByType') }}:</label>
           <div class="type-chips">
-            <div 
+            <div
               v-for="type in notificationTypes"
               :key="type.value"
               class="type-chip"
@@ -268,9 +299,9 @@ onMounted(() => {
 
       <div class="search-bar">
         <input 
-          type="text" 
+          v-model="searchQuery" 
+          type="text"
           :placeholder="t('notifications.search')"
-          v-model="searchQuery"
         />
         <i class="fas fa-search" />
       </div>
@@ -284,7 +315,7 @@ onMounted(() => {
         {
           icon: 'fas fa-check',
           label: t('notifications.markAsRead'),
-          show: (item) => item.status === 'unread',
+          show: (item: AppNotification) => item.status === 'unread',
           action: handleMarkAsRead
         },
         {
@@ -410,7 +441,7 @@ onMounted(() => {
   color: var(--text-secondary);
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .notifications-view {
     padding: 1rem;
   }

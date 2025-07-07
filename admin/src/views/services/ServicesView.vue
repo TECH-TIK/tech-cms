@@ -33,8 +33,8 @@
           <div class="filter-input-wrapper">
             <i class="fas fa-search"></i>
             <input 
-              type="text" 
               v-model="searchQuery" 
+              type="text" 
               class="filter-input" 
               :placeholder="t('services.filters.search_placeholder')"
             >
@@ -105,21 +105,21 @@
     
     <!-- Tableau des services -->
     <div v-else class="table-box">
-      <table class="data-table" v-if="!loading && services.length > 0">
+      <table v-if="!loading && services.length > 0" class="data-table">
         <thead>
           <tr>
-            <th @click="sortBy('id')" class="sortable" :class="{ active: sortColumn === 'id' }">
+            <th class="sortable" :class="{ active: sortColumn === 'id' }" @click="sortBy('id')">
               ID
               <i v-if="sortColumn === 'id'" :class="sortDirection === 'ASC' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
             </th>
             <th>{{ t('services.table.client') }}</th>
             <th>{{ t('services.table.product') }}</th>
             <th>{{ t('services.table.domain') }}</th>
-            <th @click="sortBy('status')" class="sortable" :class="{ active: sortColumn === 'status' }">
+            <th class="sortable" :class="{ active: sortColumn === 'status' }" @click="sortBy('status')">
               {{ t('services.table.status') }}
               <i v-if="sortColumn === 'status'" :class="sortDirection === 'ASC' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
             </th>
-            <th @click="sortBy('next_due_date')" class="sortable" :class="{ active: sortColumn === 'next_due_date' }">
+            <th class="sortable" :class="{ active: sortColumn === 'next_due_date' }" @click="sortBy('next_due_date')">
               {{ t('services.table.next_due_date') }}
               <i v-if="sortColumn === 'next_due_date'" :class="sortDirection === 'ASC' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
             </th>
@@ -142,13 +142,13 @@
             <td>{{ formatCurrency(service.recurring_amount) }}</td>
             <td class="actions">
               <div class="action-buttons">
-                <button class="btn-icon" @click.stop="viewServiceDetails(service.id)" :title="t('services.actions.view')">
+                <button class="btn-icon" :title="t('services.actions.view')" @click.stop="viewServiceDetails(service.id)">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn-icon" @click.stop="editService(service.id)" :title="t('services.actions.edit')">
+                <button class="btn-icon" :title="t('services.actions.edit')" @click.stop="editService(service.id)">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn-icon" @click.stop="deleteServicePrompt(service.id)" :title="t('services.actions.delete')">
+                <button class="btn-icon" :title="t('services.actions.delete')" @click.stop="deleteServicePrompt(service.id)">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
@@ -159,7 +159,7 @@
     </div>
 
     <!-- Pagination -->
-    <div class="pagination" v-if="totalPages > 1">
+    <div v-if="totalPages > 1" class="pagination">
       <button 
         class="pagination-btn" 
         :disabled="currentPage === 1" 
@@ -188,9 +188,9 @@
     </div>
 
     <!-- Modal de confirmation de suppression -->
-    <div class="modal show" v-if="showDeleteModal" style="display: flex; align-items: center; justify-content: center;">
+    <div v-if="showDeleteModal" class="modal show" style="display: flex; align-items: center; justify-content: center;">
       <div class="modal-backdrop" @click="showDeleteModal = false"></div>
-      <div class="modal-content" style="position: fixed; z-index: 1052; max-height: 80vh; backdrop-filter: none; -webkit-backdrop-filter: none;">
+      <div class="modal-content" style="position: fixed; z-index: 1052; max-height: 80vh; backdrop-filter: none;">
         <div class="modal-header">
           <h3>{{ t('services.delete_modal.title') }}</h3>
           <button class="close-btn" @click="showDeleteModal = false">
@@ -202,10 +202,10 @@
           <p class="warning">{{ t('services.delete_modal.warning') }}</p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showDeleteModal = false" :disabled="isDeleting">
+          <button class="btn btn-secondary" :disabled="isDeleting" @click="showDeleteModal = false">
             {{ t('common.cancel') }}
           </button>
-          <button class="btn btn-danger" @click="confirmDelete" :disabled="isDeleting">
+          <button class="btn btn-danger" :disabled="isDeleting" @click="confirmDelete">
             <span v-if="isDeleting">
               <span class="spinner-border spinner-border-sm mr-2"></span>
               {{ t('common.deleting') }}...
@@ -225,13 +225,16 @@ import { useI18n } from 'vue-i18n'
 import { useServicesStore } from '@/stores/services'
 import { useClientsStore } from '@/stores/clients'
 import { useProductStore } from '@/stores/products'
+import { useRealtimeStore } from '@/stores/realtime'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import logger from '@/services/logger'
 
 // Stores et router
 const servicesStore = useServicesStore()
 const clientsStore = useClientsStore()
 const productsStore = useProductStore()
+const realtimeStore = useRealtimeStore()
 const router = useRouter()
 const { t } = useI18n()
 
@@ -249,7 +252,7 @@ const isDeleting = ref(false)
 // Calculer les données à partir du store
 const services = computed(() => servicesStore.services)
 const loading = computed(() => servicesStore.loading)
-const stats = computed(() => servicesStore.stats)
+
 const currentPage = computed(() => servicesStore.currentPage)
 const totalItems = computed(() => servicesStore.total)
 const perPage = computed(() => servicesStore.perPage)
@@ -303,6 +306,7 @@ const formatDate = (date: string) => {
   try {
     return format(new Date(date), 'dd/MM/yyyy', { locale: fr })
   } catch (e) {
+    logger.warn('Failed to format date', { date, error: e })
     return date
   }
 }
@@ -312,29 +316,9 @@ const formatCurrency = (amount: number | undefined) => {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount)
 }
 
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'pending': return 'fas fa-clock'
-    case 'active': return 'fas fa-check-circle'
-    case 'suspended': return 'fas fa-pause-circle'
-    case 'cancelled': return 'fas fa-times-circle'
-    case 'terminated': return 'fas fa-trash-alt'
-    case 'fraud': return 'fas fa-exclamation-triangle'
-    default: return 'fas fa-question-circle'
-  }
-}
 
-const getStatusIconClass = (status: string) => {
-  switch (status) {
-    case 'pending': return 'status-pending'
-    case 'active': return 'status-active'
-    case 'suspended': return 'status-suspended'
-    case 'cancelled': return 'status-cancelled'
-    case 'terminated': return 'status-terminated'
-    case 'fraud': return 'status-fraud'
-    default: return ''
-  }
-}
+
+
 
 // Actions
 const fetchData = async () => {
@@ -360,7 +344,7 @@ const fetchData = async () => {
     await clientsStore.fetchClients()
     await productsStore.fetchProducts()
   } catch (error) {
-    console.error('Erreur lors du chargement des données:', error)
+    logger.error('Erreur lors du chargement des données:', { error })
   }
 }
 
@@ -368,6 +352,28 @@ const goToPage = (page: number | string) => {
   if (typeof page === 'string') return;
   if (page < 1 || page > totalPages.value || page === currentPage.value) return
   fetchData()
+}
+
+/**
+ * Initialiser les fonctionnalités temps réel
+ */
+const initRealtime = () => {
+  logger.debug('[ServicesView] Initialisation des fonctionnalités temps réel')
+  
+  try {
+    // S'assurer que le service temps réel est initialisé
+    if (!realtimeStore.isInitialized) {
+      logger.debug('[ServicesView] Initialisation du store realtime')
+      realtimeStore.init()
+    }
+    
+    // Initialiser les écouteurs d'événements pour les services
+    servicesStore.initRealtimeListeners()
+    
+    logger.info('[ServicesView] Fonctionnalités temps réel initialisées avec succès')
+  } catch (error) {
+    logger.error('[ServicesView] Erreur lors de l\'initialisation du temps réel', { error })
+  }
 }
 
 const sortBy = (column: string) => {
@@ -397,27 +403,27 @@ const editService = (id: number | undefined) => {
 }
 
 const deleteServicePrompt = (id: number | undefined) => {
-  console.log(`[ServicesView] deleteServicePrompt appelé avec id: ${id}`);
+  logger.debug(`[ServicesView] deleteServicePrompt appelé avec id: ${id}`);
   if (id === undefined) return;
   serviceToDelete.value = id
   showDeleteModal.value = true
-  console.log(`[ServicesView] Modal de suppression affichée pour le service ${id}`);
+  logger.debug(`[ServicesView] Modal de suppression affichée pour le service ${id}`);
 }
 
 const confirmDelete = async () => {
-  console.log(`[ServicesView] confirmDelete appelé pour le service ${serviceToDelete.value}`);
+  logger.info(`[ServicesView] confirmDelete appelé pour le service ${serviceToDelete.value}`);
   if (!serviceToDelete.value) return
   
   try {
-    console.log(`[ServicesView] Appel de servicesStore.deleteService pour le service ${serviceToDelete.value}`);
+    logger.debug(`[ServicesView] Appel de servicesStore.deleteService pour le service ${serviceToDelete.value}`);
     isDeleting.value = true
     await servicesStore.deleteService(serviceToDelete.value)
-    console.log(`[ServicesView] Service ${serviceToDelete.value} supprimé avec succès`);
+    logger.info(`[ServicesView] Service ${serviceToDelete.value} supprimé avec succès`);
     showDeleteModal.value = false
     serviceToDelete.value = null
     fetchData() // Actualiser les données après la suppression
   } catch (error) {
-    console.error(`[ServicesView] Erreur lors de la suppression du service ${serviceToDelete.value}:`, error)
+    logger.error('Erreur lors de la suppression du service', { serviceId: serviceToDelete.value, error })
   } finally {
     isDeleting.value = false
   }
@@ -429,8 +435,13 @@ watch([searchQuery, statusFilter, clientFilter, productFilter], () => {
 })
 
 // Cycle de vie
-onMounted(() => {
-  fetchData()
+onMounted(async () => {
+  await fetchData()
+  
+  // Initialiser le temps réel après le chargement des données
+  initRealtime()
+  
+  logger.info('[ServicesView] Composant monté et temps réel initialisé')
 })
 </script>
 

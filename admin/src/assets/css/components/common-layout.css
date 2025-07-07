@@ -7,7 +7,7 @@
 :root {
   /* Couleurs */
   --primary-blue: #00C3FF;
-  --secondary-blue: #0066FF;
+  --secondary-blue: #06F;
   --accent-blue: #5F9FFF;
   --neon-blue: #00F0FF;
   
@@ -32,9 +32,9 @@
   --info: #3B82F6;
   
   /* Effets visuels */
-  --glass-bg: rgba(255, 255, 255, 0.02);
-  --glass-border: rgba(0, 102, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 102, 255, 0.1);
+  --glass-bg: rgb(255 255 255 / 2%);
+  --glass-border: rgb(0 102 255 / 10%);
+  --glass-shadow: 0 8px 32px 0 rgb(0 102 255 / 10%);
   
   /* Texte */
   --text-color: #E4E6EB;
@@ -63,7 +63,6 @@
   padding: var(--spacing-lg);
   box-shadow: var(--glass-shadow);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   margin-bottom: var(--spacing-xl);
 }
@@ -73,7 +72,6 @@
   font-size: 1.75rem;
   font-weight: 600;
   background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue));
-  -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
@@ -93,7 +91,6 @@
   margin-bottom: var(--spacing-xl);
   box-shadow: var(--glass-shadow);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
 }
 
@@ -131,7 +128,7 @@
 .filter-input {
   width: 100%;
   padding: 0.75rem 1rem 0.75rem 2.5rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(255 255 255 / 5%);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-color);
@@ -141,7 +138,7 @@
 
 .filter-input:focus {
   border-color: var(--primary-blue);
-  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
+  box-shadow: 0 0 0 2px rgb(0 102 255 / 20%);
   outline: none;
 }
 
@@ -164,7 +161,7 @@
 .filter-button:hover {
   opacity: 0.9;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+  box-shadow: 0 4px 12px rgb(0 102 255 / 30%);
 }
 
 /* Filtres de statut */
@@ -193,14 +190,14 @@
 }
 
 .status-filter.active {
-  background: rgba(0, 102, 255, 0.1);
+  background: rgb(0 102 255 / 10%);
   border-color: var(--primary-blue);
   color: var(--primary-blue);
 }
 
 .status-filter .count {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(255 255 255 / 10%);
   border-radius: var(--radius-sm);
   padding: 0.1rem 0.5rem;
   margin-left: 0.5rem;
@@ -214,7 +211,6 @@
   padding: var(--spacing-lg);
   box-shadow: var(--glass-shadow);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   overflow-x: auto;
 }
@@ -239,7 +235,7 @@ table tbody tr {
 }
 
 table tbody tr:hover {
-  background: rgba(0, 102, 255, 0.05);
+  background: rgb(0 102 255 / 5%);
 }
 
 table tbody td {
@@ -285,24 +281,24 @@ table tbody td {
 
 .status-active,
 .status-success {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgb(16 185 129 / 10%);
   color: var(--success);
 }
 
 .status-inactive,
 .status-error {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgb(239 68 68 / 10%);
   color: var(--error);
 }
 
 .status-pending,
 .status-warning {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgb(245 158 11 / 10%);
   color: var(--warning);
 }
 
 .status-info {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgb(59 130 246 / 10%);
   color: var(--info);
 }
 
@@ -327,13 +323,13 @@ table tbody td {
 }
 
 .action-button:hover {
-  background: rgba(0, 102, 255, 0.1);
+  background: rgb(0 102 255 / 10%);
   border-color: var(--primary-blue);
   color: var(--primary-blue);
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .view-container {
     padding: var(--spacing-md);
   }

@@ -12,7 +12,7 @@
     </div>
 
     <div class="content-box">
-      <form @submit.prevent="handleSubmit" class="form-container">
+      <form class="form-container" @submit.prevent="handleSubmit">
         <!-- Section client et produit -->
         <div class="form-section">
           <h3 class="section-title">{{ t('services.form.section.client_product') }}</h3>
@@ -34,7 +34,7 @@
                 </option>
               </select>
             </div>
-            <span class="error-message" v-if="formErrors.client_id">{{ formErrors.client_id }}</span>
+            <span v-if="formErrors.client_id" class="error-message">{{ formErrors.client_id }}</span>
           </div>
           
           <div class="form-group">
@@ -54,7 +54,7 @@
                 </option>
               </select>
             </div>
-            <span class="error-message" v-if="formErrors.product_id">{{ formErrors.product_id }}</span>
+            <span v-if="formErrors.product_id" class="error-message">{{ formErrors.product_id }}</span>
           </div>
         </div>
 
@@ -67,15 +67,15 @@
             <div class="input-wrapper">
               <i class="fas fa-globe"></i>
               <input 
-                type="text" 
                 id="domain" 
                 v-model="formData.domain" 
+                type="text" 
                 class="form-control" 
                 :placeholder="t('services.form.domain_placeholder')"
                 :disabled="loading"
               >
             </div>
-            <span class="error-message" v-if="formErrors.domain">{{ formErrors.domain }}</span>
+            <span v-if="formErrors.domain" class="error-message">{{ formErrors.domain }}</span>
           </div>
           
           <div class="form-row">
@@ -84,15 +84,15 @@
               <div class="input-wrapper">
                 <i class="fas fa-user-tag"></i>
                 <input 
-                  type="text" 
                   id="username" 
                   v-model="formData.username" 
+                  type="text" 
                   class="form-control" 
                   :placeholder="t('services.form.username_placeholder')"
                   :disabled="loading"
                 >
               </div>
-              <span class="error-message" v-if="formErrors.username">{{ formErrors.username }}</span>
+              <span v-if="formErrors.username" class="error-message">{{ formErrors.username }}</span>
             </div>
             
             <div class="form-group flex-1">
@@ -100,9 +100,9 @@
               <div class="input-wrapper password-input">
                 <i class="fas fa-lock"></i>
                 <input 
-                  :type="showPassword ? 'text' : 'password'" 
                   id="password" 
                   v-model="formData.password" 
+                  :type="showPassword ? 'text' : 'password'" 
                   class="form-control" 
                   :placeholder="t('services.form.password_placeholder')"
                   :disabled="loading"
@@ -111,7 +111,7 @@
                   <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
                 </button>
               </div>
-              <span class="error-message" v-if="formErrors.password">{{ formErrors.password }}</span>
+              <span v-if="formErrors.password" class="error-message">{{ formErrors.password }}</span>
             </div>
           </div>
           
@@ -131,7 +131,7 @@
                 </option>
               </select>
             </div>
-            <span class="error-message" v-if="formErrors.server_id">{{ formErrors.server_id }}</span>
+            <span v-if="formErrors.server_id" class="error-message">{{ formErrors.server_id }}</span>
           </div>
           
           <div class="form-group">
@@ -153,7 +153,7 @@
                 <option value="fraud">{{ t('services.status.fraud') }}</option>
               </select>
             </div>
-            <span class="error-message" v-if="formErrors.status">{{ formErrors.status }}</span>
+            <span v-if="formErrors.status" class="error-message">{{ formErrors.status }}</span>
           </div>
         </div>
 
@@ -181,7 +181,7 @@
                   <option value="triennially">{{ t('services.billing_cycles.triennially') }}</option>
                 </select>
               </div>
-              <span class="error-message" v-if="formErrors.billing_cycle">{{ formErrors.billing_cycle }}</span>
+              <span v-if="formErrors.billing_cycle" class="error-message">{{ formErrors.billing_cycle }}</span>
             </div>
             
             <div class="form-group flex-1">
@@ -189,23 +189,23 @@
               <div class="input-wrapper with-button">
                 <i class="fas fa-calendar"></i>
                 <input 
-                  type="date" 
                   id="next_due_date" 
                   v-model="formData.next_due_date" 
+                  type="date" 
                   class="form-control" 
                   :disabled="loading"
                 >
-                <button 
-                  type="button" 
-                  class="btn btn-icon" 
-                  title="Recalculer la date d'échéance" 
-                  @click="calculateNextDueDate"
+                <button
+                  type="button"
+                  class="btn btn-icon"
+                  :title="t('services.form.calculate_due_date')"
                   :disabled="loading"
+                  @click="calculateNextDueDate"
                 >
                   <i class="fas fa-calculator"></i>
                 </button>
               </div>
-              <span class="error-message" v-if="formErrors.next_due_date">{{ formErrors.next_due_date }}</span>
+              <span v-if="formErrors.next_due_date" class="error-message">{{ formErrors.next_due_date }}</span>
             </div>
           </div>
           
@@ -215,9 +215,9 @@
               <div class="input-wrapper">
                 <i class="fas fa-euro-sign"></i>
                 <input 
-                  type="number" 
                   id="recurring_amount" 
                   v-model.number="formData.recurring_amount" 
+                  type="number" 
                   step="0.01" 
                   min="0" 
                   class="form-control" 
@@ -225,7 +225,7 @@
                   :disabled="loading"
                 >
               </div>
-              <span class="error-message" v-if="formErrors.recurring_amount">{{ formErrors.recurring_amount }}</span>
+              <span v-if="formErrors.recurring_amount" class="error-message">{{ formErrors.recurring_amount }}</span>
             </div>
             
             <div class="form-group flex-1">
@@ -233,9 +233,9 @@
               <div class="input-wrapper">
                 <i class="fas fa-euro-sign"></i>
                 <input 
-                  type="number" 
                   id="setup_fee" 
                   v-model.number="formData.setup_fee" 
+                  type="number" 
                   step="0.01" 
                   min="0" 
                   class="form-control" 
@@ -243,7 +243,7 @@
                   :disabled="loading"
                 >
               </div>
-              <span class="error-message" v-if="formErrors.setup_fee">{{ formErrors.setup_fee }}</span>
+              <span v-if="formErrors.setup_fee" class="error-message">{{ formErrors.setup_fee }}</span>
             </div>
           </div>
         </div>
@@ -262,24 +262,24 @@
               :disabled="loading"
               rows="4"
             ></textarea>
-            <span class="error-message" v-if="formErrors.notes">{{ formErrors.notes }}</span>
+            <span v-if="formErrors.notes" class="error-message">{{ formErrors.notes }}</span>
           </div>
         </div>
 
         <!-- Configurations personnalisées -->
-        <div class="form-section" v-if="Object.keys(formData.configuration || {}).length > 0 || isEditMode">
+        <div v-if="Object.keys(formData.configuration || {}).length > 0 || isEditMode" class="form-section">
           <h3 class="section-title">{{ t('services.form.section.configurations') }}</h3>
           
           <div class="config-entries">
-            <div v-for="(value, key) in formData.configuration" :key="key" class="config-entry">
+            <div v-for="(_configValue, key) in formData.configuration" :key="key" class="config-entry">
               <div class="form-row">
                 <div class="form-group flex-1">
                   <label>{{ t('services.form.config_name') }}</label>
                   <div class="input-wrapper">
                     <i class="fas fa-key"></i>
                     <input 
-                      type="text" 
                       v-model="configKeys[key]" 
+                      type="text" 
                       class="form-control" 
                       :disabled="loading"
                       @input="updateConfigKey(key)"
@@ -292,8 +292,8 @@
                   <div class="input-wrapper">
                     <i class="fas fa-cog"></i>
                     <input 
-                      type="text" 
                       v-model="formData.configuration[key]" 
+                      type="text" 
                       class="form-control" 
                       :disabled="loading"
                     >
@@ -305,8 +305,8 @@
                   <button 
                     type="button" 
                     class="btn btn-danger" 
-                    @click="removeConfigEntry(key)"
                     :disabled="loading"
+                    @click="removeConfigEntry(key)"
                   >
                     <i class="fas fa-trash"></i>
                   </button>
@@ -318,8 +318,8 @@
           <button 
             type="button" 
             class="btn btn-outline-secondary mt-3" 
-            @click="addConfigEntry"
             :disabled="loading"
+            @click="addConfigEntry"
           >
             <i class="fas fa-plus"></i>
             {{ t('services.form.add_config') }}
@@ -328,7 +328,7 @@
 
         <!-- Boutons du formulaire -->
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" @click="goBack" :disabled="loading">
+          <button type="button" class="btn btn-secondary" :disabled="loading" @click="goBack">
             {{ t('common.cancel') }}
           </button>
           <button type="submit" class="btn btn-primary" :disabled="loading">
@@ -342,7 +342,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive, watch } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useServicesStore } from '@/stores/services'
@@ -351,6 +351,7 @@ import { useProductStore } from '@/stores/products'
 import { useServersStore } from '@/stores/servers'
 import { useNotificationStore } from '@/stores/notifications'
 import type { Service } from '@/types'
+import logger from '@/services/logger'
 
 // Stores et router
 const servicesStore = useServicesStore()
@@ -392,21 +393,24 @@ const defaultFormData = {
   configuration: {} as Record<string, string>
 }
 
-const formData = reactive<{
+// Type pour formData
+type ServiceFormData = {
   client_id: any;
   product_id: any;
-  status: string;
+  status: 'pending' | 'active' | 'suspended' | 'cancelled' | 'terminated' | 'fraud';
   domain?: string;
   server_id?: any;
   username?: string;
   password?: string;
   next_due_date?: string;
-  billing_cycle?: string;
+  billing_cycle?: 'monthly' | 'quarterly' | 'semi_annually' | 'annually' | 'biennially' | 'triennially';
   recurring_amount?: number;
   setup_fee?: number;
   notes?: string;
   configuration: Record<string, string>;
-}>({ ...defaultFormData })
+}
+
+const formData = reactive<ServiceFormData>({ ...defaultFormData as unknown as ServiceFormData })
 
 // Computed properties
 const clients = computed(() => clientsStore.clients)
@@ -433,24 +437,38 @@ const fetchData = async () => {
     if (isEditMode.value && serviceId.value) {
       const service = await servicesStore.fetchServiceById(serviceId.value)
       
-      // Préparer les données du formulaire
-      Object.keys(formData).forEach(key => {
-        if (key in service) {
-          // @ts-ignore
-          formData[key] = service[key]
+      // Vérifier que le service existe avant d'accéder à ses propriétés
+      if (service) {
+        // Préparer les données du formulaire en utilisant le typage approprié
+        // Utiliser une assertion de type pour formData et service
+        const typedFormData = formData as Record<string, any>
+        const typedService = service as Record<string, any>
+        
+        Object.keys(typedFormData).forEach(key => {
+          if (key in service) {
+            typedFormData[key] = typedService[key]
+          }
+        })
+        
+        // Préparer les clés de configuration
+        if (service.configuration) {
+          formData.configuration = { ...service.configuration }
+          Object.keys(service.configuration).forEach(key => {
+            configKeys[key] = key
+          })
         }
-      })
-      
-      // Préparer les clés de configuration
-      if (service.configuration) {
-        formData.configuration = { ...service.configuration }
-        Object.keys(service.configuration).forEach(key => {
-          configKeys[key] = key
+      } else {
+        // Notification si le service n'est pas trouvé
+        logger.warn(`Service avec ID ${serviceId.value} non trouvé`)
+        notificationStore.showNotification({
+          title: t('common.error'),
+          message: t('services.form.not_found'),
+          type: 'error'
         })
       }
     }
   } catch (error) {
-    console.error('Erreur lors du chargement des données:', error)
+    logger.error('Erreur lors du chargement des données', { error })
     notificationStore.showNotification({
       title: t('common.error'),
       message: t('services.form.error_loading'),
@@ -541,7 +559,7 @@ const handleSubmit = async () => {
     // Rediriger vers la liste des services
     router.push({ name: 'services' })
   } catch (error) {
-    console.error('Erreur lors de la soumission du formulaire:', error)
+    logger.error('Erreur lors de la soumission du formulaire', { error })
     notificationStore.showNotification({
       title: t('common.error'),
       message: t('services.form.error_submit'),
@@ -613,13 +631,17 @@ function calculateNextDueDate() {
   formData.next_due_date = `${year}-${month}-${day}`;
 }
 
+// Fonction temps réel supprimée pour éviter les conflits pendant l'édition du service
+
 // Calculer la date d'échéance par défaut au chargement du formulaire
 onMounted(() => {
   fetchData()
   // Si c'est un nouveau service et que la date d'échéance n'est pas déjà définie
   if (!isEditMode.value && !formData.next_due_date) {
-    calculateNextDueDate();
+    calculateNextDueDate()
   }
+  
+    // Fonctionnalité temps réel supprimée pour éviter les conflits pendant l'édition
 })
 </script>
 
@@ -707,7 +729,7 @@ onMounted(() => {
 
 .form-control:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+  box-shadow: 0 0 0 0.25rem rgb(var(--primary-color-rgb), 0.25);
   outline: none;
 }
 

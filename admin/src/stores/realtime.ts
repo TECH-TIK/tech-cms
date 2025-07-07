@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import axios from '@/utils/axios'
+import { ApiService } from '@/services/api'
 import * as ablyService from '@/services/ably'
 import * as Ably from 'ably'
+import logger from '@/services/logger'
 
 export const useRealtimeStore = defineStore('realtime', () => {
   // État
-  console.log('[REALTIME STORE] Initialisation du store')
+  logger.info('[REALTIME STORE] Initialisation du store')
   const initialized = ref(false)
   const connected = ref(false)
   const error = ref<Error | null>(null)
@@ -24,21 +25,21 @@ export const useRealtimeStore = defineStore('realtime', () => {
 
   // Actions
   const init = async () => {
-    console.log('[REALTIME STORE] Initialisation du service de temps réel')
+    logger.info('[REALTIME STORE] Initialisation du service de temps réel')
     try {
       if (initialized.value) {
-        console.log('[REALTIME STORE] Service déjà initialisé')
+        logger.info('[REALTIME STORE] Service déjà initialisé')
         return
       }
 
       loading.value = true
       error.value = null
 
-      // Récupérer le token depuis l'API
-      console.log('[REALTIME STORE] Récupération du token API')
-      const response = await axios.get('/api/v1/realtime/token')
+      // Récupérer le token depuis l'API centralisée
+      logger.debug('[REALTIME STORE] Récupération du token API via le service centralisé')
+      const response = await ApiService.routes.realtime.getToken()
       
-      console.log('[REALTIME STORE] Réponse API token:', response.data)
+      logger.debug('[REALTIME STORE] Réponse API token:', { response: response.data })
       
       // Vérifier si la réponse contient une erreur
       if (response.data?.error) {
@@ -52,7 +53,7 @@ export const useRealtimeStore = defineStore('realtime', () => {
       }
 
       // Initialiser Ably avec le token
-      console.log('[REALTIME STORE] Initialisation d\'Ably avec le token')
+      logger.debug('[REALTIME STORE] Initialisation d\'Ably avec le token')
       await ablyService.initAbly(token)
       
       // Configurer les écouteurs d'état de la connexion
@@ -61,15 +62,15 @@ export const useRealtimeStore = defineStore('realtime', () => {
       initialized.value = true
       connected.value = true
       reconnectAttempts.value = 0
-      console.log('[REALTIME STORE] Service de temps réel initialisé avec succès')
+      logger.info('[REALTIME STORE] Service de temps réel initialisé avec succès')
       
       // Afficher les canaux après l'initialisation
       setTimeout(() => {
-        console.log('[REALTIME STORE] État initial des canaux:')
+        logger.debug('[REALTIME STORE] État initial des canaux:')
         debugShowChannels()
       }, 1000) // Délai court pour permettre l'établissement des connexions
     } catch (err) {
-      console.error('[REALTIME STORE] Erreur d\'initialisation:', err)
+      logger.error('[REALTIME STORE] Erreur lors de l\'initialisation', { error: err })
       error.value = err as Error
       initialized.value = false
       connected.value = false
@@ -87,7 +88,7 @@ export const useRealtimeStore = defineStore('realtime', () => {
     if (!client) return
     
     client.connection.on('connected', () => {
-      console.log('[REALTIME STORE] Connexion établie')
+      logger.info('[REALTIME STORE] Connexion réussie')
       connected.value = true
       error.value = null
       reconnectAttempts.value = 0
@@ -100,22 +101,22 @@ export const useRealtimeStore = defineStore('realtime', () => {
     })
     
     client.connection.on('disconnected', () => {
-      console.log('[REALTIME STORE] Connexion perdue')
+      logger.warn('[REALTIME STORE] Connexion perdue')
       connected.value = false
       
       // Ne pas déclencher de reconnexion ici, Ably va essayer de se reconnecter automatiquement
     })
     
     client.connection.on('suspended', () => {
-      console.warn('[REALTIME STORE] Connexion suspendue')
+      logger.debug('[REALTIME STORE] Connexion suspendue')
       connected.value = false
       
       // Si Ably n'arrive pas à se reconnecter, on programme notre propre tentative
       scheduleReconnect()
     })
     
-    client.connection.on('failed', (stateChange: Ably.Types.ConnectionStateChange) => {
-      console.error('[REALTIME STORE] Échec de connexion:', stateChange.reason)
+    client.connection.on('failed', (stateChange: Ably.ConnectionStateChange) => {
+      logger.error('[REALTIME STORE] Échec de connexion', { reason: stateChange.reason })
       connected.value = false
       error.value = new Error(stateChange.reason?.message || 'Échec de connexion')
       
@@ -125,8 +126,9 @@ export const useRealtimeStore = defineStore('realtime', () => {
   }
 
   const disconnect = () => {
-    console.log('[REALTIME STORE] Déconnexion du service de temps réel')
+    logger.info('[REALTIME STORE] Déconnexion du service de temps réel')
     ablyService.disconnect()
+    logger.debug('[REALTIME STORE] État de la connexion après déconnexion:', { state: ablyService.getClient()?.connection.state })
     initialized.value = false
     connected.value = false
     
@@ -135,7 +137,6 @@ export const useRealtimeStore = defineStore('realtime', () => {
       clearTimeout(reconnectTimeout.value)
       reconnectTimeout.value = null
     }
-    
     // Arrêter l'affichage automatique
     stopAutoDisplay()
   }
@@ -146,7 +147,7 @@ export const useRealtimeStore = defineStore('realtime', () => {
   }
 
   const retry = async () => {
-    console.log('[REALTIME STORE] Nouvelle tentative d\'initialisation')
+    logger.info('[REALTIME STORE] Nouvelle tentative d\'initialisation')
     resetError()
     reconnectAttempts.value = 0
     
@@ -162,7 +163,7 @@ export const useRealtimeStore = defineStore('realtime', () => {
   // Programmer une tentative de reconnexion avec backoff exponentiel
   const scheduleReconnect = () => {
     if (reconnectAttempts.value >= maxReconnectAttempts) {
-      console.error('[REALTIME STORE] Nombre maximum de tentatives de reconnexion atteint')
+      logger.error('[REALTIME STORE] Nombre maximum de tentatives de reconnexion atteint')
       return
     }
     
@@ -172,18 +173,19 @@ export const useRealtimeStore = defineStore('realtime', () => {
     // Calcul du délai avec backoff exponentiel (1s, 2s, 4s, 8s, 16s...)
     const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.value - 1), 30000)
     
-    console.log(`[REALTIME STORE] Tentative de reconnexion ${reconnectAttempts.value}/${maxReconnectAttempts} dans ${delay}ms`)
+    logger.warn('[REALTIME STORE] Tentative de reconnexion...')
+    logger.info(`[REALTIME STORE] Tentative de reconnexion ${reconnectAttempts.value}/${maxReconnectAttempts} dans ${delay}ms`)
     
     // Programmer la reconnexion
     reconnectTimeout.value = setTimeout(() => {
-      console.log(`[REALTIME STORE] Exécution de la tentative de reconnexion ${reconnectAttempts.value}`)
+      logger.info(`[REALTIME STORE] Exécution de la tentative de reconnexion ${reconnectAttempts.value}`)
       init()
     }, delay)
   }
 
   // Actions de débogage
   const debugShowChannels = () => {
-    console.log('[REALTIME STORE] Affichage des canaux actifs')
+    logger.debug('[REALTIME STORE] Affichage des canaux actifs')
     return ablyService.logSubscriptions()
   }
   
@@ -192,14 +194,14 @@ export const useRealtimeStore = defineStore('realtime', () => {
     // Arrêter tout intervalle existant
     stopAutoDisplay()
     
-    console.log(`[REALTIME STORE] Démarrage de l'affichage automatique des canaux (intervalle: ${intervalMs}ms)`)
+    logger.debug(`[REALTIME STORE] Démarrage de l'affichage automatique des canaux (intervalle: ${intervalMs}ms)`)
     
     // Afficher immédiatement
     debugShowChannels()
     
     // Puis configurer l'intervalle
     autoDisplayInterval.value = setInterval(() => {
-      console.log('[REALTIME STORE] Mise à jour automatique des canaux:')
+      logger.debug('[REALTIME STORE] Mise à jour automatique des canaux:')
       debugShowChannels()
     }, intervalMs)
     
@@ -211,7 +213,7 @@ export const useRealtimeStore = defineStore('realtime', () => {
     if (autoDisplayInterval.value) {
       clearInterval(autoDisplayInterval.value)
       autoDisplayInterval.value = null
-      console.log('[REALTIME STORE] Arrêt de l\'affichage automatique des canaux')
+      logger.debug('[REALTIME STORE] Arrêt de l\'affichage automatique des canaux')
       return true
     }
     return false
@@ -222,7 +224,7 @@ export const useRealtimeStore = defineStore('realtime', () => {
     if (isConnected) {
       // Afficher les canaux quand on se connecte
       setTimeout(() => {
-        console.log('[REALTIME STORE] Canaux après connexion:')
+        logger.debug('[REALTIME STORE] Canaux après connexion:')
         debugShowChannels()
       }, 1000)
     }
@@ -230,7 +232,7 @@ export const useRealtimeStore = defineStore('realtime', () => {
 
   // Installation d'une commande globale pour le débogage
   if (typeof window !== 'undefined') {
-    // @ts-ignore - Ajouter la commande debug au window
+    
     window.AblyDebug = {
       showChannels: () => debugShowChannels(),
       getStatus: () => ({
@@ -243,31 +245,30 @@ export const useRealtimeStore = defineStore('realtime', () => {
       reconnect: () => retry(),
       testSubscription: () => {
         // Créer un abonnement de test pour démontrer le fonctionnement
-        console.log('[REALTIME STORE] Création d\'un abonnement de test')
+        logger.debug('[REALTIME STORE] Création d\'un abonnement de test')
         
         // S'assurer que le client est initialisé
         if (!initialized.value || !connected.value) {
-          console.error('[REALTIME STORE] Client non initialisé ou non connecté')
+          logger.debug('[REALTIME STORE] Client non initialisé ou non connecté')
           return
         }
         
         // Créer des abonnements de test pour les canaux d'administration
         const unsubscribeGlobal = ablyService.subscribeToAdminChannel('test-event', (message) => {
-          console.log('[REALTIME STORE] Message global reçu:', message)
+          logger.debug('[REALTIME STORE] Message global reçu', { message })
         })
         
         // Utiliser ID 0 pour le test
         const adminId = 0
         const unsubscribePrivate = ablyService.subscribeToAdminPrivateChannel(adminId, 'test-event', (message) => {
-          console.log(`[REALTIME STORE] Message privé pour admin ${adminId} reçu:`, message)
+          logger.debug(`[REALTIME STORE] Message privé pour admin ${adminId} reçu`, { message })
         })
         
-        console.log('[REALTIME STORE] Abonnements de test créés. Utilisez AblyDebug.showChannels() pour vérifier')
+        logger.debug('[REALTIME STORE] Abonnements de test créés. Utilisez AblyDebug.showChannels() pour vérifier')
         
         // Définir des fonctions pour publier des messages de test
-        // @ts-ignore
         window.AblyDebug.testPublishGlobal = (message = 'test global') => {
-          console.log('[REALTIME STORE] Envoi d\'un message de test global')
+          logger.debug('[REALTIME STORE] Envoi d\'un message de test global')
           ablyService.publishToAdminChannel('test-event', { 
             message, 
             timestamp: new Date().toISOString(),
@@ -275,9 +276,8 @@ export const useRealtimeStore = defineStore('realtime', () => {
           })
         }
         
-        // @ts-ignore
         window.AblyDebug.testPublishPrivate = (message = 'test privé') => {
-          console.log(`[REALTIME STORE] Envoi d\'un message de test privé pour admin ${adminId}`)
+          logger.debug(`[REALTIME STORE] Envoi d\'un message de test privé pour admin ${adminId}`)
           ablyService.publishToAdminPrivateChannel(adminId, 'test-event', { 
             message, 
             timestamp: new Date().toISOString(),
@@ -285,9 +285,9 @@ export const useRealtimeStore = defineStore('realtime', () => {
           })
         }
         
-        console.log('[REALTIME STORE] Utilisez ces commandes pour tester:')
-        console.log('- AblyDebug.testPublishGlobal("message") : envoyer un message global')
-        console.log('- AblyDebug.testPublishPrivate("message") : envoyer un message privé')
+        logger.debug('[REALTIME STORE] Utilisez ces commandes pour tester:')
+        logger.debug('- AblyDebug.testPublishGlobal("message") : envoyer un message global')
+        logger.debug('- AblyDebug.testPublishPrivate("message") : envoyer un message privé')
         
         // Renvoyer une fonction pour se désabonner des deux canaux
         return () => {
@@ -313,32 +313,32 @@ export const useRealtimeStore = defineStore('realtime', () => {
         // 2. Client Ably
         console.group('2. Client Ably')
         const client = ablyService.getClient()
-        console.log('Client Ably:', client ? 'Initialisé' : 'Non initialisé')
+        logger.debug('Client Ably:', { status: client ? 'Initialisé' : 'Non initialisé' })
         if (client) {
-          console.log('État de la connexion:', client.connection.state)
-          console.log('ID de connexion:', client.connection.id)
+          logger.debug('État de la connexion', { state: client.connection.state })
+          logger.debug('ID de connexion', { id: client.connection.id })
         }
         console.groupEnd()
         
         // 3. Abonnements et canaux
         console.group('3. Abonnements et canaux')
-        console.log('Canaux:')
+        logger.debug('Canaux:')
         const channels = ablyService.logSubscriptions()
         console.groupEnd()
         
         // 4. Vérifications
         console.group('4. Analyse des problèmes potentiels')
         if (!initialized.value) {
-          console.error('❌ Le système temps réel n\'est pas initialisé')
+          logger.debug('❌ Le système temps réel n\'est pas initialisé')
         } else if (!connected.value) {
-          console.error('❌ Le système temps réel n\'est pas connecté')
+          logger.debug('❌ Le système temps réel n\'est pas connecté')
         } else if (!client) {
-          console.error('❌ Le client Ably n\'est pas initialisé')
+          logger.debug('❌ Le client Ably n\'est pas initialisé')
         } else if (!channels || channels.length === 0) {
-          console.warn('⚠️ Aucun canal n\'est actuellement actif')
-          console.log('💡 Solution: Utilisez AblyDebug.testSubscription() pour créer un canal de test')
+          logger.debug('⚠️ Aucun canal n\'est actuellement actif')
+          logger.debug('💡 Solution: Utilisez AblyDebug.testSubscription() pour créer un canal de test')
         } else {
-          console.log('✅ Tout semble fonctionner correctement')
+          logger.debug('✅ Tout semble fonctionner correctement')
         }
         console.groupEnd()
         
@@ -350,10 +350,10 @@ export const useRealtimeStore = defineStore('realtime', () => {
       isAutoDisplayActive: () => autoDisplayInterval.value !== null
     }
     
-    console.log('[REALTIME STORE] Commandes de débogage installées:')
-    console.log('- AblyDebug.showChannels() : afficher les canaux actifs')
-    console.log('- AblyDebug.startAutoDisplay(30000) : afficher automatiquement les canaux (intervalle en ms)')
-    console.log('- AblyDebug.stopAutoDisplay() : arrêter l\'affichage automatique')
+    logger.debug('[REALTIME STORE] Commandes de débogage installées:')
+    logger.debug('- AblyDebug.showChannels() : afficher les canaux actifs')
+    logger.debug('- AblyDebug.startAutoDisplay(30000) : afficher automatiquement les canaux (intervalle en ms)')
+    logger.debug('- AblyDebug.stopAutoDisplay() : arrêter l\'affichage automatique')
     
     // Démarrer l'affichage automatique par défaut 
     // avec un intervalle de 1 minute (60000 ms)

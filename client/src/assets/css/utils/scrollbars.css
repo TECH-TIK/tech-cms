@@ -1,0 +1,257 @@
+/**
+ * Styles de scrollbar personnalisés pour le portail client TechCMS
+ * Design glassmorphism cohérent avec l'identité visuelle
+ */
+
+/* ===== SCROLLBARS GLOBALES ===== */
+
+/* Styles globaux pour toutes les scrollbars */
+* {
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) rgba(255, 255, 255, 0.1);
+}
+
+/* Webkit (Chrome, Safari, Edge) - Styles globaux */
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: all 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--primary-hover) 0%, var(--secondary-hover) 100%);
+    transform: scale(1.1);
+}
+
+*::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* ===== SCROLLBARS SPÉCIALISÉES ===== */
+
+/* Scrollbar pour le contenu principal */
+.app-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.app-content::-webkit-scrollbar-track {
+    background: rgba(16, 20, 35, 0.3);
+    border-radius: 12px;
+    margin: 0.5rem;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, 
+        rgba(0, 102, 255, 0.6) 0%, 
+        rgba(0, 198, 255, 0.6) 100%);
+    border-radius: 12px;
+    border: 2px solid rgba(16, 20, 35, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.app-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, 
+        rgba(0, 102, 255, 0.8) 0%, 
+        rgba(0, 198, 255, 0.8) 100%);
+}
+
+/* Scrollbar pour les cartes et conteneurs glassmorphism */
+.card::-webkit-scrollbar,
+.account-card::-webkit-scrollbar,
+.stat-card::-webkit-scrollbar {
+    width: 6px;
+}
+
+.card::-webkit-scrollbar-track,
+.account-card::-webkit-scrollbar-track,
+.stat-card::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+}
+
+.card::-webkit-scrollbar-thumb,
+.account-card::-webkit-scrollbar-thumb,
+.stat-card::-webkit-scrollbar-thumb {
+    background: rgba(0, 102, 255, 0.4);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card::-webkit-scrollbar-thumb:hover,
+.account-card::-webkit-scrollbar-thumb:hover,
+.stat-card::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 102, 255, 0.6);
+}
+
+/* Scrollbar pour les tableaux */
+.table-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 102, 255, 0.5);
+    border-radius: 10px;
+    border: 2px solid rgba(16, 20, 35, 0.2);
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 102, 255, 0.7);
+}
+
+/* Scrollbar pour les formulaires et inputs */
+.form-input::-webkit-scrollbar,
+.form-select::-webkit-scrollbar,
+.form-textarea::-webkit-scrollbar {
+    width: 4px;
+}
+
+.form-input::-webkit-scrollbar-track,
+.form-select::-webkit-scrollbar-track,
+.form-textarea::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.form-input::-webkit-scrollbar-thumb,
+.form-select::-webkit-scrollbar-thumb,
+.form-textarea::-webkit-scrollbar-thumb {
+    background: rgba(0, 102, 255, 0.3);
+    border-radius: 6px;
+}
+
+.form-input::-webkit-scrollbar-thumb:hover,
+.form-select::-webkit-scrollbar-thumb:hover,
+.form-textarea::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 102, 255, 0.5);
+}
+
+/* ===== SCROLLBARS THÉMATIQUES ===== */
+
+/* Scrollbar pour les éléments de succès */
+.success-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+/* Scrollbar pour les éléments d'erreur */
+.error-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+/* Scrollbar pour les éléments d'avertissement */
+.warning-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Mobile - Scrollbars plus fines */
+@media (max-width: 768px) {
+    *::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    
+    .app-content::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .card::-webkit-scrollbar,
+    .account-card::-webkit-scrollbar,
+    .stat-card::-webkit-scrollbar {
+        width: 3px;
+    }
+}
+
+/* ===== MASQUER SCROLLBARS QUAND NON NÉCESSAIRES ===== */
+
+/* Masquer la scrollbar horizontale par défaut */
+.no-horizontal-scroll {
+    overflow-x: hidden;
+}
+
+/* Masquer toutes les scrollbars */
+.no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Afficher la scrollbar seulement au hover */
+.scrollbar-on-hover {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollbar-on-hover::-webkit-scrollbar {
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+.scrollbar-on-hover:hover::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollbar-on-hover:hover {
+    scrollbar-width: thin;
+}
+
+/* ===== ANIMATIONS ===== */
+
+/* Animation d'apparition de la scrollbar */
+@keyframes scrollbar-appear {
+    from {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+    to {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+
+*::-webkit-scrollbar-thumb {
+    animation: scrollbar-appear 0.3s ease;
+}
+
+/* ===== ACCESSIBILITÉ ===== */
+
+/* Respect des préférences utilisateur pour les animations */
+@media (prefers-reduced-motion: reduce) {
+    *::-webkit-scrollbar-thumb {
+        animation: none;
+        transition: none;
+    }
+    
+    *::-webkit-scrollbar-thumb:hover {
+        transform: none;
+    }
+}
+
+/* Contraste élevé */
+@media (prefers-contrast: high) {
+    *::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border: 2px solid var(--text-primary);
+    }
+}

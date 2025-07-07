@@ -51,7 +51,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .general-section {
         padding: var(--spacing-md);
     }

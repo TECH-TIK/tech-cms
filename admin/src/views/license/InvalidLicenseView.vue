@@ -28,9 +28,9 @@
           <div class="form-group">
             <label for="licenseKey">Clé de Licence</label>
             <input 
-              type="text" 
               id="licenseKey" 
               v-model="licenseKey" 
+              type="text" 
               placeholder="Entrez votre clé de licence" 
               class="form-control"
               required
@@ -166,7 +166,7 @@ const updateLicense = async () => {
   background-color: #fff;
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 5%);
 }
 
 .license-format-hint {
@@ -202,7 +202,7 @@ const updateLicense = async () => {
 .form-control:focus {
   border-color: #80bdff;
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 25%);
 }
 
 .error-message {
@@ -274,7 +274,7 @@ const updateLicense = async () => {
   to { opacity: 1; }
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .license-form-container {
     flex-direction: row;
   }

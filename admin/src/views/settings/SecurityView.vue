@@ -17,17 +17,17 @@
         <div class="loading-state-text">{{ t('common.loading') }}</div>
       </div>
       
-      <form v-else @submit.prevent="saveSecuritySettings" class="table-box">
+      <form v-else class="table-box" @submit.prevent="saveSecuritySettings">
         <div class="settings-group">
           <h3>{{ t('settings.security.authentication') }}</h3>
           
           <div class="form-group">
             <div class="form-check">
               <input 
+                id="enableTwoFactor"
+                v-model="securitySettings.enableTwoFactor"
                 type="checkbox"
                 class="form-check-input"
-                v-model="securitySettings.enableTwoFactor"
-                id="enableTwoFactor"
               />
               <label class="form-check-label" for="enableTwoFactor">
                 {{ t('settings.security.enableTwoFactor') }}
@@ -41,8 +41,8 @@
           <div class="form-group">
             <label class="form-label">{{ t('settings.security.sessionTimeout') }}</label>
             <select 
-              class="form-control"
               v-model="securitySettings.sessionTimeout"
+              class="form-control"
             >
               <option value="15">15 {{ t('common.minutes') }}</option>
               <option value="30">30 {{ t('common.minutes') }}</option>
@@ -58,9 +58,9 @@
           <div class="form-group">
             <label class="form-label">{{ t('settings.security.maxLoginAttempts') }}</label>
             <input 
-              type="number" 
+              v-model="securitySettings.maxLoginAttempts" 
+              type="number"
               class="form-control"
-              v-model="securitySettings.maxLoginAttempts"
               min="1"
               max="10"
             />
@@ -69,8 +69,8 @@
           <div class="form-group">
             <label class="form-label">{{ t('settings.security.lockoutTime') }}</label>
             <select 
-              class="form-control"
               v-model="securitySettings.lockoutTime"
+              class="form-control"
             >
               <option value="5">5 {{ t('common.minutes') }}</option>
               <option value="15">15 {{ t('common.minutes') }}</option>
@@ -87,9 +87,9 @@
           <div class="form-group">
             <label class="form-label">{{ t('settings.security.minPasswordLength') }}</label>
             <input 
-              type="number" 
+              v-model="securitySettings.minPasswordLength" 
+              type="number"
               class="form-control"
-              v-model="securitySettings.minPasswordLength"
               min="8"
               max="32"
             />
@@ -98,10 +98,10 @@
           <div class="form-group">
             <div class="form-check">
               <input 
+                id="requireUppercase"
+                v-model="securitySettings.requireUppercase"
                 type="checkbox"
                 class="form-check-input"
-                v-model="securitySettings.requireUppercase"
-                id="requireUppercase"
               />
               <label class="form-check-label" for="requireUppercase">
                 {{ t('settings.security.requireUppercase') }}
@@ -112,10 +112,10 @@
           <div class="form-group">
             <div class="form-check">
               <input 
+                id="requireNumber"
+                v-model="securitySettings.requireNumber"
                 type="checkbox"
                 class="form-check-input"
-                v-model="securitySettings.requireNumber"
-                id="requireNumber"
               />
               <label class="form-check-label" for="requireNumber">
                 {{ t('settings.security.requireNumber') }}
@@ -126,10 +126,10 @@
           <div class="form-group">
             <div class="form-check">
               <input 
+                id="requireSpecialChar"
+                v-model="securitySettings.requireSpecialChar"
                 type="checkbox"
                 class="form-check-input"
-                v-model="securitySettings.requireSpecialChar"
-                id="requireSpecialChar"
               />
               <label class="form-check-label" for="requireSpecialChar">
                 {{ t('settings.security.requireSpecialChar') }}
@@ -140,8 +140,8 @@
           <div class="form-group">
             <label class="form-label">{{ t('settings.security.passwordExpiryDays') }}</label>
             <select 
-              class="form-control"
               v-model="securitySettings.passwordExpiryDays"
+              class="form-control"
             >
               <option value="0">{{ t('settings.security.never') }}</option>
               <option value="30">30 {{ t('common.days') }}</option>
@@ -159,10 +159,10 @@
           <div class="form-group">
             <div class="form-check">
               <input 
+                id="enableApiAccess"
+                v-model="securitySettings.enableApiAccess"
                 type="checkbox"
                 class="form-check-input"
-                v-model="securitySettings.enableApiAccess"
-                id="enableApiAccess"
               />
               <label class="form-check-label" for="enableApiAccess">
                 {{ t('settings.security.enableApiAccess') }}
@@ -173,8 +173,8 @@
           <div v-if="securitySettings.enableApiAccess" class="form-group">
             <label class="form-label">{{ t('settings.security.apiTokenExpiry') }}</label>
             <select 
-              class="form-control"
               v-model="securitySettings.apiTokenExpiry"
+              class="form-control"
             >
               <option value="1">1 {{ t('common.day') }}</option>
               <option value="7">7 {{ t('common.days') }}</option>
@@ -206,6 +206,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '@/stores/settings'
 import { useNotificationStore } from '@/stores/notifications'
+import logger from '@/services/logger'
 import '@/assets/css/components/common-layout.css'
 import '@/assets/css/pages/settings.css'
 
@@ -218,16 +219,16 @@ const loading = ref(true)
 const saving = ref(false)
 const securitySettings = reactive({
   enableTwoFactor: false,
-  sessionTimeout: '60',
+  sessionTimeout: 60, // Converti en nombre
   maxLoginAttempts: 5,
-  lockoutTime: '15',
+  lockoutTime: 15, // Converti en nombre
   minPasswordLength: 8,
   requireUppercase: true,
   requireNumber: true,
   requireSpecialChar: false,
-  passwordExpiryDays: '90',
+  passwordExpiryDays: 90, // Converti en nombre
   enableApiAccess: true,
-  apiTokenExpiry: '30'
+  apiTokenExpiry: 30 // Converti en nombre
 })
 
 // Méthodes
@@ -237,7 +238,7 @@ const fetchSettings = async () => {
     const security = await settingsStore.fetchSecuritySettings()
     Object.assign(securitySettings, security)
   } catch (error) {
-    console.error('Erreur lors du chargement des paramètres de sécurité:', error)
+    logger.error('Erreur lors du chargement des paramètres de sécurité', { error })
     notificationStore.notificationError(t('settings.loadError'))
   } finally {
     loading.value = false
@@ -250,7 +251,7 @@ const saveSecuritySettings = async () => {
     await settingsStore.updateSecuritySettings(securitySettings)
     notificationStore.success(t('settings.saveSuccess'))
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde des paramètres de sécurité:', error)
+    logger.error('Erreur lors de la sauvegarde des paramètres de sécurité', { error })
     notificationStore.notificationError(t('settings.saveError'))
   } finally {
     saving.value = false

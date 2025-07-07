@@ -5,8 +5,9 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { handleError } from '@/utils/error-handler'
 import Logo from '@/components/common/Logo.vue'
+import logger from '@/services/logger'
 
-console.log('[LOGIN] Initialisation du composant Login')
+logger.debug('[LOGIN] Initialisation du composant Login')
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -24,14 +25,14 @@ const forgotEmail = ref('')
 const forgotSuccess = ref(false)
 
 onMounted(() => {
-  console.log('[LOGIN] Composant Login monté')
+  logger.debug('[LOGIN] Composant Login monté')
 })
 
 // Méthodes
 const handleLogin = async () => {
-  console.log('[LOGIN] Tentative de connexion')
+  logger.info('[LOGIN] Tentative de connexion')
   if (!email.value || !password.value) {
-    console.log('[LOGIN] Champs manquants')
+    logger.warn('[LOGIN] Champs manquants')
     error.value = t('login.errorFields')
     return
   }
@@ -39,12 +40,12 @@ const handleLogin = async () => {
   try {
     loading.value = true
     error.value = ''
-    console.log('[LOGIN] Appel de authStore.login')
+    logger.debug('[LOGIN] Appel de authStore.login')
     await authStore.login(email.value, password.value, remember.value)
-    console.log('[LOGIN] Connexion réussie')
+    logger.info('[LOGIN] Connexion réussie')
     router.push('/dashboard')
   } catch (err: any) {
-    console.error('[LOGIN] Erreur de connexion:', err)
+    logger.error('[LOGIN] Erreur de connexion', { error: err })
     error.value = handleError(err)
   } finally {
     loading.value = false
@@ -52,22 +53,22 @@ const handleLogin = async () => {
 }
 
 const handleForgotPassword = async () => {
-  console.log('[LOGIN] Tentative de réinitialisation du mot de passe')
+  logger.info('[LOGIN] Tentative de réinitialisation du mot de passe')
   if (!forgotEmail.value) {
-    console.log('[LOGIN] Email manquant')
+    logger.warn('[LOGIN] Email manquant')
     error.value = t('login.errorEmail')
     return
   }
 
   try {
     loading.value = true
-    console.log('[LOGIN] Appel de authStore.forgotPassword')
+    logger.debug('[LOGIN] Appel de authStore.forgotPassword')
     await authStore.forgotPassword(forgotEmail.value)
-    console.log('[LOGIN] Email de réinitialisation envoyé')
+    logger.info('[LOGIN] Email de réinitialisation envoyé')
     forgotSuccess.value = true
     error.value = ''
   } catch (err: any) {
-    console.error('[LOGIN] Erreur de réinitialisation:', err)
+    logger.error('[LOGIN] Erreur de réinitialisation', { error: err })
     error.value = handleError(err)
   } finally {
     loading.value = false
@@ -75,7 +76,7 @@ const handleForgotPassword = async () => {
 }
 
 const toggleForgotPassword = () => {
-  console.log('[LOGIN] Basculement du formulaire de réinitialisation')
+  logger.debug('[LOGIN] Basculement du formulaire de réinitialisation')
   showForgotPassword.value = !showForgotPassword.value
   error.value = ''
   forgotSuccess.value = false
@@ -99,8 +100,8 @@ const toggleForgotPassword = () => {
               <i class="fas fa-envelope" />
               <input
                 id="email"
-                type="email"
                 v-model="email"
+                type="email"
                 :placeholder="t('login.emailPlaceholder')"
                 required
                 autocomplete="email"
@@ -114,8 +115,8 @@ const toggleForgotPassword = () => {
               <i class="fas fa-lock" />
               <input
                 id="password"
-                :type="showPassword ? 'text' : 'password'"
                 v-model="password"
+                :type="showPassword ? 'text' : 'password'"
                 :placeholder="t('login.passwordPlaceholder')"
                 required
                 autocomplete="current-password"
@@ -133,9 +134,9 @@ const toggleForgotPassword = () => {
           <div class="form-options">
             <div class="remember-me">
               <input
-                type="checkbox"
                 id="remember"
                 v-model="remember"
+                type="checkbox"
               />
               <label for="remember">{{ t('login.rememberMe') }}</label>
             </div>
@@ -175,8 +176,8 @@ const toggleForgotPassword = () => {
               <i class="fas fa-envelope" />
               <input
                 id="forgot-email"
-                type="email"
                 v-model="forgotEmail"
+                type="email"
                 :placeholder="t('login.emailPlaceholder')"
                 required
               />
@@ -415,7 +416,7 @@ const toggleForgotPassword = () => {
   font-size: 0.875rem;
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .login-view {
     padding: 1rem;
   }

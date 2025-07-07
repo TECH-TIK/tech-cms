@@ -1,0 +1,214 @@
+/* Styles pour la page des champs personnalisés */
+
+.product-custom-fields-page {
+  padding: var(--spacing-md);
+  width: 100%;
+}
+
+.custom-fields-section {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  backdrop-filter: blur(10px);
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.custom-fields-list {
+  margin-bottom: var(--spacing-lg);
+}
+
+.custom-field-item {
+  background: rgb(0 0 0 / 10%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  transition: all var(--transition-fast);
+}
+
+.custom-field-item:hover {
+  border-color: rgb(0 102 255 / 30%);
+}
+
+.custom-field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.custom-field-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.custom-field-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.btn-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: rgb(0 0 0 / 20%);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-icon:hover {
+  background: rgb(0 102 255 / 20%);
+  color: var(--text-color);
+}
+
+.btn-icon.edit:hover {
+  color: var(--primary-blue);
+}
+
+.btn-icon.delete:hover {
+  color: var(--error);
+}
+
+.custom-field-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  font-size: 0.875rem;
+}
+
+.custom-field-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-xs);
+}
+
+.detail-value {
+  color: var(--text-color);
+}
+
+.add-field-form {
+  background: rgb(0 0 0 / 10%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+}
+
+.form-title {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 calc(var(--spacing-sm) * -1);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-col {
+  flex: 1;
+  padding: 0 var(--spacing-sm);
+  min-width: 200px;
+}
+
+.form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  background: rgb(0 0 0 / 20%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  color: var(--text-color);
+  transition: all var(--transition-fast);
+}
+
+.form-control:focus {
+  border-color: var(--primary-blue);
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(0 102 255 / 25%);
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+.form-hint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: var(--spacing-xs);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-title {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-description {
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Responsive */
+@media (width <= 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .form-col {
+    width: 100%;
+    padding: 0;
+  }
+  
+  .custom-field-details {
+    grid-template-columns: 1fr;
+  }
+}
